@@ -374,6 +374,12 @@ section.tab-panel{scroll-margin-top:84px}
 .dose{padding:11px 13px;border-radius:12px;background:rgba(226,135,67,.11);font-size:12.5px;font-weight:600;line-height:1.55;margin-bottom:6px}
 .dose small{display:block;margin-top:4px;font-size:11px;color:var(--muted)}
 .dose.ok{background:rgba(34,183,132,.11)}
+.dose.err{background:rgba(214,69,69,.12);border:1.5px solid rgba(214,69,69,.45);color:#b03232}
+[data-theme="dark"] .dose.err{color:#ff8f8f}
+@keyframes warnBlink{0%,100%{background:rgba(226,135,67,.14)}50%{background:rgba(226,135,67,.38)}}
+@keyframes warnShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.dose.warn-pisca{background:rgba(226,135,67,.2);border:1.5px solid rgba(226,135,67,.6);color:#8a4a0f;animation:warnBlink 1s ease-in-out infinite,warnShake .9s ease-in-out infinite}
+[data-theme="dark"] .dose.warn-pisca{color:#ffc98a}
 .diag{border:1.5px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
 .diag-t{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;
   font-size:13px;font-weight:800;text-align:left;background:var(--bg)}
@@ -1534,6 +1540,21 @@ function etapa1(){
   else if(at>120){ ok=false; L.push(`<b>AT em ${at} ppm:</b> baixe aos poucos com ácido muriático, re-teste a cada dose`); }
   return {ok, L};
 }
+/* ================= liberação do sulfato de alumínio (Etapa 3) =================
+   NOVA REGRA: água MUITO TURVA ou TURVA (turbidez > 20%) libera o sulfato SEMPRE
+   que pH 7,2–7,6 e alcalinidade 80–120 — mesmo sem os 100 ppm exatos.
+   Cristalina (≤ 20%): verde total com AT 95–105; aviso amarelo piscando com 80–120.
+   pH ou alcalinidade fora da faixa: bloqueado (vermelho), independente da turbidez. */
+function podeUsarSulfato(ph, alcalinidade, turbPct){
+  const phOk   = ph >= 7.2 && ph <= 7.6;
+  const alcOk  = alcalinidade >= 80 && alcalinidade <= 120;
+  const alc100 = alcalinidade >= 95 && alcalinidade <= 105;
+  const muitoTurva = turbPct > 60, turva = turbPct > 20 && turbPct <= 60;
+  if(!phOk || !alcOk) return { libera:false, tipo:'bloqueado' };
+  if(muitoTurva || turva) return { libera:true, tipo:'aviso_turbidez', msg:'Água muito turva - sulfato liberado. Alcalinidade em 100% garante máxima eficiência.' };
+  if(!alc100) return { libera:true, tipo:'aviso_100', msg:'Liberado. Para máxima eficiência, alcalinidade em 100 ppm.' };
+  return { libera:true, tipo:'ok' };
+}
 function renderTreat(){
   const e1 = etapa1(), c = params.cloro;
   const ok2 = c>=1 && c<=3.5, cAlto = c>3.5, cBaixo = c<1;
@@ -1556,9 +1577,10 @@ function renderTreat(){
   const elapsed = treat ? Date.now()-treat.ts : 0;
   const eh = Math.floor(elapsed/3600e3), em = Math.floor(elapsed%3600e3/60e3);
   let cls3, b3t, b3c, body3;
-  if(!e1.ok){
-    cls3='lock'; b3t='Bloqueada'; b3c='tob';
-    body3 = `<div class="dose">Equilibre pH e alcalinidade na Etapa 1 antes do sulfato — senão ele não decanta direito.</div>`;
+  const sul = podeUsarSulfato(params.ph, params.alcalinidade, params.turbidez);
+  if(!sul.libera){
+    cls3='lock'; b3t='Bloqueada'; b3c='rb';
+    body3 = `<div class="dose err">🛑 Equilibre pH e alcalinidade na Etapa 1 antes do sulfato — senão ele não decanta direito.</div>`;
   } else if(cAlto){
     cls3='lock'; b3t='🛑 Não aplicar'; b3c='rb';
     body3 = `<div class="dose">🛑 <b>Cloro alto (${fmtVal(PARAMS[1],c)} ppm)</b> + sulfato turva tudo. Aguarde a Etapa 2 resolver.</div>`;
@@ -1570,13 +1592,26 @@ function renderTreat(){
     body3 = `<div class="dose ok">Apliquei há <b>${eh}h${em?' '+em+'min':''}</b>. Não ligue o filtro e não mexa na água por 12 h — o sulfato está assentando a sujeira no fundo. Aspire amanhã.</div>
       <button class="btn ghost" id="btnDiag">Já apliquei e continua verde → diagnóstico</button>`;
   } else {
-    cls3='todo'; b3t='Pronta'; b3c='tob';
-    body3 = `<div class="dose"><b>Dose: ${fmtG(g)}</b> (20 g por m³)<small>Dilua em balde, bomba em RECIRCULAR por 15 min. Depois desligue TUDO e deixe decantar 12–24 h.</small></div>
+    const doseHtml = `<div class="dose"><b>Dose: ${fmtG(g)}</b> (20 g por m³)<small>Dilua em balde, bomba em RECIRCULAR por 15 min. Depois desligue TUDO e deixe decantar 12–24 h.</small></div>
       <button class="btn" id="btnConfirm">Confirmar que apliquei — ${fmtG(g)}</button>`;
+    if(sul.tipo === 'aviso_turbidez'){
+      cls3='todo'; b3t='Liberada'; b3c='tob';
+      body3 = `<div class="dose warn-pisca">✅ <b>Água muito turva detectada — Sulfato liberado!</b> Para eficiência máxima, mantenha alcalinidade em 100 ppm. Turbidez alta exige decantação.</div>` + doseHtml;
+    } else if(sul.tipo === 'aviso_100'){
+      cls3='todo'; b3t='Liberada'; b3c='tob';
+      body3 = `<div class="dose warn-pisca">✅ Liberado. Para melhor eficiência, alcalinidade ideal é 100 ppm.</div>` + doseHtml;
+    } else {
+      cls3='ok'; b3t='Pronta'; b3c='okb';
+      body3 = doseHtml;
+    }
   }
   $('#ts3').className='tstep '+cls3;
   $('#tsb3').className='ts-badge '+b3c; $('#tsb3').textContent=b3t;
   $('#tsbody3').innerHTML = body3;
+  if((sul.tipo==='aviso_turbidez' || sul.tipo==='aviso_100') && renderTreat._vib !== sul.tipo){
+    buzz([80,50,80]);                       /* vibra uma vez quando o aviso aparece/troca */
+  }
+  renderTreat._vib = sul.tipo;
 }
 $('#tab-tratam').addEventListener('click', e=>{
   if(e.target.closest('#btnConfirm')){
