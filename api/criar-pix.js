@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
         description,
         payment_method_id: 'pix',
         external_reference: 'poolapp-lic-30d',
-        metadata: { device_id, litros, timestamp: Date.now() },
+        metadata: { device_id, litros, timestamp: Date.now(), nome: String(body.nome || '').slice(0, 80) },
         payer: { email: String(body.email || process.env.PAYER_EMAIL || 'poolapp@exemplo.com') }
       })
     });
