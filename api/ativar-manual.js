@@ -13,6 +13,7 @@
 //      o código gerado precisa ser adicionado à lista.
 // ============================================================
 const ADMIN_KEY = process.env.ADMIN_KEY || 'SEJA';
+const admin = require('./_admin.js');   /* aceita também Authorization: Bearer <JWT do painel> */
 const LIC_DAYS = 30;
 
 function gerarCodigo(){
@@ -25,12 +26,13 @@ module.exports = async (req, res) => {
   const CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, x-admin-key'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-key'
   };
   if (req.method === 'OPTIONS') { res.writeHead(204, CORS); return res.end(); }
 
-  const key = String(req.headers['x-admin-key'] || '');
-  if (!key || key !== ADMIN_KEY) {
+  const jwt = admin.verify(admin.bearer(req));          /* sessão nova do painel */
+  const key = String(req.headers['x-admin-key'] || '');  /* chave legada (compatibilidade) */
+  if (!jwt && (!key || key !== ADMIN_KEY)) {
     res.writeHead(401, { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     return res.end(JSON.stringify({ error: 'Senha admin incorreta' }));
   }

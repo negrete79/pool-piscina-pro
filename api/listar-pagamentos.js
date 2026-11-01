@@ -13,6 +13,7 @@
 // ============================================================
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN || '';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'SEJA';
+const admin = require('./_admin.js');   /* aceita também Authorization: Bearer <JWT do painel> */
 const DIAS_HISTORICO = 90;
 const LIMITE = 50;
 
@@ -20,7 +21,7 @@ function end(res, code, obj) {
   res.writeHead(code, {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, x-admin-key',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-key',
     'Cache-Control': 'no-store',
     'Content-Type': 'application/json'
   });
@@ -29,8 +30,9 @@ function end(res, code, obj) {
 
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return end(res, 204, {});
-  const key = String(req.headers['x-admin-key'] || '');
-  if (!key || key !== ADMIN_KEY) return end(res, 401, { error: 'Senha admin incorreta' });
+  const jwt = admin.verify(admin.bearer(req));          /* sessão nova do painel */
+  const key = String(req.headers['x-admin-key'] || '');  /* chave legada (compatibilidade) */
+  if (!jwt && (!key || key !== ADMIN_KEY)) return end(res, 401, { error: 'Senha admin incorreta' });
   if (req.method !== 'GET') return end(res, 405, { error: 'Use GET' });
   if (!MP_ACCESS_TOKEN) return end(res, 500, { error: 'MP_ACCESS_TOKEN não configurado na Vercel' });
 
@@ -56,17 +58,27 @@ module.exports = async (req, res) => {
       (typeof p.external_reference === 'string' && p.external_reference.indexOf('poolapp') === 0) ||
       (typeof p.description === 'string' && p.description.indexOf('PoolApp') !== -1)
     );
-    const pagamentos = nossos.map(p => ({
-      id: p.id,
-      data: p.date_created,
-      nome: (p.metadata && p.metadata.nome)
-            || [p.payer && p.payer.first_name, p.payer && p.payer.last_name].filter(Boolean).join(' ')
-            || '—',
-      email: (p.payer && p.payer.email) || '—',
-      valor: p.transaction_amount,
-      status: p.status,
-      device_id: (p.metadata && p.metadata.device_id) || ''
-    }));
+    const pagamentos = nossos.map(p => {
+      const base = {
+        id: p.id,
+        data: p.date_created,
+        nome: (p.metadata && p.metadata.nome)
+              || [p.payer && p.payer.first_name, p.payer && p.payer.last_name].filter(Boolean).join(' ')
+              || '',
+        email: (p.payer && p.payer.email) || '',
+        valor: p.transaction_amount,
+        status: p.status,
+        device_id: (p.metadata && p.metadata.device_id) || ''
+      };
+      /* overrides salvos pelo painel (Editar nome/e-mail / Excluir) corrigem os "--" */
+      const ov = admin.getOverrides()[String(p.id)];
+      if (ov) {
+        if (ov.nome)  base.nome = ov.nome;
+        if (ov.email) base.email = ov.email;
+        if (ov.excluido) base.status = 'cancelled';
+      }
+      return base;
+    });
     return end(res, 200, { ok: true, total: pagamentos.length, pagamentos });
   } catch (e) {
     return end(res, 500, { error: 'Falha ao falar com o Mercado Pago', detail: String((e && e.message) || e) });
