@@ -133,30 +133,45 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 .tabbtn svg{width:19px;height:19px}
 .tabbtn.active{color:var(--deep);background:rgba(15,108,110,.08)}
 
-/* ---------- Válvula ---------- */
-.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.vposbtn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 4px;border-radius:14px;background:rgba(13,48,56,.04);border:1.5px solid transparent;transition:all .2s;text-align:center}
-.vposbtn b{font-size:10px;font-weight:800;letter-spacing:.03em}
-.vposbtn span{font-size:8.5px;line-height:1.2;font-weight:600;color:rgba(13,48,56,.5)}
-.vposbtn.active{background:#fff;border-color:var(--vc,var(--deep));box-shadow:0 6px 14px rgba(3,90,103,.12)}
-.vposbtn.active b{color:var(--vc,var(--deep))}
-.valve-info{margin-top:12px;border:1.5px solid var(--line);border-left:4px solid var(--deep);border-radius:16px;padding:13px 14px;background:rgba(13,48,56,.025)}
+/* ---------- Válvula (manopla giratória) ---------- */
+.dial-wrap{display:flex;justify-content:center;margin-top:14px}
+.dial{position:relative;width:min(300px,100%);aspect-ratio:1/1;user-select:none;-webkit-user-select:none}
+#dialPos{position:absolute;inset:0}
+.dial-ring{position:absolute;inset:13.33%;border:2px dashed rgba(13,48,56,.25);border-radius:50%}
+.dial-pos{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;width:70px;cursor:pointer}
+.dial-pos .dn{width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid rgba(13,48,56,.14);display:grid;place-items:center;font-family:var(--mono);font-size:14px;font-weight:700;color:rgba(13,48,56,.55);box-shadow:0 2px 6px rgba(13,48,56,.08);transition:background .25s,border-color .25s,color .25s,box-shadow .25s,transform .25s}
+.dial-pos>span:last-child{font-size:8px;font-weight:800;letter-spacing:.04em;color:rgba(13,48,56,.5);white-space:nowrap;transition:color .25s}
+.dial-pos.active .dn{background:#0F4C5C;border-color:#0F4C5C;color:#fff;box-shadow:0 6px 14px rgba(15,76,92,.35);transform:scale(1.1)}
+.dial-pos.active>span:last-child{color:#0F4C5C}
+.dial-knob{position:absolute;left:50%;top:50%;width:106px;height:106px;margin:-53px 0 0 -53px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff 0%,#f0f5f5 55%,#d9e5e5 100%);box-shadow:0 12px 26px rgba(13,48,56,.24),inset 0 -4px 10px rgba(13,48,56,.1),inset 0 2px 4px #fff;transition:transform .55s cubic-bezier(.22,1,.36,1);touch-action:none;cursor:grab;z-index:2}
+.dial-knob.grabbing{transition:none;cursor:grabbing}
+.knob-rod{position:absolute;left:50%;top:12px;bottom:50%;width:11px;margin-left:-5.5px;border-radius:6px;background:linear-gradient(180deg,#0F4C5C,#15707e);box-shadow:0 2px 5px rgba(13,48,56,.35),inset 0 1px 2px rgba(255,255,255,.25)}
+.knob-cap{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#fff;box-shadow:0 3px 9px rgba(13,48,56,.3),inset 0 1px 3px #fff;display:grid;place-items:center;color:#0F4C5C}
+.dial-hint{margin-top:13px;font-size:11.5px;font-weight:600;line-height:1.55;color:rgba(13,48,56,.55);text-align:center}
+.vtip{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;padding:12px 13px;border-radius:16px;background:rgba(15,76,92,.06);border:1.5px solid rgba(15,76,92,.13);text-align:left;transition:transform .15s,background .2s}
+.vtip:active{transform:scale(.98)}
+.vt-ico{width:34px;height:34px;border-radius:12px;background:#0F4C5C;color:#fff;display:grid;place-items:center;flex:none}
+.vt-txt{flex:1;min-width:0;font-size:12px;font-weight:600;line-height:1.5;color:rgba(13,48,56,.82)}
+.vt-n{font-family:var(--mono);font-size:11px;font-weight:700;color:#0F4C5C;background:#fff;border-radius:999px;padding:4px 8px;flex:none;box-shadow:0 2px 5px rgba(13,48,56,.1)}
+.valve-info{margin-top:12px;border:1.5px solid var(--line);border-left:4px solid #0F4C5C;border-radius:16px;padding:13px 14px;background:rgba(13,48,56,.025);scroll-margin:90px}
 .vi-name{font-size:13px;font-weight:800;letter-spacing:.04em}
 .vi-sum{font-size:12.5px;font-weight:600;line-height:1.5;color:rgba(13,48,56,.75);margin:5px 0 8px}
 .vi-steps{margin-left:16px;display:grid;gap:6px}
 .vi-steps li{font-size:12px;font-weight:500;line-height:1.45;color:rgba(13,48,56,.7)}
 
-/* ---------- Registros ---------- */
-.regrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.reg{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px;border-radius:16px;background:rgba(13,48,56,.04);border:1.5px solid transparent;transition:all .2s}
-.reg b{font-size:10px;font-weight:800;letter-spacing:.04em}
-.reg .st{font-size:10px;font-weight:700}
-.reg-dot{width:22px;height:22px;border-radius:50%;position:relative;flex:none}
-.reg.open .reg-dot{background:rgba(47,191,143,.2)}
-.reg.open .reg-dot::after{content:'';position:absolute;left:4px;right:4px;top:50%;height:3px;transform:translateY(-50%);border-radius:2px;background:var(--mint)}
+/* ---------- Registros (cards com ícone) ---------- */
+.regrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.reg{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 4px 12px;border-radius:18px;background:#fff;border:1.5px solid rgba(13,48,56,.09);box-shadow:0 3px 10px rgba(13,48,56,.07);transition:border-color .25s,background .25s,box-shadow .25s,transform .15s}
+.reg:active{transform:scale(.96)}
+.reg .ric{width:44px;height:44px;border-radius:14px;background:rgba(13,48,56,.05);color:rgba(13,48,56,.5);display:grid;place-items:center;transition:background .25s,color .25s,box-shadow .25s}
+.reg .ric svg{width:22px;height:22px}
+.reg b{font-size:9.5px;font-weight:800;letter-spacing:.05em;color:rgba(13,48,56,.75)}
+.reg .st{font-size:10px;font-weight:700;color:rgba(13,48,56,.45)}
+.reg.open{border-color:#0F4C5C;background:rgba(15,76,92,.05);box-shadow:0 8px 18px rgba(15,76,92,.16)}
+.reg.open .ric{background:#0F4C5C;color:#fff;box-shadow:0 4px 10px rgba(15,76,92,.28)}
+.reg.open b{color:#0F4C5C}
 .reg.open .st{color:#0d6b4c}
-.reg.closed .reg-dot{background:rgba(214,69,69,.14)}
-.reg.closed .reg-dot::after{content:'';position:absolute;left:50%;top:4px;bottom:4px;width:3px;transform:translateX(-50%);border-radius:2px;background:var(--red)}
+.reg.closed .ric{background:rgba(214,69,69,.1);color:#c05050}
 .reg.closed .st{color:#8f2f2f}
 .alerta{margin-top:12px;padding:11px 13px;border-radius:14px;font-size:12px;font-weight:600;line-height:1.5}
 .a-ok{background:rgba(47,191,143,.13);color:#0d6b4c}
@@ -345,8 +360,23 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
           <h2>Válvula do filtro</h2>
           <button class="chip chipbtn" id="vManual">Manual</button>
         </div>
-        <p class="hint">Toque numa posição para ver o que ela faz e o passo a passo. Desligue sempre a bomba antes de girar a manopla.</p>
-        <div class="vgrid" id="valveGrid" style="margin-top:12px"></div>
+        <p class="hint">Como na válvula real: desligue sempre a bomba antes de girar a manopla.</p>
+        <div class="dial-wrap">
+          <div class="dial" id="dial">
+            <div class="dial-ring"></div>
+            <div id="dialPos"></div>
+            <div class="dial-knob" id="dialKnob" role="slider" aria-label="Manopla da válvula" aria-valuemin="1" aria-valuemax="6">
+              <span class="knob-rod"></span>
+              <span class="knob-cap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.2 6 7.7 6 10.5a6 6 0 1 1-12 0C6 10.7 8.5 7.2 12 3Z"/></svg></span>
+            </div>
+          </div>
+        </div>
+        <p class="dial-hint">Arraste a manopla ou toque num número · cada giro traz uma dica nova · toque na dica para ver a próxima</p>
+        <button class="vtip" id="valveTip" aria-label="Ver a próxima dica">
+          <span class="vt-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-3.7 11.8c.7.5 1.2 1.3 1.2 2.2h5c0-.9.5-1.7 1.2-2.2A6.5 6.5 0 0 0 12 3Z"/></svg></span>
+          <span class="vt-txt" id="vtTxt"></span>
+          <span class="vt-n" id="vtN">1/3</span>
+        </button>
         <div class="valve-info" id="valveInfo"></div>
       </div>
     </section>
@@ -356,9 +386,9 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
       <div class="card" id="sec-regs">
         <div class="shead"><span class="sic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></svg></span><h2>Posição dos registros</h2></div>
         <div class="regrow" id="regRow">
-          <button class="reg closed" id="reg-dreno"><span class="reg-dot"></span><b>DRENO</b><span class="st">Fechado</span></button>
-          <button class="reg open" id="reg-skimmer"><span class="reg-dot"></span><b>SKIMMER</b><span class="st">Aberto</span></button>
-          <button class="reg open" id="reg-asp"><span class="reg-dot"></span><b>ASPIRAÇÃO</b><span class="st">Aberto</span></button>
+          <button class="reg closed" id="reg-dreno"><span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9"/><path d="m8.5 8.5 3.5 3.5 3.5-3.5"/><path d="M3 18c3 0 3 2 6 2s3-2 6-2 3 2 6 2"/></svg></span><b>DRENO</b><span class="st">Fechado</span></button>
+          <button class="reg open" id="reg-skimmer"><span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12"/><path d="M12 15V7"/><path d="m8.5 10.5 3.5-3.5 3.5 3.5"/><path d="M3 19c3 0 3 2 6 2s3-2 6-2 3 2 6 2"/></svg></span><b>SKIMMER</b><span class="st">Aberto</span></button>
+          <button class="reg open" id="reg-asp"><span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16l-6.2 7v5.5l-3.6 3.5v-9L4 4Z"/></svg></span><b>ASPIRAÇÃO</b><span class="st">Aberto</span></button>
         </div>
         <div class="alerta a-ok" id="alertaReg"></div>
         <div class="a-note">⚠️ Desligue a bomba antes de girar qualquer registro.</div>
@@ -562,22 +592,109 @@ const MSHORT = ['Dia a dia: filtra e devolve limpo','Lava a areia por dentro','A
 let valve = store.get('poolapp.valve', {pos:0});
 if(typeof valve === 'number') valve = {pos: Math.min(5, Math.max(0, Math.round(valve)))};
 if(!isObj(valve) || !Number.isInteger(valve.pos)) valve = {pos:0};
-function renderValve(){
-  $('#valveGrid').innerHTML = VALVE.map((v,i)=>
-    `<button class="vposbtn${i===valve.pos?' active':''}" data-i="${i}" style="--vc:${v.c}"><b>${v.name}</b><span>${MSHORT[i]}</span></button>`).join('');
-  const v = VALVE[valve.pos];
-  const box = $('#valveInfo');
+const VTIPS = [
+ ['Filtre das 9h às 17h: rende mais e evapora menos cloro.',
+  'Manômetro 0,3 bar acima do normal? Hora de ir para RETRO-LAVAR.',
+  'pH entre 7,0 e 7,4 faz o cloro render até 3x mais — meça antes de filtrar.'],
+ ['Pare quando o visor ficar limpo — lavar além disso só desperdiça água.',
+  'Retro-lave depois de aspirar sujeira pesada ou dar choque de cloro.',
+  'Retro-lavando mais de 1x por semana? A areia pode estar no fim da vida útil.'],
+ ['30 a 60 segundos bastam — enxaguar mais não traz nenhum benefício.',
+  'Nunca pule o enxágue: sem ele a areia solta volta para a piscina.',
+  'Termine sempre em FILTRAR, girando a manopla com a bomba desligada.'],
+ ['É o modo certo para diluir cloro, algicida e sulfato por igual na água.',
+  'Nesse modo a água NÃO passa pela areia — aqui não se filtra.',
+  '15 minutos circulando já espalham o produto no volume todo.'],
+ ['Abra só o registro do DRENO e fique de olho no nível — bomba puxando ar queima.',
+  'É aqui que se aspira sujeira pesada direto para o esgoto.',
+  'Para abaixar o nível depois da chuva, use o DRENO — nunca o RETRO-LAVAR.'],
+ ['Só com a bomba desligada — girar com água pressurizada danifica a válvula.',
+  'Posição de manutenção: troca de areia ou revisão do pré-filtro.',
+  'Terminou? Volte para FILTRAR antes de religar a bomba.']
+];
+let tipIdx = 0;
+let knobRot = valve.pos * 60;
+const dialEl = $('#dial'), posWrap = $('#dialPos'), knobEl = $('#dialKnob');
+const DIAL_R = 36.67; /* raio dos números, em % do diâmetro do mostrador */
+posWrap.innerHTML = VALVE.map((v,i)=>{
+  const th = i*Math.PI/3, x = 50 + DIAL_R*Math.sin(th), y = 50 - DIAL_R*Math.cos(th);
+  return `<button class="dial-pos" data-i="${i}" style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%"><span class="dn">${i+1}</span><span>${v.name}</span></button>`;
+}).join('');
+function setTip(){ $('#vtTxt').textContent = VTIPS[valve.pos][tipIdx]; $('#vtN').textContent = (tipIdx+1)+'/3'; }
+function renderValveInfo(){
+  const v = VALVE[valve.pos], box = $('#valveInfo');
   box.style.borderLeftColor = v.c;
   box.innerHTML = `<div class="vi-name" style="color:${v.c}">${v.name}</div>
     <p class="vi-sum">${v.sum}</p>
     <ol class="vi-steps">${v.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`;
 }
-$('#valveGrid').addEventListener('click', e=>{
-  const b = e.target.closest('.vposbtn'); if(!b) return;
-  valve = {pos: +b.dataset.i};
-  store.set('poolapp.valve', valve);
-  renderValve(); buzz(8);
+function highlightPos(){
+  posWrap.querySelectorAll('.dial-pos').forEach(b=>b.classList.toggle('active', +b.dataset.i===valve.pos));
+}
+function rotTo(i){
+  const cur = ((knobRot%360)+360)%360;
+  let d = i*60 - cur;
+  if(d>180)d-=360; if(d<-180)d+=360;
+  knobRot += d;
+  knobEl.style.transform = 'rotate('+knobRot+'deg)';
+}
+function scrollToInfo(){ try{ $('#valveInfo').scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){} }
+function applyPos(i, save, scroll){
+  const changed = i !== valve.pos;
+  valve = {pos: i};
+  tipIdx = 0;
+  highlightPos(); setTip(); renderValveInfo();
+  if(save) store.set('poolapp.valve', valve);
+  if(changed) buzz(8);
+  if(scroll) scrollToInfo();
+}
+posWrap.addEventListener('click', e=>{
+  const b = e.target.closest('.dial-pos'); if(!b) return;
+  const i = +b.dataset.i;
+  if(i === valve.pos){ rotTo(i); scrollToInfo(); buzz(6); return; }
+  rotTo(i); applyPos(i, true, true);
 });
+$('#valveTip').addEventListener('click', ()=>{ tipIdx = (tipIdx+1)%3; setTip(); buzz(5); });
+/* arrasto da manopla: gira de verdade, 360°, com ímã na posição mais próxima */
+let drag = null;
+knobEl.addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  const r = dialEl.getBoundingClientRect();
+  drag = {id:e.pointerId, cx:r.left+r.width/2, cy:r.top+r.height/2,
+          a0:Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI,
+          r0:knobRot, moved:false};
+  knobEl.classList.add('grabbing');
+  try{ knobEl.setPointerCapture(e.pointerId); }catch(err){}
+});
+knobEl.addEventListener('pointermove', e=>{
+  if(!drag || e.pointerId!==drag.id) return;
+  const a = Math.atan2(e.clientY-drag.cy, e.clientX-drag.cx)*180/Math.PI;
+  let d = a - drag.a0;
+  if(d>180)d-=360; if(d<-180)d+=360;
+  if(Math.abs(d)>5) drag.moved = true;
+  knobRot = drag.r0 + d;
+  knobEl.style.transform = 'rotate('+knobRot+'deg)';
+  const idx = ((Math.round(knobRot/60))%6+6)%6;
+  if(idx !== valve.pos) applyPos(idx, false, false);
+});
+function endDrag(e){
+  if(!drag || (e.pointerId!==undefined && e.pointerId!==drag.id)) return;
+  const moved = drag.moved;
+  drag = null;
+  knobEl.classList.remove('grabbing');
+  const idx = ((Math.round(knobRot/60))%6+6)%6;
+  if(moved){ rotTo(idx); applyPos(idx, true, true); }
+  else rotTo(valve.pos);
+}
+knobEl.addEventListener('pointerup', endDrag);
+knobEl.addEventListener('pointercancel', endDrag);
+function initValve(){
+  knobEl.style.transition = 'none';
+  knobEl.style.transform = 'rotate('+knobRot+'deg)';
+  void knobEl.offsetWidth;
+  knobEl.style.transition = '';
+  highlightPos(); setTip(); renderValveInfo();
+}
 $('#vManual').addEventListener('click', ()=>{
   openSheet('Manual · Válvula do filtro', `
     <p class="sh-intro">As 6 posições da manopla e para que serve cada uma:</p>
@@ -1126,7 +1243,7 @@ $('#btnManual').addEventListener('click', ()=>{
   openSheet('Manual do PoolApp', `
     <p class="sh-intro">Tudo funciona offline — só o clima e o pagamento precisam de internet.</p>
     <div class="vs-step"><span class="n">1</span><span><b>Volume da água</b> — use − e + (passo de 1.000 L) ou digite o valor. A litragem rápida calcula comp × larg × prof × 1.000 e o botão “Aplicar volume acima” leva o resultado para o volume.</span></div>
-    <div class="vs-step"><span class="n">2</span><span><b>Válvula do filtro</b> — toque numa posição para ver o que ela faz e o passo a passo correto.</span></div>
+    <div class="vs-step"><span class="n">2</span><span><b>Válvula do filtro</b> — arraste a manopla ou toque num número; cada posição traz dicas e o passo a passo correto.</span></div>
     <div class="vs-step"><span class="n">3</span><span><b>Registros</b> — marque aberto/fechado; o app avisa se a combinação saiu do dia a dia.</span></div>
     <div class="vs-step"><span class="n">4</span><span><b>Parâmetros</b> — toque para medir pH, cloro, turbidez, alcalinidade, dureza e cianúrico. As doses são calculadas para o seu volume.</span></div>
     <div class="vs-step"><span class="n">5</span><span><b>Tratamento</b> — 3 etapas na ordem: equilibrar pH/AT, clorar e clarificar com sulfato de alumínio.</span></div>
@@ -1194,7 +1311,7 @@ async function openInstallHelp(){
 }
 
 /* ================= init (à prova de falhas) ================= */
-try{ renderValve(); }catch(e){}
+try{ initValve(); }catch(e){}
 try{ renderRegistros(); }catch(e){}
 try{ renderAllDoses(); }catch(e){}
 try{ renderOnline(); }catch(e){}
