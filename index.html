@@ -347,6 +347,7 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 .ug-in.bad{border-color:#D64545;background:rgba(214,69,69,.05)}
 .ug-err{color:#c23535;font-size:11.5px;font-weight:800;margin-top:-3px}
 .sup-link{display:block;margin:12px auto 0;background:none;border:0;padding:4px;font-size:11.5px;font-weight:700;color:var(--deep);text-decoration:underline;cursor:pointer}
+.ug-hint{font-size:10.5px;font-weight:600;color:rgba(13,48,56,.45);margin-top:-2px}
 .btn[disabled]{opacity:.45;cursor:default}
 
 /* ---------- Toasts ---------- */
@@ -1390,14 +1391,48 @@ function wireUserGate(p, btnSel){
   if(n) n.addEventListener('input', ()=>upd(true));
   if(e) e.addEventListener('input', ()=>upd(true));
 }
+/* Número do WhatsApp do suporte — TROQUE AQUI pelo seu número (55 + DDD + número, ex.: 5511999999999) */
+const SUPORTE_WA = '55SEUNUMERO';
 function openSuporte(){
+  const escS = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const u  = store.get('poolapp_user', null);
+  const lp = store.get('poolapp_last_payment', null);
+  const agora = new Date();
+  const dh = ('0'+agora.getDate()).slice(-2) + '/' + ('0'+(agora.getMonth()+1)).slice(-2) + '/' + agora.getFullYear()
+           + ' ' + ('0'+agora.getHours()).slice(-2) + ':' + ('0'+agora.getMinutes()).slice(-2);
   openSheet('Paguei e não ativou?', `
-    <p class="sh-intro">Calma — quase sempre libera em 1 minuto. Tente nesta ordem:</p>
-    <div class="vs-step"><span class="n">1</span><span><b>Espere 1 minuto</b> com o app aberto: o Pix cai em segundos e a licença ativa sozinha, sem fechar nada.</span></div>
-    <div class="vs-step"><span class="n">2</span><span><b>Feche e reabra o app</b>. Ao abrir, o PoolApp consulta o pagamento no Mercado Pago e ativa.</span></div>
-    <div class="vs-step"><span class="n">3</span><span><b>Restaurar compra</b> — na tela da licença, toque em “Restaurar compra”: o app procura o Pix pendente deste aparelho.</span></div>
-    <div class="vs-step"><span class="n">4</span><span><b>Recebeu um código por e-mail?</b> Toque em “Já tenho código” e digite no formato XXXX-XXXX-XXXX.</span></div>
-    <p class="sh-intro" style="margin-top:10px">Nada resolvido? Fale com o suporte informando <b>nome, e-mail, dia e hora do pagamento</b> — a ativação é conferida e liberada manualmente.</p>`);
+    <div id="suporteModal">
+      <p class="sh-intro">Calma — quase sempre libera em 1 minuto. Tente nesta ordem:</p>
+      <div class="vs-step"><span class="n">1</span><span><b>Espere 1 minuto</b> com o app aberto: o Pix cai em segundos e a licença ativa sozinha, sem fechar nada.</span></div>
+      <div class="vs-step"><span class="n">2</span><span><b>Feche e reabra o app</b>. Ao abrir, o PoolApp consulta o pagamento no Mercado Pago e ativa.</span></div>
+      <div class="vs-step"><span class="n">3</span><span><b>Restaurar compra</b> — na tela da licença, toque em “Restaurar compra”: o app procura o Pix pendente deste aparelho.</span></div>
+      <div class="vs-step"><span class="n">4</span><span><b>Recebeu um código por e-mail?</b> Toque em “Já tenho código” e digite no formato XXXX-XXXX-XXXX.</span></div>
+      <p class="mtit" style="margin-top:14px">Nada resolvido? Fale com o suporte</p>
+      <div class="ugate">
+        <label class="ug-lab" for="supNome">Nome completo<input type="text" class="ug-in" id="supNome" autocomplete="name" placeholder="Seu nome completo" value="${escS(u && u.nome)}"></label>
+        <label class="ug-lab" for="supEmail">E-mail<input type="email" class="ug-in" id="supEmail" autocomplete="email" placeholder="voce@email.com" value="${escS(u && u.email)}"></label>
+        <label class="ug-lab" for="supPixId">ID da transação Pix<input type="text" class="ug-in" id="supPixId" inputmode="numeric" placeholder="Ex.: 1234567890" value="${escS(lp && lp.id)}"><span class="ug-hint">Opcional — aparece no comprovante do Mercado Pago</span></label>
+        <label class="ug-lab" for="supDataHora">Data/Hora do pagamento<input type="text" class="ug-in" id="supDataHora" placeholder="dd/mm/aaaa hh:mm" value="${escS(dh)}"></label>
+      </div>
+      <button class="btn" id="supWa" style="margin-top:12px">🟢 Enviar pro WhatsApp</button>
+    </div>`);
+  $('#supWa').addEventListener('click', ()=>{
+    const nome  = ($('#supNome').value || '').trim();
+    const email = ($('#supEmail').value || '').trim();
+    const pix   = ($('#supPixId').value || '').trim();
+    const dhv   = ($('#supDataHora').value || '').trim();
+    if(!nome || !EMAIL_RE.test(email)){ toast('Preencha nome e e-mail para o suporte te encontrar', 'warn'); return; }
+    try{ store.set('poolapp_user', {nome, email}); }catch(e){}
+    const msg = '🌊 *PoolApp Universal — Suporte de ativação*\n\n'
+      + '• Nome: ' + nome + '\n'
+      + '• E-mail: ' + email + '\n'
+      + '• ID Transação Pix: ' + (pix || 'não sei informar') + '\n'
+      + '• Data/Hora do pagamento: ' + (dhv || 'não sei informar') + '\n\n'
+      + 'Paguei o Pix de R$ 29,90 e a licença não ativou no app. Por favor, conferir e liberar. 🙏';
+    const url = 'https://wa.me/' + SUPORTE_WA + '?text=' + encodeURIComponent(msg);
+    try{ window.open(url, '_blank'); }catch(e){ location.href = url; }
+    toast('Abrindo o WhatsApp do suporte…', 'ok');
+  });
 }
 function deviceId(){
   let d = store.get('poolapp_device', null);

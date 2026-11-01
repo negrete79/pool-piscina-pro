@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Página restrita ao administrador — não indexar -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0F4C5C">
+<title>PoolApp · Admin</title>
+<style>
+  :root{ --deep:#0F4C5C; --ink:#0D3038; --line:#e4eaec; --ok:#1e9e6a; --warn:#c77c11; --bad:#c23535; }
+  *{ box-sizing:border-box }
+  [hidden]{ display:none !important }
+  body{ margin:0; background:#fff; color:var(--ink);
+        font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; padding:16px }
+  h1{ font-size:19px; margin:0 0 2px; color:var(--deep) }
+  .sub{ font-size:12px; color:#667; margin:0 0 14px }
+  .bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px }
+  .bar input[type=search]{ flex:1; min-width:200px; height:42px; border:1.5px solid var(--line);
+        border-radius:10px; padding:0 12px; font-size:14px }
+  .bar input[type=search]:focus{ border-color:var(--deep); outline:none }
+  button{ cursor:pointer; font-weight:700; border-radius:10px; border:1.5px solid var(--deep);
+        background:#fff; color:var(--deep); padding:9px 12px; font-size:12.5px }
+  button:hover{ background:#f0f7f8 }
+  button.pri{ background:var(--deep); color:#fff }
+  button.pri:hover{ background:#0c3d4a }
+  .count{ font-size:12px; color:#667 }
+  .tbl-wrap{ overflow-x:auto; border:1.5px solid var(--line); border-radius:12px }
+  table{ border-collapse:collapse; width:100%; min-width:820px; font-size:13px }
+  th,td{ text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:middle }
+  th{ background:#f4f8f9; color:var(--deep); font-size:11px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap }
+  tr:last-child td{ border-bottom:0 }
+  td.acts{ white-space:nowrap }
+  td.acts button{ margin-right:4px; margin-bottom:4px; padding:6px 9px; font-size:11.5px }
+  .st{ display:inline-block; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:800 }
+  .st-approved{ background:#e2f6ec; color:var(--ok) }
+  .st-pending,.st-in_process{ background:#fdf1de; color:var(--warn) }
+  .st-rejected,.st-cancelled{ background:#fde7e7; color:var(--bad) }
+  .st-outro{ background:#eef1f2; color:#556 }
+  .mono{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px }
+  .msg{ padding:12px 14px; border-radius:12px; font-weight:600; margin-bottom:12px }
+  .msg.err{ background:#fde7e7; color:var(--bad) }
+  .msg.info{ background:#eef6f7; color:var(--deep) }
+  .log{ margin-top:14px; font-size:12px; color:#445 }
+  .log div{ padding:3px 0; border-bottom:1px dashed var(--line) }
+  .empty{ padding:26px; text-align:center; color:#667; font-weight:600 }
+  .note{ margin-top:14px; font-size:11.5px; color:#778 }
+  .gate{ display:grid; place-items:center; min-height:70vh; text-align:center }
+  .gate .box{ font-size:15px; font-weight:700; color:var(--bad) }
+  .code-ok{ display:block; font-size:10.5px; color:var(--ok); font-weight:800; margin-top:2px }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate"><div class="box">Verificando acesso…</div></div>
+
+<div id="painel" hidden>
+  <h1>🔧 PoolApp · Painel Admin</h1>
+  <p class="sub">Pagamentos Pix (Mercado Pago) dos últimos 90 dias · assinatura fixa R$ 29,90 / 30 dias</p>
+
+  <div class="bar">
+    <input type="search" id="busca" placeholder="Buscar por e-mail (também nome ou ID)…" autocomplete="off">
+    <button class="pri" id="btnAtualizar">↻ Atualizar</button>
+  </div>
+  <div class="count" id="count"></div>
+  <div id="msg" hidden></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th><th>Nome</th><th>E-mail</th><th>Valor</th><th>ID</th><th>Status</th><th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="7" class="empty">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="log" id="log" hidden></div>
+  <p class="note">• <b>Ativar 30 dias</b> gera um código no formato XXXX-XXXX-XXXX. O cliente digita no app em “Licença → Já tenho código”.<br>
+  • <b>Reenviar código</b> abre o WhatsApp com a mensagem pronta — escolha o contato do cliente.<br>
+  • Se a env <span class="mono">POOL_CODES</span> estiver configurada na Vercel, o código gerado precisa ser adicionado à lista; sem ela, qualquer código no formato é aceito.</p>
+</div>
+
+<script>
+'use strict';
+/* ====== SENHA ADMIN (simples, conforme solicitado) ====== */
+var SENHA_ADMIN = 'SEJA';
+var KEY = ''; // senha digitada, enviada como x-admin-key nas chamadas
+
+function bloquear(){
+  document.getElementById('gate').innerHTML =
+    '<div class="box">⛔ Acesso restrito — senha incorreta ou cancelada.<br><br>' +
+    '<span style="font-weight:600;color:#778;font-size:12.5px">Feche ou recarregue a página para tentar de novo.</span></div>';
+}
+
+(function init(){
+  var s = null;
+  try{ s = prompt('Senha admin:'); }catch(e){ s = null; }
+  if(s !== SENHA_ADMIN){ bloquear(); return; }
+  KEY = s;
+  document.getElementById('gate').hidden = true;
+  document.getElementById('painel').hidden = false;
+  carregar();
+})();
+
+/* ====== helpers ====== */
+function H(){ return { 'x-admin-key': KEY }; }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtData(iso){
+  var d = new Date(iso);
+  if(isNaN(d.getTime())) return '—';
+  var dd = ('0'+d.getDate()).slice(-2), mm = ('0'+(d.getMonth()+1)).slice(-2), hh = ('0'+d.getHours()).slice(-2), mi = ('0'+d.getMinutes()).slice(-2);
+  return dd + '/' + mm + '/' + String(d.getFullYear()).slice(-2) + ' ' + hh + ':' + mi;
+}
+function fmtValor(v){ return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtStatus(s){
+  var map = { approved:'Aprovado', pending:'Pendente', in_process:'Em análise', rejected:'Recusado', cancelled:'Cancelado' };
+  return map[s] || (s || '—');
+}
+function showMsg(txt, kind){
+  var m = document.getElementById('msg');
+  m.hidden = false; m.className = 'msg ' + (kind || 'info'); m.textContent = txt;
+}
+function hideMsg(){ document.getElementById('msg').hidden = true; }
+function addLog(txt){
+  var l = document.getElementById('log');
+  l.hidden = false;
+  var d = document.createElement('div');
+  d.textContent = '[' + fmtData(new Date().toISOString()) + '] ' + txt;
+  l.insertBefore(d, l.firstChild);
+}
+
+/* tenta a rota padrão da Vercel (/api/xxx) e cai para /api/xxx.js se precisar */
+async function apiGet(path){
+  try{ var r = await fetch(path, { headers: H() }); if(r.status !== 404) return r; }catch(e){}
+  return await fetch(path + '.js', { headers: H() });
+}
+async function apiPost(path, obj){
+  var o = { method:'POST', headers: Object.assign({'Content-Type':'application/json'}, H()), body: JSON.stringify(obj) };
+  try{ var r = await fetch(path, o); if(r.status !== 404) return r; }catch(e){}
+  return await fetch(path + '.js', o);
+}
+
+/* ====== carga da lista ====== */
+var PAGAMENTOS = [];   // linhas carregadas
+var CODIGOS = {};      // id do pagamento → código gerado nesta sessão
+
+async function carregar(){
+  var tb = document.getElementById('tbody');
+  tb.innerHTML = '<tr><td colspan="7" class="empty">Carregando pagamentos…</td></tr>';
+  hideMsg();
+  try{
+    var r = await apiGet('/api/listar-pagamentos');
+    var j = await r.json();
+    if(!r.ok){ showMsg('Erro ' + r.status + ': ' + (j && j.error || 'falha na consulta'), 'err');
+               tb.innerHTML = '<tr><td colspan="7" class="empty">Não foi possível carregar.</td></tr>'; return; }
+    PAGAMENTOS = j.pagamentos || [];
+    render(PAGAMENTOS);
+  }catch(e){
+    showMsg('Sem conexão com a API (' + e.message + '). Verifique a internet e clique em Atualizar.', 'err');
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Não foi possível carregar.</td></tr>';
+  }
+}
+
+/* ====== render ====== */
+function render(lista){
+  var tb = document.getElementById('tbody');
+  if(!lista.length){
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum pagamento encontrado nos últimos 90 dias.</td></tr>';
+    document.getElementById('count').textContent = '0 pagamentos';
+    return;
+  }
+  tb.innerHTML = lista.map(function(p){
+    var cls = p.status === 'approved' ? 'st-approved'
+            : (p.status === 'pending' || p.status === 'in_process') ? 'st-pending'
+            : (p.status === 'rejected' || p.status === 'cancelled') ? 'st-rejected' : 'st-outro';
+    var cod = CODIGOS[p.id] || '';
+    return '<tr data-busca="' + esc((p.email||'') + ' ' + (p.nome||'') + ' ' + (p.id||'')).toLowerCase() + '">' +
+      '<td>' + fmtData(p.data) + '</td>' +
+      '<td>' + esc(p.nome || '—') + '</td>' +
+      '<td>' + esc(p.email || '—') + '</td>' +
+      '<td><b>' + fmtValor(p.valor) + '</b></td>' +
+      '<td class="mono">' + esc(p.id || '—') + '</td>' +
+      '<td><span class="st ' + cls + '">' + esc(fmtStatus(p.status)) + '</span></td>' +
+      '<td class="acts">' +
+        '<button class="pri" onclick="ativar(' + JSON.stringify(JSON.stringify(p.id)) + ')">Ativar 30 dias</button>' +
+        '<button onclick="reenviar(' + JSON.stringify(JSON.stringify(p.id)) + ')">Reenviar código</button>' +
+        '<button onclick="copiarId(' + JSON.stringify(JSON.stringify(p.id)) + ')">Copiar ID</button>' +
+        (cod ? '<span class="code-ok">Código: ' + esc(cod) + '</span>' : '') +
+      '</td></tr>';
+  }).join('');
+  document.getElementById('count').textContent = lista.length + ' pagamento' + (lista.length === 1 ? '' : 's');
+}
+
+/* ====== busca por e-mail (também nome/ID) ====== */
+document.getElementById('busca').addEventListener('input', function(){
+  var q = this.value.trim().toLowerCase();
+  var rows = document.querySelectorAll('#tbody tr[data-busca]');
+  var n = 0;
+  rows.forEach(function(tr){
+    var hit = !q || tr.getAttribute('data-busca').indexOf(q) !== -1;
+    tr.style.display = hit ? '' : 'none';
+    if(hit) n++;
+  });
+  document.getElementById('count').textContent = n + ' pagamento' + (n === 1 ? '' : 's') + (q ? ' (filtro)' : '');
+});
+
+/* ====== ações ====== */
+function linhaPorId(id){
+  for(var i = 0; i < PAGAMENTOS.length; i++) if(String(PAGAMENTOS[i].id) === String(id)) return PAGAMENTOS[i];
+  return null;
+}
+
+async function ativar(id){
+  var p = linhaPorId(id);
+  if(!p) return;
+  var email = (p.email || '').trim();
+  if(!email || email === '—'){ alert('Este pagamento está sem e-mail no Mercado Pago. Peça o e-mail ao cliente pelo suporte.'); return; }
+  showMsg('Gerando código de ativação para ' + email + '…', 'info');
+  try{
+    var r = await apiPost('/api/ativar-manual', { email: email });
+    var j = await r.json();
+    if(!r.ok || !j.ok){ showMsg('Erro: ' + (j && j.error || 'falha ao gerar código'), 'err'); return; }
+    CODIGOS[p.id] = j.code;
+    hideMsg();
+    addLog('Código ' + j.code + ' gerado para ' + email + ' (30 dias).');
+    render(PAGAMENTOS);
+    aplicarFiltro();
+  }catch(e){ showMsg('Sem conexão com a API: ' + e.message, 'err'); }
+}
+window.ativar = ativar;
+
+async function reenviar(id){
+  var p = linhaPorId(id);
+  if(!p) return;
+  var cod = CODIGOS[p.id];
+  if(!cod){
+    var email = (p.email || '').trim();
+    if(!email || email === '—'){ alert('Pagamento sem e-mail: gere o código pelo botão Ativar 30 dias após pegar o e-mail do cliente.'); return; }
+    showMsg('Gerando código antes de reenviar…', 'info');
+    try{
+      var r0 = await apiPost('/api/ativar-manual', { email: email });
+      var j0 = await r0.json();
+      if(!r0.ok || !j0.ok){ showMsg('Erro: ' + (j0 && j0.error || 'falha ao gerar código'), 'err'); return; }
+      CODIGOS[p.id] = cod = j0.code;
+      addLog('Código ' + cod + ' gerado para ' + email + ' (30 dias).');
+      render(PAGAMENTOS); aplicarFiltro();
+    }catch(e){ showMsg('Sem conexão com a API: ' + e.message, 'err'); return; }
+  }
+  var nome = p.nome && p.nome !== '—' ? p.nome.split(' ')[0] + ', ' : '';
+  var msg = '🌊 *PoolApp Universal — Ativação da licença*\n\n'
+    + 'Olá, ' + nome + 'tudo bem? Seu pagamento foi confirmado ✅\n\n'
+    + 'Código de ativação: *' + cod + '*\n\n'
+    + 'No app: toque em “Licença” → “Já tenho código” e digite o código acima.\n'
+    + 'Licença válida por 30 dias. 🏊';
+  try{ await navigator.clipboard.writeText(msg); }catch(e){}
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  hideMsg();
+  addLog('Mensagem de reenvio aberta no WhatsApp (código ' + cod + ' copiado).');
+}
+window.reenviar = reenviar;
+
+async function copiarId(id){
+  try{ await navigator.clipboard.writeText(String(id)); addLog('ID ' + id + ' copiado.'); }
+  catch(e){
+    var i = document.createElement('input'); i.value = String(id); document.body.appendChild(i);
+    i.select(); try{ document.execCommand('copy'); addLog('ID ' + id + ' copiado.'); }catch(e2){ alert(id); }
+    i.remove();
+  }
+}
+window.copiarId = copiarId;
+
+function aplicarFiltro(){
+  var inp = document.getElementById('busca');
+  if(inp && inp.value){ var ev = Object.assign(new Event('input')); inp.dispatchEvent(ev); }
+}
+
+document.getElementById('btnAtualizar').addEventListener('click', carregar);
+</script>
+</body>
+</html>
