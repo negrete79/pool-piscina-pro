@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0F5C5C">
+<title>PoolApp · Redefinir senha</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body{ font-family:'Inter',sans-serif; margin:0 }
+  [hidden]{ display:none !important }
+  .drops{ position:fixed; inset:0; overflow:hidden; pointer-events:none }
+  .drops i{ position:absolute; display:block; width:140px; height:140px; border-radius:42% 58% 55% 45%/50% 45% 55% 50%;
+    background:rgba(255,255,255,.06); animation:fd 14s ease-in-out infinite }
+  .drops i:nth-child(2){ width:90px; height:90px; left:70%; top:12%; animation-delay:-4s }
+  @keyframes fd{ 0%,100%{ transform:translateY(0) rotate(0) } 50%{ transform:translateY(-26px) rotate(9deg) } }
+  .card{ width:100%; max-width:420px; background:#fff; border-radius:24px; padding:30px 26px; box-shadow:0 20px 60px rgba(0,0,0,.35) }
+  .field{ position:relative }
+  .field input{ width:100%; height:50px; border-radius:14px; border:1.5px solid #d7e2e2; padding:0 46px 0 42px;
+    font-size:14.5px; font-weight:600; color:#123A40; outline:none; box-sizing:border-box }
+  .field input:focus{ border-color:#0F5C5C; box-shadow:0 0 0 4px rgba(15,92,92,.12) }
+  .field .ico{ position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:15px }
+  .field .eye{ position:absolute; right:8px; top:50%; transform:translateY(-50%); width:36px; height:36px;
+    border-radius:10px; display:grid; place-items:center; font-size:16px; background:none; border:0; cursor:pointer }
+  .field .eye:hover{ background:#eef4f4 }
+  .btn{ display:flex; align-items:center; justify-content:center; gap:9px; width:100%; height:52px; border-radius:15px;
+    background:linear-gradient(135deg,#16A34A,#15803D); color:#fff; font-weight:800; font-size:15px; border:0; cursor:pointer;
+    box-shadow:0 8px 22px rgba(22,163,74,.35) }
+  .btn:disabled{ opacity:.6 }
+  .spin{ width:17px; height:17px; border-radius:99px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; animation:sp .8s linear infinite }
+  @keyframes sp{ to{ transform:rotate(360deg) } }
+  .toastbox{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:100 }
+  .toast{ padding:11px 18px; border-radius:13px; color:#fff; font-weight:700; font-size:13px; box-shadow:0 12px 34px rgba(0,0,0,.3); animation:ti .25s }
+  .toast.err{ background:#B03232 } .toast.ok{ background:#15803D } .toast.warn{ background:#B36A1D }
+  @keyframes ti{ from{ opacity:0; transform:translateY(-8px) } to{ opacity:1 } }
+  .okbox{ padding:18px 16px; border-radius:14px; background:#e6f6ee; border:1.5px solid #b7e4cf; text-align:center }
+  .okbox b{ display:block; font-size:17px; color:#127a56; margin-bottom:4px }
+  .okbox span{ font-size:12.5px; color:#44585c; font-weight:600 }
+</style>
+</head>
+<body class="grid place-items-center min-h-screen p-5" style="background:linear-gradient(150deg,#0F5C5C 0%,#0A3D3D 70%,#082f2f 100%)">
+<div class="drops"><i></i><i></i></div>
+<div class="toastbox" id="toasts"></div>
+
+<div class="card relative">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="w-12 h-12 rounded-2xl grid place-items-center text-[22px]" style="background:linear-gradient(145deg,#0F5C5C,#0A3D3D)">🔒</span>
+    <div>
+      <h1 class="text-[17px] font-extrabold text-[#123A40]">Redefinir senha</h1>
+      <p class="text-[12px] font-semibold text-[#6b7f83]">PoolApp · Painel Admin</p>
+    </div>
+  </div>
+
+  <div id="formArea">
+    <p class="text-[13px] font-medium text-[#6b7f83] mb-4" style="line-height:1.6">Crie uma nova senha para o painel (mínimo 6 caracteres).</p>
+    <div class="field mb-3">
+      <span class="ico">🔒</span>
+      <input type="password" id="s1" placeholder="Nova senha" autocomplete="new-password">
+      <button type="button" class="eye" data-eye="s1" aria-label="Mostrar senha">👁️</button>
+    </div>
+    <div class="field mb-4">
+      <span class="ico">🔒</span>
+      <input type="password" id="s2" placeholder="Confirmar nova senha" autocomplete="new-password">
+      <button type="button" class="eye" data-eye="s2" aria-label="Mostrar senha">👁️</button>
+    </div>
+    <button class="btn" id="btnReset"><span id="btnTxt">Redefinir senha</span></button>
+  </div>
+
+  <div id="okArea" hidden>
+    <div class="okbox">
+      <b>✅ Senha alterada com sucesso</b>
+      <span>Já pode entrar no painel com a nova senha.</span>
+    </div>
+    <a href="/admin.html" class="btn mt-4" style="text-decoration:none">Ir para o login</a>
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="/admin.html" class="text-[12.5px] font-bold text-[#0F5C5C] underline underline-offset-2">← Voltar para o login</a>
+  </div>
+</div>
+
+<script>
+'use strict';
+function toast(msg, kind){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || 'warn');
+  t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+document.querySelectorAll('.eye').forEach(b=>b.addEventListener('click', ()=>{
+  const inp = document.getElementById(b.dataset.eye);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  b.textContent = show ? '🙈' : '👁️';
+}));
+const token = new URLSearchParams(location.search).get('token') || '';
+if(!token){
+  document.getElementById('formArea').innerHTML =
+    '<p class="text-[13px] font-bold text-[#b03232]">Link inválido — token ausente. Peça um novo em “Esqueceu a senha?”.</p>';
+}
+document.getElementById('btnReset').addEventListener('click', async ()=>{
+  if(!token) return toast('Token ausente — peça um novo link', 'err');
+  const s1 = document.getElementById('s1').value, s2 = document.getElementById('s2').value;
+  if(s1.length < 6) return toast('A nova senha precisa de 6+ caracteres', 'err');
+  if(s1 !== s2) return toast('As senhas não conferem', 'err');
+  const btn = document.getElementById('btnReset');
+  btn.disabled = true;
+  document.getElementById('btnTxt').innerHTML = '<span class="spin" style="display:inline-block"></span> Salvando…';
+  try{
+    const r = await fetch('/api/admin-reset', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token, nova_senha: s1})
+    });
+    const j = await r.json();
+    if(!r.ok || !j.ok){ toast(j.error || 'Não foi possível redefinir', 'err'); return; }
+    document.getElementById('formArea').hidden = true;
+    document.getElementById('okArea').hidden = false;
+  }catch(e){
+    toast('Sem conexão com o servidor.', 'err');
+  }finally{
+    btn.disabled = false;
+    document.getElementById('btnTxt').textContent = 'Redefinir senha';
+  }
+});
+</script>
+</body>
+</html>
