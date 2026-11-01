@@ -36,7 +36,22 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none !important}
-html{scroll-behavior:smooth}
+/* range customizado: track escuro + preenchimento teal + thumb visível (corrige barra branca/esticada) */
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;max-width:100%;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:7px;border-radius:99px;
+  background:linear-gradient(90deg,var(--teal) 0,var(--teal) var(--fill,50%),rgba(120,140,145,.28) var(--fill,50%),rgba(120,140,145,.28) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:6px solid var(--teal);margin-top:-7.5px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+input[type=range]:disabled::-webkit-slider-thumb{border-color:#8ca3ad}
+input[type=range]::-moz-range-track{height:7px;border-radius:99px;background:rgba(120,140,145,.28)}
+input[type=range]::-moz-range-progress{height:7px;border-radius:99px;background:var(--teal)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:5px solid var(--teal);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+[data-theme="dark"] input[type=range]::-webkit-slider-runnable-track{
+  background:linear-gradient(90deg,#22B784 0,#22B784 var(--fill,50%),rgba(234,244,244,.16) var(--fill,50%),rgba(234,244,244,.16) 100%)}
+[data-theme="dark"] input[type=range]::-webkit-slider-thumb{border-color:#22B784}
+[data-theme="dark"] input[type=range]::-moz-range-progress{background:#22B784}
+[data-theme="dark"] input[type=range]::-moz-range-thumb{border-color:#22B784}
+html{scroll-behavior:auto} /* a suavidade agora vem da animação rAF do gotoTab (âncora não para no meio) */
 html,body{max-width:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 'Inter',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   padding-bottom:calc(96px + env(safe-area-inset-bottom));min-height:100vh;transition:background .3s,color .3s;
@@ -149,7 +164,7 @@ section.tab-panel{scroll-margin-top:84px}
   border:1.5px solid var(--line);border-radius:12px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;
   background:var(--card);color:var(--ink)}
 .dim-ctl input[type=number]:focus,.dim-ctl input[type=text]:focus{outline:none;border-color:var(--teal)}
-.dim-ctl input[type=range]{flex:1;min-width:0;accent-color:var(--teal);height:34px}
+.dim-ctl input[type=range]{flex:1;min-width:0;height:34px}
 .lf-total{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:11px 14px;
   border-radius:14px;background:rgba(15,92,92,.07);border:1px dashed rgba(15,92,92,.25);
   font-size:12px;font-weight:600;color:var(--muted)}
@@ -299,7 +314,7 @@ section.tab-panel{scroll-margin-top:84px}
 .badge{font-size:9.5px;font-weight:800;color:#fff;padding:3px 8px;border-radius:99px;letter-spacing:.03em}
 .pval{font-family:var(--mono);font-size:21px;font-weight:700;letter-spacing:-.02em}
 .pval i{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);margin-left:3px}
-.p-slider{width:100%;accent-color:var(--teal);height:30px}
+.p-slider{width:100%;height:30px}
 .pbar{position:relative;height:8px;border-radius:99px;background:rgba(120,140,145,.22);margin:4px 0 2px}
 .pzone{position:absolute;top:0;bottom:0;border-radius:99px;background:rgba(34,183,132,.4)}
 .pknob{position:absolute;top:50%;width:15px;height:15px;border-radius:99px;background:#fff;border:3px solid currentColor;
@@ -323,9 +338,9 @@ section.tab-panel{scroll-margin-top:84px}
 .m-knob{position:absolute;top:50%;width:16px;height:16px;border-radius:99px;background:#fff;border:3px solid currentColor;transform:translate(-50%,-50%)}
 .m-lab{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
 .m-row{display:flex;align-items:center;gap:12px}
-.m-row input[type=range]{flex:1;accent-color:var(--teal)}
-.m-row input[type=number]{width:96px;height:46px;border:1.5px solid var(--line);border-radius:12px;text-align:center;
-  font-family:var(--mono);font-size:15px;font-weight:600;background:var(--card)}
+.m-row input[type=range]{flex:1;min-width:0}
+.m-row input[type=text],.m-row input[type=number]{width:96px;flex:none;height:46px;border:1.5px solid var(--line);border-radius:12px;text-align:center;
+  font-family:var(--mono);font-size:15px;font-weight:600;background:var(--card);color:var(--ink);max-width:38%}
 .m-na{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700}
 .m-na input{width:19px;height:19px;accent-color:var(--red)}
 .m-na-alert{margin-top:8px;padding:10px 13px;border-radius:12px;background:rgba(214,69,69,.12);
@@ -794,16 +809,31 @@ function buildSpy(){
   SECTIONS.forEach(n=>{ const el = document.getElementById('tab-'+n); if(el) spy.observe(el); });
   spyPick();
 }
-/* clique no menu de baixo: scroll suave até a seção + marca o ativo */
+/* clique no menu de baixo: scroll suave AUTO-CORRETIVO — recalcula o alvo a cada quadro,
+   então mudança de layout no meio do caminho não interrompe: a âncora SEMPRE chega */
+let animCancel = false;
+addEventListener('touchstart', ()=>{ animCancel = true; }, {passive:true});
+addEventListener('wheel', ()=>{ animCancel = true; }, {passive:true});
 function gotoTab(name){
   if(LIC_LOCKED && LOCKED_TABS.indexOf(name) !== -1){ openPaywall(); return; }
   const el = document.getElementById('tab-'+name); if(!el) return;
   setActiveTab(name);
   lockScrollSpy = true;
   clearTimeout(spyT);
-  const y = Math.max(0, el.getBoundingClientRect().top + (window.pageYOffset||0) - headerOffset());
-  try{ window.scrollTo({top:y, behavior:'smooth'}); }catch(e){ window.scrollTo(0,y); }
-  spyT = setTimeout(()=>{ lockScrollSpy = false; spyPick(); }, 800);
+  animCancel = false;
+  const t0 = performance.now(), DUR = 700;
+  function frame(now){
+    if(animCancel){ spyT = setTimeout(()=>{ lockScrollSpy = false; spyPick(); }, 150); return; }
+    const target = Math.max(0, el.getBoundingClientRect().top + (window.pageYOffset||0) - headerOffset());
+    const cur = window.pageYOffset || 0;
+    const diff = target - cur;
+    const k = Math.min(1, (now - t0) / DUR);
+    const step = Math.abs(diff) < 1.5 ? diff : diff * (0.3 - 0.18 * k);
+    window.scrollTo(0, cur + step);
+    if(Math.abs(target - (window.pageYOffset||0)) > 1.5 && now - t0 < DUR + 600){ requestAnimationFrame(frame); }
+    else { window.scrollTo(0, target); spyT = setTimeout(()=>{ lockScrollSpy = false; spyPick(); }, 160); }
+  }
+  requestAnimationFrame(frame);
 }
 function applyLicenseLock(){
   document.body.classList.toggle('lic-locked', LIC_LOCKED === true);
@@ -817,10 +847,21 @@ function initTabs(){
 }
 addEventListener('resize', ()=>{ try{ buildSpy(); }catch(e){} });
 
+/* pinta o preenchimento das barras (custom property --fill usada no CSS do range) */
+function paintRange(el){
+  try{
+    const min = parseFloat(el.min || '0'), max = parseFloat(el.max || '100'), v = parseFloat(el.value || '0');
+    el.style.setProperty('--fill', (isFinite(v) && max > min ? Math.min(100, Math.max(0, (v - min) / (max - min) * 100)) : 0) + '%');
+  }catch(e){}
+}
+function paintAllRanges(){ document.querySelectorAll('input[type=range]').forEach(paintRange); }
+document.addEventListener('input', e=>{ if(e.target && e.target.type === 'range') paintRange(e.target); });
+
 /* ================= sheet + toast ================= */
 function openSheet(title, html){
   $('#shTitle').textContent = title;
   $('#shBody').innerHTML = html;
+  paintAllRanges();
   $('#sback').hidden = false; $('#sheet').hidden = false;
 }
 function closeSheet(){ $('#sback').hidden = true; $('#sheet').hidden = true; }
@@ -1272,6 +1313,7 @@ const PINFOS = {
  metais:'Ferro e cobre na água mancham as paredes (marrom e verde-azulado). Importante se a água vem de poço.'
 };
 function metaisStatus(){
+  if(params.metaisNA) return {t:'Não medido', c:'#8ca3ad'};
   return (params.ferro>0.3 || params.cobre>0.2) ? {t:'Alto', c:'#D64545'} : {t:'Ideal', c:'#22B784'};
 }
 function renderParams(){
@@ -1307,6 +1349,7 @@ function renderParams(){
       <span class="ptip" data-tipbox="metais" hidden>${PINFOS.metais}</span>
     </div>`;
   })();
+  paintAllRanges();
 }
 $('#paramGrid').addEventListener('click', e=>{
   const tip = e.target.closest('.tipi');
@@ -1431,10 +1474,13 @@ function openMetais(){
     <p class="sh-intro">Ferro e cobre mancham vinil, fibra e azulejo (marrom e verde-azulado). Meça principalmente se a água vem de poço ou se a piscina usa algicida com cobre.</p>
     ${block(mFe)}
     ${block(mCu)}
+    <label class="m-na"><input type="checkbox" id="mMetNA"> Não sei / Não medido</label>
+    <div class="m-na-alert" id="mMetNAAlert" hidden>🔴 Omissão de parâmetro — cálculo pode não ser preciso</div>
     <div class="m-dose t-ok" id="mMetDose"></div>
     <button class="btn m-save" id="mMetSave">✓ Salvar metais</button>`);
   function metaisDose(){
     const box = $('#mMetDose');
+    if(params.metaisNA){ box.className='m-dose t-warn'; box.innerHTML='<b>Metais não medidos:</b> sem essa medição o app não detecta risco de manchas no vinil/fibra/azulejo. Meça com teste próprio de metais ou leve uma amostra a uma loja de piscina.'; return; }
     const f = params.ferro > 0.3, c = params.cobre > 0.2;
     if(f && c){ box.className='m-dose t-warn'; box.innerHTML='<b>Ferro e cobre altos:</b> aplique sequestrante de metais (quelante) conforme a bula, filtre 8 h e retro-lave. As duas manchas saem com tratamento ácido.'; }
     else if(f){ box.className='m-dose t-act'; box.innerHTML='<b>Ferro alto — mancha marrom:</b> aplique sequestrante de metais conforme a bula, com o filtro em FILTRAR por 8 h. Origem comum: água de poço.'; }
@@ -1457,12 +1503,22 @@ function openMetais(){
     r.addEventListener('input', ()=>upd(parseFloat(r.value),'r'));
     n.addEventListener('input', ()=>upd(parseFloat(String(n.value).replace(',','.')),'n'));
   }
-  bind(mFe); bind(mCu); metaisDose();
+  bind(mFe); bind(mCu);
+  const naBox = $('#mMetNA');
+  function setMetNA(on){
+    naBox.checked = !!on;
+    ['mRferro','mNferro','mRcobre','mNcobre'].forEach(x=>{ const el = document.getElementById(x); if(el) el.disabled = !!on; });
+    $('#mMetNAAlert').hidden = !on;
+    params.metaisNA = !!on;
+    metaisDose();
+  }
+  setMetNA(!!params.metaisNA);
+  naBox.addEventListener('change', ()=>{ setMetNA(naBox.checked); buzz(8); });
   $('#mMetSave').addEventListener('click', ()=>{
     store.set('poolapp.params', params);
     renderParams();
     closeSheet();
-    toast('Metais salvos: Fe '+fmt1(params.ferro)+' · Cu '+fmt1(params.cobre)+' ppm', 'ok');
+    toast(params.metaisNA ? 'Metais marcados como “não medido”' : 'Metais salvos: Fe '+fmt1(params.ferro)+' · Cu '+fmt1(params.cobre)+' ppm', params.metaisNA ? 'warn' : 'ok');
   });
 }
 
