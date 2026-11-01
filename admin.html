@@ -4,45 +4,66 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0F5C5C">
 <title>PoolApp · Painel Admin</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{colors:{teal1:'#0F5C5C',deep:'#0A3D3D'}}}}}</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-body{font-family:'Inter',sans-serif}[hidden]{display:none!important}
+body{font-family:Inter,sans-serif}[hidden]{display:none!important}
 .toastbox{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{padding:11px 18px;border-radius:13px;color:#fff;font-weight:700;font-size:13px;box-shadow:0 12px 34px rgba(0,0,0,.3)}
-.toast.err{background:#B03232}.toast.ok{background:#15803D}.toast.warn{background:#B36A1D}.toast.info{background:#0F5C5C}
-.badge{display:inline-block;padding:4px 11px;border-radius:99px;font-size:11px;font-weight:800}
-.b-ok{background:#dcf5e9;color:#127a56}.b-pend{background:#fdf1d7;color:#9a6a10}.b-can{background:#fde3e3;color:#b03232}.b-test{background:#e0edfd;color:#1d63c4}
-.act{padding:7px 10px;border-radius:10px;font-size:11.5px;font-weight:700;border:1.5px solid #0F5C5C;color:#0F5C5C;background:#fff}
-.act.pri{background:#0F5C5C;color:#fff}.act.del{border-color:#D64545;color:#D64545}
-.modal{position:fixed;inset:0;z-index:90;background:rgba(7,26,26,.55);display:grid;place-items:center;padding:18px}
-.mcard{width:100%;max-width:430px;background:#fff;border-radius:22px;padding:22px 20px;box-shadow:0 24px 70px rgba(0,0,0,.35);max-height:88vh;overflow-y:auto}
-.stcard{background:#fff;border:1.5px solid #e3ecec;border-radius:16px;padding:13px 15px}.stcard b{display:block;font-size:20px;font-weight:800;margin-top:2px}
-.logline{font-size:11.5px;padding:5px 0;border-bottom:1px dashed #e3ecec}
+.toast{padding:11px 18px;border-radius:13px;color:#fff;font-weight:700;font-size:13px;box-shadow:0 12px 34px rgba(0,0,0,.3)}.toast.err{background:#B03232}.toast.ok{background:#15803D}
+.field{position:relative}.field input{width:100%;height:52px;border-radius:14px;border:1.5px solid #d7e2e2;padding:0 48px 0 14px;font-size:15px;font-weight:600;outline:none}
+.field input:focus{border-color:#0F5C5C;box-shadow:0 0 0 4px rgba(15,92,92,.12)}
+.eyeBtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:10px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer}
+.eyeBtn:hover{background:#eef4f4}.eyeBtn svg{width:22px;height:22px;stroke:#6b7f83;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body class="bg-[#F5F7F7]">
-<div class="toastbox" id="toasts"></div>
-
 <div id="viewLogin" class="min-h-screen grid place-items-center p-5" style="background:linear-gradient(150deg,#0F5C5C 0%,#0A3D3D 70%,#082f2f 100%)">
-<div class="w-full max-w-[420px]"><div class="bg-white rounded-[24px] px-7 py-8">
-<h1 class="text-[17px] font-extrabold">PoolApp · Painel Admin</h1>
+<div class="w-full max-w-[400px]"><div class="bg-white rounded-[28px] px-7 py-8">
+<h1 class="text-[18px] font-extrabold">PoolApp · Painel Admin</h1>
 <form id="loginForm" class="mt-5">
 <input type="email" id="loginEmail" placeholder="E-mail" class="w-full h-12 rounded-xl border px-4 mb-3">
-<input type="password" id="loginSenha" placeholder="Senha" class="w-full h-12 rounded-xl border px-4 mb-3">
-<label class="flex gap-2 text-[13px] mb-4"><input type="checkbox" id="lembrar" checked> Lembrar</label>
-<button type="submit" class="w-full h-12 rounded-xl bg-green-600 text-white font-bold" id="btnLogin">Entrar</button>
-<p id="lockMsg" class="hidden text-[12px] text-red-600 mt-3 text-center"></p>
+<div class="field mb-3">
+<input type="password" id="loginSenha" placeholder="Senha">
+<button type="button" class="eyeBtn" id="pwEye">
+<svg id="eyeOpen" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3.5"/></svg>
+<svg id="eyeClosed" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.53 9.53a3.5 3.5 0 0 0 4.94 4.94"/><path d="M1 1l22 22"/></svg>
+</button>
+</div>
+<label class="flex gap-2 text-[14px] font-semibold mb-5"><input type="checkbox" id="lembrar" checked> Lembrar</label>
+<button type="submit" class="w-full h-[54px] rounded-[16px] bg-[#16A34A] text-white font-extrabold" id="btnLogin">Entrar</button>
+<p id="lockMsg" class="hidden text-[12px] font-bold text-red-600 mt-3 text-center"></p>
 </form></div></div></div>
 
-<div id="viewPainel" hidden>
-<header class="sticky top-0 bg-white/80 backdrop-blur border-b p-3 flex gap-3"><span>🔧</span><div class="flex-1"><p class="font-extrabold">Olá, <span id="admNome">Admin</span></p><p id="admEmail" class="text-[11px]"></p></div><button id="btnSair" class="px-3 h-10 border rounded-xl text-red-600 font-bold">Sair</button></header>
-<main class="max-w-6xl mx-auto p-4">
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4"><div class="stcard"><span class="text-[10px] uppercase">Total 30 dias</span><b id="kFat">—</b></div><div class="stcard"><span class="text-[10px] uppercase">Ativações</span><b id="kAtiv">—</b></div><div class="stcard"><span class="text-[10px] uppercase">Pendentes</span><b id="kPend">—</b></div><div class="stcard"><span class="text-[10px] uppercase">Expirados</span><b id="kExp">—</b></div></div>
+<script>
+const $=s=>document.querySelector(s);
+function tokenGet(){return localStorage.getItem('pa_token')||sessionStorage.getItem('pa_token')||'';}
+function tokenStore(t,lem){if(lem)localStorage.setItem('pa_token',t);else sessionStorage.setItem('pa_token',t);}
+function tokenPayload(t){try{return JSON.parse(atob(t.split('.')[0].replace(/-/g,'+').replace(/_/g,'/')));}catch(e){return null;}}
+async function api(p,o){try{const r=await fetch(p,o);if(r.status!==404)return r;}catch(e){}return fetch(p+'.js',o);}
 
-<div class="bg-white border rounded-2xl p-3 mb-4 flex flex-wrap gap-2">
-<input id="busca" placeholder="🔎 Buscar..." class="flex-1 min-w-[200px] h-11 border rounded-xl px-3">
-<button id="btnAtualizar" class="h-11 px-4 border border-[#0F5C5C]
+const pwEye=document.getElementById('pwEye'), inpSenha=document.getElementById('loginSenha'), eyeOpen=document.getElementById('eyeOpen'), eyeClosed=document.getElementById('eyeClosed');
+pwEye.addEventListener('click',()=>{
+  const show=inpSenha.type==='password';
+  inpSenha.type=show?'text':'password';
+  eyeOpen.style.display=show?'none':'block';
+  eyeClosed.style.display=show?'block':'none';
+});
+
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const email=document.getElementById('loginEmail').value.trim(),senha=inpSenha.value;
+ if(!email||!senha){alert('Preencha');return;}
+ const btn=document.getElementById('btnLogin');btn.disabled=true;
+ try{
+  const r=await api('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
+  const j=await r.json();
+  if(!r.ok||!j.ok){alert(j.error||'Login falhou');return;}
+  tokenStore(j.token,document.getElementById('lembrar').checked);
+  location.reload();
+ }catch(err){alert('Erro conexão');}
+ finally{btn.disabled=false;}
+});
+</script>
+</body>
+</html>
