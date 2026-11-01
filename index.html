@@ -76,6 +76,7 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 .input-vol{flex:1;min-width:0;height:56px;text-align:center;font-weight:800;font-family:var(--mono);font-size:17px;color:var(--ink);background:rgba(13,48,56,.04);border:1.5px solid transparent;border-radius:16px}
 .input-vol:focus{border-color:var(--deep);background:#fff}
 #m3Display{text-align:center;font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--teal);margin-top:12px}
+#dimsDisplay{text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--deep);background:rgba(15,108,110,.07);border-radius:999px;padding:6px 14px;width:fit-content;margin:10px auto 0;letter-spacing:.02em}
 .vol-note{font-size:12px;font-weight:500;color:rgba(13,48,56,.55);margin-top:6px;text-align:center;line-height:1.5}
 .flabel{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(13,48,56,.5);margin:16px 0 8px}
 
@@ -159,20 +160,62 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 .vi-steps{margin-left:16px;display:grid;gap:6px}
 .vi-steps li{font-size:12px;font-weight:500;line-height:1.45;color:rgba(13,48,56,.7)}
 
-/* ---------- Registros (cards com ícone) ---------- */
-.regrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.reg{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 4px 12px;border-radius:18px;background:#fff;border:1.5px solid rgba(13,48,56,.09);box-shadow:0 3px 10px rgba(13,48,56,.07);transition:border-color .25s,background .25s,box-shadow .25s,transform .15s}
+/* ---------- Animação BOMBA + FILTRO (manual) ---------- */
+.pumpdemo{display:flex;align-items:center;justify-content:center;gap:7px;margin:2px 0 12px;padding:14px 8px;border-radius:16px;background:rgba(15,108,110,.06)}
+.pd-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.pd-item b{font-size:8.5px;font-weight:800;letter-spacing:.06em;color:rgba(13,48,56,.6)}
+.pd-pool{display:block;width:50px;height:38px;border-radius:12px;background:linear-gradient(180deg,rgba(15,108,110,.14),rgba(15,108,110,.32));position:relative;overflow:hidden}
+.pd-pool::before{content:'';position:absolute;left:0;right:0;top:7px;height:6px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.75) 0 8px,transparent 8px 16px);animation:pdWave 1.6s linear infinite}
+@keyframes pdWave{to{transform:translateX(16px)}}
+.pd-pipe{display:block;width:24px;height:10px;border-radius:5px;background:rgba(13,48,56,.13);position:relative;overflow:hidden;flex:none}
+.pd-flow{position:absolute;inset:0;background:repeating-linear-gradient(90deg,#157a56 0 6px,transparent 6px 12px);animation:pdFlow .8s linear infinite}
+@keyframes pdFlow{to{transform:translateX(12px)}}
+.pd-pump{display:block;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff 0%,#eef3f3 55%,#cfdcdc 100%);box-shadow:0 5px 12px rgba(13,48,56,.2),inset 0 -3px 6px rgba(13,48,56,.12);display:grid;place-items:center}
+.pd-impeller{display:block;width:28px;height:28px;border-radius:50%;border:3px solid #0F4C5C;border-top-color:transparent;border-right-color:transparent;animation:pdSpin 1.1s linear infinite}
+@keyframes pdSpin{to{transform:rotate(360deg)}}
+.pd-filter{display:block;width:50px;height:50px;border-radius:14px;background:linear-gradient(180deg,#e2f1f1,#bcd9d9);position:relative;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(15,76,92,.28)}
+.pd-sand{position:absolute;left:50%;bottom:6px;width:30px;height:18px;margin-left:-15px;border-radius:8px;background:repeating-linear-gradient(45deg,#d9b36c 0 4px,#c9a055 4px 8px);animation:pdSand 1.2s ease-in-out infinite}
+@keyframes pdSand{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.pd-stop,.pd-stop *{animation:none!important}
+.pd-stop{opacity:.55;filter:grayscale(.5)}
+.pd-join{display:block;width:50px;height:20px;border-radius:7px;background:rgba(13,48,56,.1);position:relative;overflow:hidden}
+.pd-exit{display:block;width:50px;height:38px;border-radius:12px;position:relative;overflow:hidden}
+.pd-exit.good{background:linear-gradient(180deg,rgba(21,122,86,.15),rgba(21,122,86,.35));box-shadow:inset 0 0 0 2px rgba(21,122,86,.25)}
+.pd-exit.bad{background:linear-gradient(180deg,rgba(150,85,31,.14),rgba(150,85,31,.34));box-shadow:inset 0 0 0 2px rgba(150,85,31,.25)}
+.pd-pipe.esg .pd-flow{background:repeating-linear-gradient(90deg,#a3703f 0 6px,transparent 6px 12px)}
+.pd-pipe.rev .pd-flow{animation-direction:reverse}
+.pd-filter.pd-dirty .pd-sand{background:repeating-linear-gradient(45deg,#8d6b3f 0 4px,#71532e 4px 8px)}
+.pd-filter.pd-fast .pd-sand{animation-duration:.45s}
+.poschips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 12px}
+.pchip{font-size:10px;font-weight:800;letter-spacing:.03em;padding:7px 11px;border-radius:999px;background:rgba(13,48,56,.06);color:rgba(13,48,56,.65);border:1.5px solid transparent;transition:all .2s}
+.pchip.on{background:#0F4C5C;color:#fff;border-color:#0F4C5C}
+
+/* ---------- Registros (manopla redonda realista) ---------- */
+.regrow{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.reg{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px 12px;border-radius:18px;background:#fff;border:1.5px solid rgba(13,48,56,.09);box-shadow:0 3px 10px rgba(13,48,56,.07);transition:border-color .25s,background .25s,box-shadow .25s,transform .15s}
 .reg:active{transform:scale(.96)}
-.reg .ric{width:44px;height:44px;border-radius:14px;background:rgba(13,48,56,.05);color:rgba(13,48,56,.5);display:grid;place-items:center;transition:background .25s,color .25s,box-shadow .25s}
-.reg .ric svg{width:22px;height:22px}
-.reg b{font-size:9.5px;font-weight:800;letter-spacing:.05em;color:rgba(13,48,56,.75)}
+.rknob{position:relative;width:56px;height:56px;border-radius:50%;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.rknob::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fafcfc 0%,#e3eaea 48%,#aebcbc 100%);border:2px solid rgba(13,48,56,.12);box-shadow:0 7px 14px rgba(13,48,56,.22),inset 0 -3px 6px rgba(13,48,56,.16),inset 0 2px 3px #fff}
+.rknob::after{content:'';position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#cfd9d9);box-shadow:0 1px 3px rgba(13,48,56,.35)}
+.rk-lever{position:absolute;left:50%;top:50%;width:38px;height:9px;margin:-4.5px 0 0 -19px;border-radius:5px;background:linear-gradient(180deg,#94a5a5 0%,#7c8e8e 32%,#fff 32%,#fff 68%,#7c8e8e 68%,#647777 100%);box-shadow:0 2px 4px rgba(13,48,56,.3),inset 0 1px 2px rgba(255,255,255,.35);transition:background .3s}
+.reg.closed .rknob{transform:rotate(90deg)}
+.reg.closed .rknob::before{filter:saturate(.4)}
+.rflow{display:flex;gap:5px;height:7px;align-items:center}
+.rflow i{width:5px;height:5px;border-radius:50%;background:#157a56;opacity:0}
+.reg.open .rflow i{animation:regDrop 1.1s ease-in infinite}
+.reg.open .rflow i:nth-child(2){animation-delay:.22s}
+.reg.open .rflow i:nth-child(3){animation-delay:.44s}
+@keyframes regDrop{0%{opacity:0;transform:translateY(-4px)}35%{opacity:.85}100%{opacity:0;transform:translateY(5px)}}
+.reg b{font-size:10px;font-weight:800;letter-spacing:.05em;color:rgba(13,48,56,.75);white-space:nowrap}
 .reg .st{font-size:10px;font-weight:700;color:rgba(13,48,56,.45)}
-.reg.open{border-color:#0F4C5C;background:rgba(15,76,92,.05);box-shadow:0 8px 18px rgba(15,76,92,.16)}
-.reg.open .ric{background:#0F4C5C;color:#fff;box-shadow:0 4px 10px rgba(15,76,92,.28)}
-.reg.open b{color:#0F4C5C}
+.reg.open{border-color:#157a56;background:rgba(21,122,86,.06);box-shadow:0 8px 18px rgba(21,122,86,.18)}
+.reg.open .rknob::before{background:radial-gradient(circle at 34% 28%,#f2fbf7 0%,#cdeadd 48%,#8fc7ab 100%);border-color:rgba(21,122,86,.4)}
+.reg.open .rk-lever{background:linear-gradient(180deg,#1c9a68 0%,#157a56 32%,#fff 32%,#fff 68%,#157a56 68%,#0d5c40 100%)}
+.reg.open b{color:#0d6b4c}
 .reg.open .st{color:#0d6b4c}
-.reg.closed .ric{background:rgba(214,69,69,.1);color:#c05050}
-.reg.closed .st{color:#8f2f2f}
+.reg.closed .st{color:#6b7a7a}
+.reg.danger{animation:regFlash .6s linear infinite;border-color:#D64545!important}
+@keyframes regFlash{0%,100%{box-shadow:0 0 0 0 rgba(214,69,69,0)}50%{box-shadow:0 0 0 7px rgba(214,69,69,.28);background:rgba(214,69,69,.14)}}
 .alerta{margin-top:12px;padding:11px 13px;border-radius:14px;font-size:12px;font-weight:600;line-height:1.5}
 .a-ok{background:rgba(47,191,143,.13);color:#0d6b4c}
 .a-warn{background:rgba(226,135,67,.14);color:#8a4d1c}
@@ -192,6 +235,12 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 .pzone{position:absolute;top:0;bottom:0;border-radius:3px;background:rgba(47,191,143,.4)}
 .pknob{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:#fff;border:2.5px solid currentColor;transform:translate(-50%,-50%)}
 .pideal{font-size:9.5px;font-weight:700;color:rgba(13,48,56,.45)}
+.pcard{position:relative}
+.p-slider{width:100%;height:26px;margin:0;accent-color:#0F4C5C;cursor:pointer}
+.tipi{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(13,48,56,.35);color:rgba(13,48,56,.6);background:#fff;font-family:Georgia,serif;font-style:italic;font-size:10.5px;font-weight:800;display:grid;place-items:center;flex:none;padding:0;line-height:1}
+.tipi:active{transform:scale(.9)}
+.ptip{position:absolute;left:6px;right:6px;top:4px;z-index:6;background:#12343b;color:#fff;border-radius:12px;padding:9px 11px;font-size:10.5px;font-weight:600;line-height:1.5;box-shadow:0 12px 26px rgba(13,48,56,.4);text-align:left;animation:tIn .2s}
+.ptip::after{content:'';position:absolute;left:20px;top:-4px;width:10px;height:10px;background:#12343b;transform:rotate(45deg);border-radius:2px}
 
 /* ---------- Tratamento ---------- */
 .tstep{border:1.5px solid var(--line);border-radius:18px;padding:13px;margin-bottom:10px;background:rgba(255,255,255,.6)}
@@ -291,6 +340,14 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 .coderow input{flex:1;height:46px;text-align:center;font-family:var(--mono);font-weight:700;letter-spacing:.06em;border:1.5px solid rgba(13,48,56,.12);border-radius:14px;text-transform:uppercase}
 .coderow .btn{width:auto;padding:0 18px}
 .mt12{margin-top:12px}
+.ugate{margin-top:12px;display:grid;gap:9px;text-align:left}
+.ug-lab{display:flex;flex-direction:column;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:rgba(13,48,56,.55)}
+.ug-in{width:100%;height:46px;border:1.5px solid rgba(13,48,56,.14);border-radius:13px;padding:0 12px;font-size:14px;font-weight:600;color:var(--ink);background:#fff;box-sizing:border-box}
+.ug-in:focus{border-color:var(--deep);outline:none}
+.ug-in.bad{border-color:#D64545;background:rgba(214,69,69,.05)}
+.ug-err{color:#c23535;font-size:11.5px;font-weight:800;margin-top:-3px}
+.sup-link{display:block;margin:12px auto 0;background:none;border:0;padding:4px;font-size:11.5px;font-weight:700;color:var(--deep);text-decoration:underline;cursor:pointer}
+.btn[disabled]{opacity:.45;cursor:default}
 
 /* ---------- Toasts ---------- */
 #toasts{position:fixed;left:0;right:0;bottom:84px;z-index:70;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
@@ -334,17 +391,18 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
 
         <div class="volume-row">
           <button class="btn-vol" id="btnMinus" aria-label="Diminuir 1.000 litros"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
-          <input type="number" id="volumeInput" class="input-vol" inputmode="numeric" min="1000" step="100" value="45000" aria-label="Volume da piscina em litros">
+          <input type="number" id="volumeInput" class="input-vol" inputmode="numeric" min="1000" step="100" value="39900" aria-label="Volume da piscina em litros">
           <button class="btn-vol" id="btnPlus" aria-label="Aumentar 1.000 litros"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg></button>
         </div>
-        <div id="m3Display">45.000 L = 45 m³</div>
+        <div id="dimsDisplay">C: — L: — P: —</div>
+        <div id="m3Display">39.900 L = 40 m³</div>
         <p class="vol-note">Piscina retangular: comprimento × largura × profundidade média (m) × 1.000 = litros</p>
 
         <div class="flabel">Litragem rápida · comp × larg × prof</div>
         <div class="litragem-rapida-grid">
-          <label>Comprimento (m)<input type="number" id="compInput" step="0.05" min="0" inputmode="decimal" placeholder="0,00"></label>
-          <label>Largura (m)<input type="number" id="largInput" step="0.05" min="0" inputmode="decimal" placeholder="0,00"></label>
-          <label>Prof. média (m)<input type="number" id="profInput" step="0.05" min="0" inputmode="decimal" placeholder="0,00"></label>
+          <label>Comprimento (m)<input type="text" id="compInput" inputmode="decimal" placeholder="0,00"></label>
+          <label>Largura (m)<input type="text" id="largInput" inputmode="decimal" placeholder="0,00"></label>
+          <label>Prof. média (m)<input type="text" id="profInput" inputmode="decimal" placeholder="0,00"></label>
         </div>
         <div class="lf-total"><span>Total: comp × larg × prof × 1.000</span><b id="lfTotal">—</b></div>
         <button class="btn" style="margin-top:12px" onclick="aplicarLitragem()">Aplicar volume acima</button>
@@ -386,12 +444,13 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
       <div class="card" id="sec-regs">
         <div class="shead"><span class="sic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></svg></span><h2>Posição dos registros</h2></div>
         <div class="regrow" id="regRow">
-          <button class="reg closed" id="reg-dreno"><span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9"/><path d="m8.5 8.5 3.5 3.5 3.5-3.5"/><path d="M3 18c3 0 3 2 6 2s3-2 6-2 3 2 6 2"/></svg></span><b>DRENO</b><span class="st">Fechado</span></button>
-          <button class="reg open" id="reg-skimmer"><span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12"/><path d="M12 15V7"/><path d="m8.5 10.5 3.5-3.5 3.5 3.5"/><path d="M3 19c3 0 3 2 6 2s3-2 6-2 3 2 6 2"/></svg></span><b>SKIMMER</b><span class="st">Aberto</span></button>
-          <button class="reg open" id="reg-asp"><span class="ric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16l-6.2 7v5.5l-3.6 3.5v-9L4 4Z"/></svg></span><b>ASPIRAÇÃO</b><span class="st">Aberto</span></button>
+          <button class="reg closed" id="reg-dreno"><span class="rknob"><span class="rk-lever"></span></span><span class="rflow"><i></i><i></i><i></i></span><b>DRENO</b><span class="st">Fechado</span></button>
+          <button class="reg open" id="reg-skimmer"><span class="rknob"><span class="rk-lever"></span></span><span class="rflow"><i></i><i></i><i></i></span><b>SKIMMER</b><span class="st">Aberto</span></button>
+          <button class="reg open" id="reg-asp"><span class="rknob"><span class="rk-lever"></span></span><span class="rflow"><i></i><i></i><i></i></span><b>ASPIRAÇÃO</b><span class="st">Aberto</span></button>
+          <button class="reg closed" id="reg-hidro"><span class="rknob"><span class="rk-lever"></span></span><span class="rflow"><i></i><i></i><i></i></span><b>HIDROMASSAGEM</b><span class="st">Fechado</span></button>
         </div>
         <div class="alerta a-ok" id="alertaReg"></div>
-        <div class="a-note">⚠️ Desligue a bomba antes de girar qualquer registro.</div>
+        <div class="alerta a-warn" style="margin-top:10px;text-align:center">⚠️ Desligue a bomba antes de girar</div>
       </div>
     </section>
 
@@ -499,11 +558,15 @@ const fmtG = g => g>=1000 ? fmt1(g/1000)+' kg' : fmt(g)+' g';
 const fmtMl= m => m>=1000 ? (m/1000).toLocaleString('pt-BR',{maximumFractionDigits:2})+' L' : fmt(m)+' mL';
 const buzz = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
 const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+function dimsText(c,l,p){
+  const f = n => Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});
+  return 'C: '+f(c)+'m L: '+f(l)+'m P: '+f(p)+'m';
+}
 /* volume sempre lido do campo ao vivo (fonte única: #volumeInput) */
 function getVolume(){
   const el = document.getElementById('volumeInput');
   const v = el ? parseInt(el.value, 10) : NaN;
-  return (isFinite(v) && v > 0) ? v : 45000;
+  return (isFinite(v) && v > 0) ? v : 39900;
 }
 
 /* ================= abas (display block/none) ================= */
@@ -518,7 +581,7 @@ function showTab(name){
   const btns = document.querySelectorAll('.tabbtn');
   for(let i=0;i<btns.length;i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-tab')===name);
   store.set('poolapp.tab', name);
-  try{ window.scrollTo({top:0}); }catch(e){ window.scrollTo(0,0); }
+  try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
 }
 document.querySelectorAll('.tabbtn').forEach(b=>{
   b.addEventListener('click', ()=>{ buzz(6); showTab(b.getAttribute('data-tab')); });
@@ -561,10 +624,13 @@ document.getElementById('volumeInput').addEventListener('change', ()=>{ try{ ren
 (function initVolume(){
   const inp = document.getElementById('volumeInput'); if(!inp) return;
   const saved = Number(store.get('pool_volume', null));
-  const v = (isFinite(saved) && saved >= 1000) ? Math.round(saved) : 45000;
+  const v = (isFinite(saved) && saved >= 1000) ? Math.round(saved) : 39900;
   inp.value = v;
   const m3 = document.getElementById('m3Display');
   if(m3) m3.textContent = v.toLocaleString('pt-BR') + ' L = ' + Math.round(v/1000) + ' m³';
+  const dims = store.get('poolapp.dims', null);
+  const dd = document.getElementById('dimsDisplay');
+  if(dd) dd.textContent = (isObj(dims) && dims.c>0 && dims.l>0 && dims.p>0) ? dimsText(dims.c,dims.l,dims.p) : 'C: — L: — P: —';
 })();
 
 /* ================= válvula do filtro ================= */
@@ -638,21 +704,20 @@ function rotTo(i){
   knobRot += d;
   knobEl.style.transform = 'rotate('+knobRot+'deg)';
 }
-function scrollToInfo(){ try{ $('#valveInfo').scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){} }
-function applyPos(i, save, scroll){
+function applyPos(i, save){
   const changed = i !== valve.pos;
   valve = {pos: i};
   tipIdx = 0;
   highlightPos(); setTip(); renderValveInfo();
   if(save) store.set('poolapp.valve', valve);
   if(changed) buzz(8);
-  if(scroll) scrollToInfo();
+  if(changed){ try{ renderRegistros(); }catch(e){} }
 }
 posWrap.addEventListener('click', e=>{
   const b = e.target.closest('.dial-pos'); if(!b) return;
   const i = +b.dataset.i;
-  if(i === valve.pos){ rotTo(i); scrollToInfo(); buzz(6); return; }
-  rotTo(i); applyPos(i, true, true);
+  if(i === valve.pos){ rotTo(i); buzz(6); return; }
+  rotTo(i); applyPos(i, true);
 });
 $('#valveTip').addEventListener('click', ()=>{ tipIdx = (tipIdx+1)%3; setTip(); buzz(5); });
 /* arrasto da manopla: gira de verdade, 360°, com ímã na posição mais próxima */
@@ -675,7 +740,7 @@ knobEl.addEventListener('pointermove', e=>{
   knobRot = drag.r0 + d;
   knobEl.style.transform = 'rotate('+knobRot+'deg)';
   const idx = ((Math.round(knobRot/60))%6+6)%6;
-  if(idx !== valve.pos) applyPos(idx, false, false);
+  if(idx !== valve.pos) applyPos(idx, false);
 });
 function endDrag(e){
   if(!drag || (e.pointerId!==undefined && e.pointerId!==drag.id)) return;
@@ -683,7 +748,7 @@ function endDrag(e){
   drag = null;
   knobEl.classList.remove('grabbing');
   const idx = ((Math.round(knobRot/60))%6+6)%6;
-  if(moved){ rotTo(idx); applyPos(idx, true, true); }
+  if(moved){ rotTo(idx); applyPos(idx, true); }
   else rotTo(valve.pos);
 }
 knobEl.addEventListener('pointerup', endDrag);
@@ -695,40 +760,99 @@ function initValve(){
   knobEl.style.transition = '';
   highlightPos(); setTip(); renderValveInfo();
 }
+/* caminho da água em cada posição (para a animação do manual) */
+const FLOW = [
+ {st:'ok',   nota:'A bomba puxa da piscina, o filtro segura a sujeira na areia e a água limpa volta pela junção.'},
+ {st:'rev',  nota:'O fluxo sobe ao contrário pela areia e leva a sujeira presa direto para o esgoto.'},
+ {st:'fast', nota:'Água rasa e rápida assenta a areia depois da lavagem, caindo no esgoto.'},
+ {st:'byp',  nota:'Circula SEM passar pela areia — o jeito certo de diluir produto por igual.'},
+ {st:'bypE', nota:'Desce direto para o esgoto, sem passar pela areia — abaixa o nível ou aspira sujeira pesada.'},
+ {st:'off',  nota:'Tudo travado, nada circula. Só use nesta posição com a bomba desligada.'}
+];
+let flowSel = valve.pos;
+function flowHTML(i){
+  const st = FLOW[i].st;
+  const bombaOn = st !== 'off';
+  const esg = (st==='rev' || st==='fast' || st==='bypE');
+  const filtroOn = (st==='ok' || st==='rev' || st==='fast');
+  const s = c => c + (bombaOn ? '' : ' pd-stop');
+  const meio = filtroOn
+    ? `<div class="pd-item"><span class="pd-filter${st==='rev'?' pd-dirty':(st==='fast'?' pd-fast':'')}"><span class="pd-sand"></span></span><b>FILTRO</b></div>`
+    : `<div class="pd-item"><span class="${s('pd-join')}"><span class="pd-flow"></span></span><b>DIRETO</b></div>`;
+  return `<div class="pd-item"><span class="${s('pd-pool')}"></span><b>PISCINA</b></div>
+    <span class="pd-pipe${esg?' esg':''}${st==='rev'?' rev':''} ${s('')}"><span class="pd-flow"></span></span>
+    <div class="pd-item"><span class="pd-pump"><span class="${s('pd-impeller')}"></span></span><b>BOMBA</b></div>
+    <span class="pd-pipe${esg?' esg':''} ${s('')}"><span class="pd-flow"></span></span>
+    ${meio}
+    <span class="pd-pipe${esg?' esg':''} ${s('')}"><span class="pd-flow"></span></span>
+    <div class="pd-item"><span class="${s('pd-exit '+(esg?'bad':'good'))}"></span><b>${st==='off'?'FECHADO':(esg?'ESGOTO':'VOLTA LIMPA')}</b></div>`;
+}
+function renderFlow(){
+  const chips = $('#flowChips'), demo = $('#flowDemo'), nota = $('#flowNota');
+  if(!chips || !demo) return;
+  chips.innerHTML = VALVE.map((v,i)=>`<button class="pchip${i===flowSel?' on':''}" data-i="${i}">${i+1} · ${v.name}</button>`).join('');
+  demo.innerHTML = flowHTML(flowSel);
+  if(nota) nota.textContent = FLOW[flowSel].nota;
+}
 $('#vManual').addEventListener('click', ()=>{
+  flowSel = valve.pos;
   openSheet('Manual · Válvula do filtro', `
-    <p class="sh-intro">As 6 posições da manopla e para que serve cada uma:</p>
+    <div class="poschips" id="flowChips"></div>
+    <div class="pumpdemo" id="flowDemo"></div>
+    <p class="sh-intro" id="flowNota" style="margin-top:0"></p>
+    <p class="sh-intro">Toque numa posição acima para ver o caminho da água animado. As 6 posições da manopla:</p>
     ${VALVE.map((v,i)=>`<div class="vs-step"><span class="n">${i+1}</span><span><b>${v.name}</b> — ${MSHORT[i]}. ${v.sum}</span></div>`).join('')}
     <p class="sh-intro" style="margin-top:10px">Regra de ouro: bomba desligada para girar a manopla, sempre.</p>`);
+  renderFlow();
 });
 
-/* ================= registros ================= */
-let regs = store.get('poolapp_registros', {dreno:false, skimmer:true, asp:true});
-if(!isObj(regs)) regs = {dreno:false, skimmer:true, asp:true};
-regs = {dreno:!!regs.dreno, skimmer:!!regs.skimmer, asp:!!regs.asp};
+/* ================= registros (4: dreno, skimmer, aspiração, hidromassagem) ================= */
+const REGKEYS = ['dreno','skimmer','asp','hidro'];
+let regs = store.get('poolapp_registros', {dreno:false, skimmer:true, asp:true, hidro:false});
+if(!isObj(regs)) regs = {};
+regs = {dreno:!!regs.dreno, skimmer:!!regs.skimmer, asp:!!regs.asp, hidro:!!regs.hidro};
+function conflitoRegistros(){
+  if(regs.dreno && (regs.skimmer || regs.asp)) return 1;                 /* SEGURANÇA 1: dreno + puxada do dia a dia */
+  if(regs.hidro && (regs.dreno || regs.skimmer || regs.asp)) return 2;   /* SEGURANÇA 2: hidro + outro registro aberto */
+  return 0;
+}
 function renderRegistros(){
-  ['dreno','skimmer','asp'].forEach(k=>{
+  REGKEYS.forEach(k=>{
     const b = document.getElementById('reg-'+k);
     b.classList.toggle('open', regs[k]);
     b.classList.toggle('closed', !regs[k]);
     b.querySelector('.st').textContent = regs[k] ? 'Aberto' : 'Fechado';
   });
+  const cf = conflitoRegistros();
+  REGKEYS.forEach(k=>{
+    const b = document.getElementById('reg-'+k);
+    let bad = false;
+    if(cf===1) bad = (k==='dreno') || (regs[k] && (k==='skimmer' || k==='asp'));
+    if(cf===2) bad = !!regs[k];
+    b.classList.toggle('danger', bad);
+  });
   const al = $('#alertaReg');
-  const diaADia = !regs.dreno && regs.skimmer && regs.asp;
-  if(diaADia){ al.className='alerta a-ok'; al.textContent='✅ Configuração do dia a dia — puxada por skimmer e aspiração.'; }
+  const diaADia = !regs.dreno && regs.skimmer && regs.asp && !regs.hidro;
+  if(cf===1){ al.className='alerta a-bad'; al.textContent='🔴 PERIGO: DRENO aberto junto com SKIMMER/ASPIRAÇÃO. A bomba puxa ar e pode queimar. Feche o dreno — a manopla dele também pisca.'; }
+  else if(cf===2){ al.className='alerta a-bad'; al.textContent='🔴 HIDROMASSAGEM aberto junto com outro registro. Desligue a filtração para usar a hidromassagem — deixe só ela aberta.'; }
+  else if(diaADia){ al.className='alerta a-ok'; al.textContent='✅ Configuração do dia a dia — puxada por skimmer e aspiração.'; }
   else if(regs.dreno){ al.className='alerta a-bad'; al.textContent='🔴 O dreno aberto esvazia a piscina. Feche-o para voltar ao dia a dia.'; }
-  else { al.className='alerta a-warn'; al.textContent='🟡 Configuração especial de uso momentâneo. Depois volte a DRENO fechado, SKIMMER e ASPIRAÇÃO abertos.'; }
+  else { al.className='alerta a-warn'; al.textContent='🟡 Configuração especial de uso momentâneo. Depois volte: DRENO fechado, SKIMMER e ASPIRAÇÃO abertos.'; }
 }
 $('#regRow').addEventListener('click', e=>{
   const b = e.target.closest('.reg'); if(!b) return;
   const k = b.id.replace('reg-','');
   regs[k] = !regs[k];
   store.set('poolapp_registros', regs);
-  renderRegistros(); buzz(8);
+  renderRegistros();
+  const cf = conflitoRegistros();
+  if(cf===1){ try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e2){} toast('PERIGO: Dreno não pode com Skimmer/Aspiração!', 'err'); }
+  else if(cf===2){ try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e2){} toast('PERIGO: Desligue a filtração para usar a Hidromassagem!', 'err'); }
+  else buzz(8);
 });
 
 /* ================= parâmetros ================= */
-const PDEFAULT = {ph:7.4, cloro:4.0, turbidez:47, alcalinidade:70, dureza:200, cianurico:0};
+const PDEFAULT = {ph:7.4, cloro:4.0, turbidez:47, alcalinidade:70, dureza:200, cianurico:0, ferro:0.2, cobre:0.1};
 let params = store.get('poolapp.params', {...PDEFAULT});
 if(!isObj(params)) params = {...PDEFAULT};
 for(const k in PDEFAULT){ const n = Number(params[k]); params[k] = Number.isFinite(n) ? n : PDEFAULT[k]; }
@@ -737,28 +861,86 @@ const PARAMS = [
  {id:'cloro', label:'Cloro', unit:'ppm', min:0, max:10, step:0.5, lo:1, hi:3, dec:1, ideal:'ideal 1–3 ppm'},
  {id:'turbidez', label:'Turbidez', unit:'%', min:0, max:100, step:1, lo:0, hi:20, dec:0, ideal:'ideal 0–20%'},
  {id:'alcalinidade', label:'Alcalinidade', unit:'ppm', min:0, max:240, step:5, lo:80, hi:120, dec:0, ideal:'ideal 80–120 ppm'},
- {id:'dureza', label:'Dureza', unit:'ppm', min:0, max:600, step:10, lo:200, hi:400, dec:0, ideal:'ideal 200–400 ppm'},
- {id:'cianurico', label:'Cianúrico', unit:'ppm', min:0, max:200, step:5, lo:0, hi:50, dec:0, ideal:'ideal 0–50 ppm'}
+ {id:'dureza', label:'Dureza Cálcica', unit:'ppm', min:0, max:600, step:10, lo:200, hi:400, dec:0, ideal:'ideal 200–400 ppm'},
+ {id:'cianurico', label:'Ácido Cianúrico', unit:'ppm', min:0, max:200, step:5, lo:0, hi:50, dec:0, ideal:'ideal 0–50 ppm'}
 ];
 const statusOf = (p,v)=> v < p.lo ? {t:'Baixo', c:'#E28743'} : v > p.hi ? {t:'Alto', c:'#D64545'} : {t:'Ideal', c:'#2FBF8F'};
 const fmtVal = (p,v)=> v.toLocaleString('pt-BR',{minimumFractionDigits:p.dec, maximumFractionDigits:p.dec});
+const PINFOS = {
+ ph:'pH indica se a água é ácida ou alcalina. Entre 7,0 e 7,4 o cloro rende até 3x mais e não irrita olhos nem pele.',
+ cloro:'O cloro sanitiza: mata bactérias e algas. Sol, chuva e uso derrubam o valor — meça todo dia.',
+ turbidez:'Falta de transparência da água. Água boa deixa ver o fundo com clareza.',
+ alcalinidade:'A AT segura o pH no lugar. Ajuste a alcalinidade antes de corrigir o pH.',
+ dureza:'Dureza cálcica é o cálcio dissolvido. Baixa “come” o revestimento; alta deixa crosta branca.',
+ cianurico:'Protege o cloro do sol. Só faz sentido se você usa cloro estabilizado (dicloro/tricloro).',
+ metais:'Ferro e cobre na água mancham as paredes (marrom e verde-azulado). Importante se a água vem de poço.'
+};
+function metaisStatus(){
+  return (params.ferro>0.3 || params.cobre>0.2) ? {t:'Alto', c:'#D64545'} : {t:'Ideal', c:'#2FBF8F'};
+}
 function renderParams(){
   $('#paramGrid').innerHTML = PARAMS.map(p=>{
     const v = params[p.id], st = statusOf(p,v);
-    const lo = Math.max(0,(p.lo-p.min)/(p.max-p.min)*100);
-    const wi = Math.min(100,(p.hi-p.min)/(p.max-p.min)*100) - lo;
-    const kn = Math.min(100, Math.max(0,(v-p.min)/(p.max-p.min)*100));
     const na = (p.id==='dureza'||p.id==='cianurico') && !!params[p.id+'NA'];
-    return `<button class="pcard" data-id="${p.id}">
-      <span class="ph"><b>${p.label}</b><span class="badge" style="background:${na?'#8ca3ad':st.c}">${na?'Não medido':st.t}</span></span>
+    const bcol = na ? '#8ca3ad' : st.c, btxt = na ? 'Não medido' : st.t;
+    const info = `<button class="tipi" data-tip="${p.id}" aria-label="O que é ${p.label}">i</button>`;
+    let mid;
+    if(p.id==='ph' || p.id==='cloro'){
+      mid = `<input type="range" class="p-slider" data-id="${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}" aria-label="Ajustar ${p.label}">`;
+    } else {
+      const lo = Math.max(0,(p.lo-p.min)/(p.max-p.min)*100);
+      const wi = Math.min(100,(p.hi-p.min)/(p.max-p.min)*100) - lo;
+      const kn = Math.min(100, Math.max(0,(v-p.min)/(p.max-p.min)*100));
+      mid = `<span class="pbar"><span class="pzone" style="left:${lo}%;width:${wi}%"></span><span class="pknob" style="left:${kn}%;color:${bcol}"></span></span>`;
+    }
+    return `<div class="pcard" data-id="${p.id}">
+      <span class="ph"><b>${p.label}</b>${info}<span class="badge" style="background:${bcol}">${btxt}</span></span>
       <span class="pval">${fmtVal(p,v)}<i>${p.unit}</i></span>
-      <span class="pbar"><span class="pzone" style="left:${lo}%;width:${wi}%"></span><span class="pknob" style="left:${kn}%;color:${st.c}"></span></span>
+      ${mid}
       <span class="pideal">${p.ideal}</span>
-    </button>`;
-  }).join('');
+      <span class="ptip" data-tipbox="${p.id}" hidden>${PINFOS[p.id]}</span>
+    </div>`;
+  }).join('') + (()=>{
+    const ms = metaisStatus();
+    const kn = Math.min(100, Math.max(params.ferro/0.3, params.cobre/0.2, 0)*50);
+    return `<div class="pcard" data-id="metais" style="grid-column:1/-1">
+      <span class="ph"><b>Metais</b><button class="tipi" data-tip="metais" aria-label="Sobre metais">i</button><span class="badge" style="background:${ms.c}">${ms.t}</span></span>
+      <span class="pval">${fmt1(params.ferro)}<i>Fe</i> · ${fmt1(params.cobre)}<i>Cu</i></span>
+      <span class="pbar"><span class="pzone" style="left:0;width:50%"></span><span class="pknob" style="left:${kn}%;color:${ms.c}"></span></span>
+      <span class="pideal">Ferro até 0,3 ppm · Cobre até 0,2 ppm</span>
+      <span class="ptip" data-tipbox="metais" hidden>${PINFOS.metais}</span>
+    </div>`;
+  })();
 }
 $('#paramGrid').addEventListener('click', e=>{
-  const b = e.target.closest('.pcard'); if(b) openMeasure(b.dataset.id);
+  const tip = e.target.closest('.tipi');
+  if(tip){
+    const card = tip.closest('.pcard');
+    const box = card.querySelector('.ptip');
+    if(box) box.hidden = !box.hidden;
+    buzz(5);
+    return;
+  }
+  if(e.target.closest('.p-slider')) return;
+  const b = e.target.closest('.pcard'); if(!b) return;
+  if(b.dataset.id==='metais') openMetais(); else openMeasure(b.dataset.id);
+});
+let paramSaveT = null;
+$('#paramGrid').addEventListener('input', e=>{
+  const s = e.target.closest('.p-slider'); if(!s) return;
+  const p = PARAMS.find(x=>x.id===s.dataset.id); if(!p) return;
+  let v = parseFloat(s.value); if(!isFinite(v)) return;
+  v = Math.min(p.max, Math.max(p.min, v));
+  params[p.id] = v;
+  const card = s.closest('.pcard'), st = statusOf(p,v);
+  const pv = card.querySelector('.pval'); if(pv) pv.innerHTML = fmtVal(p,v)+'<i>'+p.unit+'</i>';
+  const bd = card.querySelector('.badge'); if(bd){ bd.textContent = st.t; bd.style.background = st.c; }
+  clearTimeout(paramSaveT);
+  paramSaveT = setTimeout(()=>{
+    store.set('poolapp.params', params);
+    try{ renderTreat(); }catch(e2){}
+    try{ renderFilterFromWeather(); }catch(e2){}
+  }, 300);
 });
 function doseFor(p,v){
   const m3 = getVolume()/1000;
@@ -810,7 +992,7 @@ function openMeasure(id){
       <input type="range" id="mRange" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}">
       <input type="number" id="mNum" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}" inputmode="decimal">
     </div>
-    ${(p.id==='dureza'||p.id==='cianurico')?`<label class="m-na"><input type="checkbox" id="mNA"> Não sei / Não medido</label><div class="m-na-alert" id="mNAAlert" hidden>🔴 OMISSÃO DE PARÂMETRO: ${p.label} não informado. Pode ter erro.</div>`:''}
+    ${(p.id==='dureza'||p.id==='cianurico')?`<label class="m-na"><input type="checkbox" id="mNA"> Não sei / Não medido</label><div class="m-na-alert" id="mNAAlert" hidden>🔴 Omissão de parâmetro - cálculo pode não ser preciso</div>`:''}
     <div class="m-dose t-ok" id="mDose"></div>
     <button class="btn m-save" id="mSave">✓ Salvar medição</button>`);
   const range=$('#mRange'), num=$('#mNum'), naBox=$('#mNA');
@@ -839,6 +1021,52 @@ function openMeasure(id){
     store.set('poolapp.params', params);
     renderParams(); renderTreat(); renderFilterFromWeather();
     closeSheet(); toast(p.label+' salvo: '+fmtVal(p,v)+(p.unit?' '+p.unit:''), 'ok');
+  });
+}
+function openMetais(){
+  const mFe = {id:'ferro', label:'Ferro', unit:'ppm', min:0, max:5, step:0.1, lo:0, hi:0.3, dec:1};
+  const mCu = {id:'cobre', label:'Cobre', unit:'ppm', min:0, max:3, step:0.1, lo:0, hi:0.2, dec:1};
+  const block = p=>{
+    const v = params[p.id], st = statusOf(p,v);
+    return `<div class="m-now"><span>${p.label} atual</span><b id="mB${p.id}" style="color:${st.c}">${fmtVal(p,v)} <i>${p.unit}</i></b><span class="badge" id="mBg${p.id}" style="background:${st.c}">${st.t}</span></div>
+      <div class="m-row"><input type="range" id="mR${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}"><input type="number" id="mN${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}" inputmode="decimal"></div>`;
+  };
+  openSheet('Metais · Ferro e Cobre', `
+    <p class="sh-intro">Ferro e cobre mancham vinil, fibra e azulejo (marrom e verde-azulado). Meça principalmente se a água vem de poço ou se a piscina usa algicida com cobre.</p>
+    ${block(mFe)}
+    ${block(mCu)}
+    <div class="m-dose t-ok" id="mMetDose"></div>
+    <button class="btn m-save" id="mMetSave">✓ Salvar metais</button>`);
+  function metaisDose(){
+    const box = $('#mMetDose');
+    const f = params.ferro > 0.3, c = params.cobre > 0.2;
+    if(f && c){ box.className='m-dose t-warn'; box.innerHTML='<b>Ferro e cobre altos:</b> aplique sequestrante de metais (quelante) conforme a bula, filtre 8 h e retro-lave. As duas manchas saem com tratamento ácido.'; }
+    else if(f){ box.className='m-dose t-act'; box.innerHTML='<b>Ferro alto — mancha marrom:</b> aplique sequestrante de metais conforme a bula, com o filtro em FILTRAR por 8 h. Origem comum: água de poço.'; }
+    else if(c){ box.className='m-dose t-act'; box.innerHTML='<b>Cobre alto — mancha verde-azulada:</b> suspenda algicida ou equipamento com cobre e aplique sequestrante de metais.'; }
+    else { box.className='m-dose t-ok'; box.innerHTML='Metais sob controle — sem risco de manchar a estrutura.'; }
+  }
+  function bind(p){
+    const r = $('#mR'+p.id), n = $('#mN'+p.id);
+    function upd(nv, from){
+      if(isNaN(nv)) return;
+      nv = Math.min(p.max, Math.max(p.min, nv));
+      params[p.id] = nv;
+      if(from!=='r') r.value = nv;
+      if(from!=='n') n.value = nv;
+      const st = statusOf(p,nv);
+      const now = $('#mB'+p.id); now.innerHTML = fmtVal(p,nv)+' <i>'+p.unit+'</i>'; now.style.color = st.c;
+      const bd = $('#mBg'+p.id); bd.textContent = st.t; bd.style.background = st.c;
+      metaisDose();
+    }
+    r.addEventListener('input', ()=>upd(parseFloat(r.value),'r'));
+    n.addEventListener('input', ()=>upd(parseFloat(n.value),'n'));
+  }
+  bind(mFe); bind(mCu); metaisDose();
+  $('#mMetSave').addEventListener('click', ()=>{
+    store.set('poolapp.params', params);
+    renderParams();
+    closeSheet();
+    toast('Metais salvos: Fe '+fmt1(params.ferro)+' · Cu '+fmt1(params.cobre)+' ppm', 'ok');
   });
 }
 
@@ -931,6 +1159,8 @@ function openDiag(){
     </div>`).join('')}`);
 }
 $('#shBody').addEventListener('click', e=>{
+  const c = e.target.closest('.pchip');
+  if(c){ flowSel = +c.dataset.i; renderFlow(); buzz(5); return; }
   const t = e.target.closest('.diag-t'); if(!t) return;
   const d = t.parentElement, b = d.querySelector('.diag-b');
   const open = b.hidden; b.hidden = !open; d.classList.toggle('open', open);
@@ -1119,6 +1349,56 @@ $('#licBanner').addEventListener('click', ()=>{ buzz(8); openLicense(); });
 
 /* ---- pagamento Pix (Mercado Pago) ---- */
 let pollTimer = null;
+/* ---- gate obrigatório: nome completo + e-mail válido ---- */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function userGateHTML(p){
+  return `<div class="ugate">
+    <label class="ug-lab" for="${p}Nome">Nome completo<input type="text" class="ug-in" id="${p}Nome" autocomplete="name" placeholder="Seu nome completo"></label>
+    <span class="ug-err" id="${p}NomeErr" hidden>Digite seu nome</span>
+    <label class="ug-lab" for="${p}Email">E-mail<input type="email" class="ug-in" id="${p}Email" autocomplete="email" placeholder="voce@email.com"></label>
+    <span class="ug-err" id="${p}EmailErr" hidden>E-mail inválido</span>
+  </div>`;
+}
+function userRead(p){
+  const n = document.getElementById(p+'Nome'), e = document.getElementById(p+'Email');
+  return {nome: ((n && n.value) || '').trim(), email: ((e && e.value) || '').trim()};
+}
+function userValid(p, show){
+  const u = userRead(p);
+  const okN = u.nome.length >= 2, okE = EMAIL_RE.test(u.email);
+  const ne = document.getElementById(p+'NomeErr'), ee = document.getElementById(p+'EmailErr');
+  const ni = document.getElementById(p+'Nome'), ei = document.getElementById(p+'Email');
+  if(ne) ne.hidden = show ? okN : true;
+  if(ee) ee.hidden = show ? okE : true;
+  if(ni) ni.classList.toggle('bad', show && !okN);
+  if(ei) ei.classList.toggle('bad', show && !okE);
+  return okN && okE;
+}
+function userSave(p){
+  const u = userRead(p);
+  if(u.nome && EMAIL_RE.test(u.email)) store.set('poolapp_user', u);
+}
+function wireUserGate(p, btnSel){
+  const n = document.getElementById(p+'Nome'), e = document.getElementById(p+'Email');
+  const pre = store.get('poolapp_user', null);
+  if(pre && isObj(pre)){
+    if(n && !n.value) n.value = pre.nome || '';
+    if(e && !e.value) e.value = pre.email || '';
+  }
+  const upd = show =>{ const b = $(btnSel); if(b) b.disabled = !userValid(p, show); userSave(p); };
+  upd(false);
+  if(n) n.addEventListener('input', ()=>upd(true));
+  if(e) e.addEventListener('input', ()=>upd(true));
+}
+function openSuporte(){
+  openSheet('Paguei e não ativou?', `
+    <p class="sh-intro">Calma — quase sempre libera em 1 minuto. Tente nesta ordem:</p>
+    <div class="vs-step"><span class="n">1</span><span><b>Espere 1 minuto</b> com o app aberto: o Pix cai em segundos e a licença ativa sozinha, sem fechar nada.</span></div>
+    <div class="vs-step"><span class="n">2</span><span><b>Feche e reabra o app</b>. Ao abrir, o PoolApp consulta o pagamento no Mercado Pago e ativa.</span></div>
+    <div class="vs-step"><span class="n">3</span><span><b>Restaurar compra</b> — na tela da licença, toque em “Restaurar compra”: o app procura o Pix pendente deste aparelho.</span></div>
+    <div class="vs-step"><span class="n">4</span><span><b>Recebeu um código por e-mail?</b> Toque em “Já tenho código” e digite no formato XXXX-XXXX-XXXX.</span></div>
+    <p class="sh-intro" style="margin-top:10px">Nada resolvido? Fale com o suporte informando <b>nome, e-mail, dia e hora do pagamento</b> — a ativação é conferida e liberada manualmente.</p>`);
+}
 function deviceId(){
   let d = store.get('poolapp_device', null);
   if(!d){ d = 'dev-' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); store.set('poolapp_device', d); }
@@ -1135,7 +1415,8 @@ function startPoll(id, area){
       const j = await r.json();
       if(j && j.paid){
         clearInterval(pollTimer);
-        store.set('poolapp_license', {expira: j.expira});
+        const u = store.get('poolapp_user', null);
+        store.set('poolapp_license', {expira: j.expira, nome: (isObj(u)&&u.nome)||'', email: (isObj(u)&&u.email)||''});
         try{ localStorage.removeItem('poolapp_last_payment'); }catch(e){}
         toast('Pagamento aprovado — licença liberada!', 'ok');
         setTimeout(()=>location.reload(), 900);
@@ -1150,14 +1431,16 @@ function startPoll(id, area){
     }
   }, 4000);
 }
-async function assinarPix(areaSel){
+async function assinarPix(areaSel, p){
   const area = $(areaSel); if(!area) return;
+  if(!userValid(p, true)){ toast('Preencha nome e e-mail para continuar','warn'); return; }
+  const usr = userRead(p); userSave(p);
   area.innerHTML = '<p class="sh-intro">Gerando o Pix de R$ 29,90…</p>';
   try{
     const r = await fetch(API_BASE + '/criar-pix', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({litros: getVolume(), device_id: deviceId()})
+      body: JSON.stringify({litros: getVolume(), device_id: deviceId(), nome: usr.nome, email: usr.email})
     });
     const j = await r.json();
     if(!r.ok || !j.qr_code){
@@ -1180,17 +1463,19 @@ async function assinarPix(areaSel){
     area.innerHTML = '<p class="sh-intro">Sem conexão com o serviço de pagamento. Verifique a internet e tente de novo.</p>';
   }
 }
-function codeUI(areaSel){
+function codeUI(areaSel, p){
   const area = $(areaSel); if(!area) return;
   area.innerHTML = `<div class="coderow"><input id="licCode" placeholder="XXXX-XXXX-XXXX" maxlength="14" autocomplete="off"><button class="btn" id="licValidar">Validar</button></div>`;
   $('#licValidar').addEventListener('click', async ()=>{
+    if(!userValid(p, true)){ toast('Preencha nome e e-mail para continuar','warn'); return; }
+    const usr = userRead(p); userSave(p);
     const code = ($('#licCode').value || '').trim().toUpperCase();
     if(!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return toast('Formato esperado: XXXX-XXXX-XXXX','warn');
     try{
-      const r = await fetch(API_BASE + '/check-status?code=' + encodeURIComponent(code));
+      const r = await fetch(API_BASE + '/check-status?code=' + encodeURIComponent(code) + '&nome=' + encodeURIComponent(usr.nome) + '&email=' + encodeURIComponent(usr.email));
       const j = await r.json();
       if(j && j.valid){
-        store.set('poolapp_license', {expira: j.expira});
+        store.set('poolapp_license', {expira: j.expira, nome: usr.nome, email: usr.email});
         toast('Código válido — licença liberada!','ok');
         setTimeout(()=>location.reload(), 900);
       } else toast('Código inválido','err');
@@ -1201,14 +1486,17 @@ function openLicense(){
   openSheet('Licença do PoolApp', `
     ${licBadgeHTML()}
     <p class="sh-intro">O PoolApp Universal é licenciado por assinatura mensal de <b>R$ 29,90</b>, paga via Pix com confirmação automática do Mercado Pago. Aprovado o pagamento, todos os recursos ficam liberados neste aparelho por 30 dias — e seus dados continuam salvos.</p>
-    <button class="btn" id="licAssinar">⚡ Assinar por R$ ${PRECO_TXT} - Pix (Mercado Pago)</button>
+    ${userGateHTML('lic')}
+    <button class="btn" id="licAssinar" disabled>⚡ Assinar por R$ ${PRECO_TXT} - Pix (Mercado Pago)</button>
     <div id="licPixArea"></div>
     <div class="lic-mini">
       <button class="btn ghost sm" id="licRestaurar">Restaurar compra</button>
       <button class="btn ghost sm" id="licTemCodigo">Já tenho código</button>
     </div>
-    <div id="licCodeArea"></div>`);
-  $('#licAssinar').addEventListener('click', ()=>assinarPix('#licPixArea'));
+    <div id="licCodeArea"></div>
+    <button class="sup-link" id="licSuporte">Paguei e não ativou?</button>`);
+  wireUserGate('lic', '#licAssinar');
+  $('#licAssinar').addEventListener('click', ()=>assinarPix('#licPixArea','lic'));
   $('#licRestaurar').addEventListener('click', ()=>{
     const p = store.get('poolapp_last_payment', null);
     const area = $('#licPixArea');
@@ -1219,7 +1507,8 @@ function openLicense(){
       area.innerHTML = '<p class="sh-intro">Nenhum pagamento pendente neste aparelho. Gere um novo Pix acima.</p>';
     }
   });
-  $('#licTemCodigo').addEventListener('click', ()=>codeUI('#licCodeArea'));
+  $('#licTemCodigo').addEventListener('click', ()=>codeUI('#licCodeArea','lic'));
+  $('#licSuporte').addEventListener('click', openSuporte);
 }
 function openPaywall(){
   const c = $('#pwCard');
@@ -1228,14 +1517,18 @@ function openPaywall(){
     <h3>Assine o PoolApp Universal</h3>
     <p class="pw-txt">O app é licenciado por assinatura mensal de <b>R$ ${PRECO_TXT}</b>, paga via Pix com confirmação automática do Mercado Pago. Aprovado o pagamento, todos os recursos ficam liberados neste aparelho por 30 dias. Seus dados e histórico continuam salvos.</p>
     ${licBadgeHTML()}
-    <button class="btn" id="pwAssinar">⚡ Assinar por R$ ${PRECO_TXT} - Pix (Mercado Pago)</button>
+    ${userGateHTML('pw')}
+    <button class="btn" id="pwAssinar" disabled>⚡ Assinar por R$ ${PRECO_TXT} - Pix (Mercado Pago)</button>
     <div id="pwPixArea"></div>
     <div class="lic-mini"><button class="btn ghost sm" id="pwCodigo">Já tenho código</button></div>
-    <div id="pwCodeArea"></div>`;
+    <div id="pwCodeArea"></div>
+    <button class="sup-link" id="pwSuporte">Paguei e não ativou?</button>`;
   $('#pwBack').hidden = false;
+  wireUserGate('pw', '#pwAssinar');
   $('#pwX').addEventListener('click', ()=>{ $('#pwBack').hidden = true; });
-  $('#pwAssinar').addEventListener('click', ()=>assinarPix('#pwPixArea'));
-  $('#pwCodigo').addEventListener('click', ()=>codeUI('#pwCodeArea'));
+  $('#pwAssinar').addEventListener('click', ()=>assinarPix('#pwPixArea','pw'));
+  $('#pwCodigo').addEventListener('click', ()=>codeUI('#pwCodeArea','pw'));
+  $('#pwSuporte').addEventListener('click', openSuporte);
 }
 
 /* ================= manual ================= */
@@ -1244,8 +1537,8 @@ $('#btnManual').addEventListener('click', ()=>{
     <p class="sh-intro">Tudo funciona offline — só o clima e o pagamento precisam de internet.</p>
     <div class="vs-step"><span class="n">1</span><span><b>Volume da água</b> — use − e + (passo de 1.000 L) ou digite o valor. A litragem rápida calcula comp × larg × prof × 1.000 e o botão “Aplicar volume acima” leva o resultado para o volume.</span></div>
     <div class="vs-step"><span class="n">2</span><span><b>Válvula do filtro</b> — arraste a manopla ou toque num número; cada posição traz dicas e o passo a passo correto.</span></div>
-    <div class="vs-step"><span class="n">3</span><span><b>Registros</b> — marque aberto/fechado; o app avisa se a combinação saiu do dia a dia.</span></div>
-    <div class="vs-step"><span class="n">4</span><span><b>Parâmetros</b> — toque para medir pH, cloro, turbidez, alcalinidade, dureza e cianúrico. As doses são calculadas para o seu volume.</span></div>
+    <div class="vs-step"><span class="n">3</span><span><b>Registros</b> — gire a manopla: cinza é fechado, verde é aberto. São 4: DRENO, SKIMMER, ASPIRAÇÃO e HIDROMASSAGEM. Combinação perigosa? O card vibra e pisca em vermelho.</span></div>
+    <div class="vs-step"><span class="n">4</span><span><b>Parâmetros</b> — pH e cloro têm slider direto no card; toque no card para medir os outros. Metais (ferro e cobre), Dureza Cálcica e Cianúrico têm a opção “Não sei”. As doses são calculadas para o seu volume.</span></div>
     <div class="vs-step"><span class="n">5</span><span><b>Tratamento</b> — 3 etapas na ordem: equilibrar pH/AT, clorar e clarificar com sulfato de alumínio.</span></div>
     <div class="vs-step"><span class="n">6</span><span><b>Clima</b> — horas de filtragem sugeridas conforme a temperatura e a chuva do dia.</span></div>`);
 });
@@ -1330,14 +1623,14 @@ if('serviceWorker' in navigator){
 </script>
 
 <script>
-const volInput=document.getElementById('volumeInput')||document.querySelector('input[value="45000"]');
+const volInput=document.getElementById('volumeInput')||document.querySelector('input[value="39900"]');
 const btnMinus=document.getElementById('btnMinus');
 const btnPlus=document.getElementById('btnPlus');
 function updateM3(){ const v=parseInt(volInput.value)||0; document.getElementById('m3Display').textContent=v.toLocaleString('pt-BR')+' L = '+Math.round(v/1000)+' m³'; localStorage.setItem('pool_volume',v);}
 if(btnMinus) btnMinus.onclick=()=>{ let v=parseInt(volInput.value)||0; v=Math.max(1000,v-1000); volInput.value=v; updateM3();};
 if(btnPlus) btnPlus.onclick=()=>{ let v=parseInt(volInput.value)||0; v=v+1000; volInput.value=v; updateM3();};
 if(volInput) volInput.oninput=updateM3;
-function aplicarLitragem(){ const c=parseFloat(document.getElementById('compInput').value.replace(',','.'))||0; const l=parseFloat(document.getElementById('largInput').value.replace(',','.'))||0; const p=parseFloat(document.getElementById('profInput').value.replace(',','.'))||0; const total=Math.round(c*l*p*1000); if(total>0){ volInput.value=total; updateM3(); alert('Volume aplicado: '+total+' L');}}
+function aplicarLitragem(){ const c=parseFloat(document.getElementById('compInput').value.replace(',','.'))||0; const l=parseFloat(document.getElementById('largInput').value.replace(',','.'))||0; const p=parseFloat(document.getElementById('profInput').value.replace(',','.'))||0; const total=Math.round(c*l*p*1000); if(total>0){ volInput.value=total; updateM3(); try{localStorage.setItem('poolapp.dims',JSON.stringify({c:c,l:l,p:p}));}catch(e){} const dd=document.getElementById('dimsDisplay'); if(dd){ const f=n=>n.toLocaleString('pt-BR',{maximumFractionDigits:2}); dd.textContent='C: '+f(c)+'m L: '+f(l)+'m P: '+f(p)+'m'; } alert('Volume aplicado: '+total+' L');}}
 </script>
 </body>
 </html>
