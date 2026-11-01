@@ -1885,8 +1885,24 @@ function wireUserGate(p, btnSel){
   if(n) n.addEventListener('input', ()=>upd(true));
   if(e) e.addEventListener('input', ()=>upd(true));
 }
-/* Número do WhatsApp do suporte — TROQUE AQUI pelo seu número (55 + DDD + número) */
-const SUPORTE_WA = '55SEUNUMERO';
+/* Número do WhatsApp do suporte — configurável no painel admin (📱 WhatsApp).
+   Ordem no clique: GET /api/admin-config → cache local (pa_whatsapp_numero) → padrão. */
+const WA_PADRAO = '5531999999999';
+function waLocalWA(){ try{ return String(localStorage.getItem('pa_whatsapp_numero') || '').replace(/\D/g,''); }catch(e){ return ''; } }
+async function getSuporteWA(){
+  try{
+    const ctl = ('AbortController' in window) ? new AbortController() : null;
+    const tm = ctl ? setTimeout(()=>ctl.abort(), 2500) : null;
+    const r = await fetch('/api/admin-config', ctl ? { signal: ctl.signal } : undefined);
+    if(tm) clearTimeout(tm);
+    if(r && r.ok){
+      const j = await r.json().catch(()=>null);
+      const w = String((j && j.whatsapp) || '').replace(/\D/g,'');
+      if(w){ try{ localStorage.setItem('pa_whatsapp_numero', w); }catch(e){} return w; }
+    }
+  }catch(e){}
+  return waLocalWA() || WA_PADRAO;
+}
 function openSuporte(){
   const escS = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const u  = store.get('poolapp_user', null);
@@ -1910,7 +1926,9 @@ function openSuporte(){
       </div>
       <button class="btn" id="supWa" style="margin-top:12px">🟢 Enviar pro WhatsApp</button>
     </div>`);
-  $('#supWa').addEventListener('click', ()=>{
+  let waPre = waLocalWA();               /* valor imediato enquanto o GET não responde */
+  try{ getSuporteWA().then(w=>{ waPre = w; }).catch(()=>{}); }catch(e){}
+  $('#supWa').addEventListener('click', async ()=>{
     const nome  = ($('#supNome').value || '').trim();
     const email = ($('#supEmail').value || '').trim();
     const pix   = ($('#supPixId').value || '').trim();
@@ -1923,7 +1941,8 @@ function openSuporte(){
       + '• ID Transação Pix: ' + (pix || 'não sei informar') + '\n'
       + '• Data/Hora do pagamento: ' + (dhv || 'não sei informar') + '\n\n'
       + 'Paguei o Pix de R$ 29,90 e a licença não ativou no app. Por favor, conferir e liberar. 🙏';
-    const url = 'https://wa.me/' + SUPORTE_WA + '?text=' + encodeURIComponent(msg);
+    const num = waPre || await getSuporteWA();
+    const url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
     try{ window.open(url, '_blank'); }catch(e){ location.href = url; }
     toast('Abrindo o WhatsApp do suporte…', 'ok');
   });

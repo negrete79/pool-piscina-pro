@@ -74,6 +74,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
   #filtros .fil{flex:none}
 }
 @media (max-width:640px){.acts{display:flex;flex-wrap:wrap;gap:5px}}
+@media (max-width:460px){.hidel{display:none}#btnWa,#btnCfg,#btnSair{padding-left:11px;padding-right:11px}}
 </style>
 </head>
 <body class="bg-[#f3f5f5] text-gray-900">
@@ -136,7 +137,8 @@ table.tbl tbody tr:hover{background:#f9fafb}
 <button id="btnEditNome" class="text-[11px] align-middle opacity-60 hover:opacity-100" title="Editar nome">✏️</button></p>
 <p class="text-[11px] font-medium text-gray-500 truncate" id="admEmail">admin@poolapp.com</p>
 </div>
-<button id="btnCfg" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">⚙️ Configurações</button>
+<button id="btnWa" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">📱<span class="hidel"> WhatsApp</span></button>
+<button id="btnCfg" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">⚙️<span class="hidel"> Configurações</span></button>
 <button id="btnSair" class="h-10 px-3.5 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">Sair</button>
 </div>
 </header>
@@ -362,6 +364,7 @@ function abrirPainel(nome, email){
   $('#viewPainel').hidden = false;
   renderLog();
   carregar();
+  carregarWA();
 }
 function mostrarLogin(msg){
   $('#viewPainel').hidden = true;
@@ -780,6 +783,79 @@ $('#btnEditNome').addEventListener('click', ()=>{
     $('#admNome').textContent = nome;
     try{ localStorage.setItem('pa_admin_nome', nome); }catch(e){}
     closeModal(); toast('Nome atualizado', 'ok');
+  });
+});
+
+/* ================= WhatsApp de suporte (configurável) ================= */
+const WA_DEF = '5531999999999';   /* padrão se nada configurado */
+function waSoDig(s){ return String(s || '').replace(/\D/g, ''); }
+function waNormaliza(s){
+  let d = waSoDig(s);
+  if(d.length === 10 || d.length === 11) d = '55' + d;  /* sem país → Brasil */
+  return d;
+}
+function waMascara(v){
+  let d = waSoDig(v);
+  if(d.startsWith('55') && d.length > 4) d = d.slice(2);   /* mostra sem o 55 */
+  else if(d.startsWith('55')) d = d.slice(2);
+  if(d.length <= 2) return d ? '(' + d : '';
+  if(d.length <= 6) return '(' + d.slice(0,2) + ') ' + d.slice(2);
+  if(d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+  return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7,11);
+}
+let WA_ATUAL = '';
+/* no carregamento do admin: GET /api/admin-config → localStorage pa_whatsapp_numero → padrão */
+async function carregarWA(){
+  let w = '';
+  try{
+    const r = await api('/api/admin-config');
+    if(r && r.ok){ const j = await r.json().catch(()=>({})); w = waNormaliza(j.whatsapp); }
+  }catch(e){}
+  if(!w){ try{ w = waNormaliza(localStorage.getItem('pa_whatsapp_numero')); }catch(e){} }
+  if(!w) w = WA_DEF;
+  WA_ATUAL = w;
+  try{ localStorage.setItem('pa_whatsapp_numero', w); }catch(e){}
+  return w;
+}
+$('#btnWa').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">📱 WhatsApp de Suporte</h3>
+    <p class="text-[12px] text-gray-500">Mensagens do botão “Enviar pro WhatsApp” (tela “Paguei e não ativou?” do app) chegam neste número. Trocou de chip? Troque aqui.</p>
+    <label>Número do WhatsApp de Suporte</label>
+    <input type="text" id="cfgWhatsapp" inputmode="tel" placeholder="(31) 9xxxx-xxxx" autocomplete="tel-national">
+    <p class="text-[12px] font-semibold text-[#0F5C5C] mt-1.5 break-all" id="waPreview">Link atual: …</p>
+    <div class="flex gap-2 mt-5">
+      <button class="act pri flex-1 h-11" id="btnWaSave">💾 Salvar WhatsApp</button>
+      <button class="act flex-1 h-11" id="btnWaCancel">Cancelar</button>
+    </div>`);
+  const inp = $('#cfgWhatsapp');
+  inp.value = waMascara(WA_ATUAL || '');
+  const pintar = ()=>{
+    const cur = waSoDig(inp.value);
+    if(cur) inp.value = waMascara(cur);       /* formata enquanto digita */
+    const d = waNormaliza(inp.value);
+    $('#waPreview').textContent = d ? 'Link atual: https://wa.me/' + d : 'Link atual: —';
+  };
+  pintar();
+  inp.addEventListener('input', pintar);
+  $('#btnWaCancel').addEventListener('click', closeModal);
+  $('#btnWaSave').addEventListener('click', async ()=>{
+    const d = waNormaliza(inp.value);
+    if(d.length < 12 || d.length > 13 || !d.startsWith('55')){
+      return toast('Número inválido — digite DDD + número (ex.: 31 9 9999-9999)', 'err');
+    }
+    try{ localStorage.setItem('pa_whatsapp_numero', d); }catch(e){}
+    WA_ATUAL = d;
+    let servOk = false;
+    try{
+      const r = await api('/api/admin-config', { method:'POST', headers: authHeaders(true), body: JSON.stringify({whatsapp:d}) });
+      const j = await r.json().catch(()=>({}));
+      if(r.status === 401){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
+      servOk = !!(r.ok && j.ok);
+    }catch(e){}
+    addLog('WhatsApp de suporte atualizado — ' + d);
+    closeModal();
+    toast(servOk ? 'WhatsApp atualizado!' : 'WhatsApp atualizado neste aparelho (servidor sem confirmação)', servOk ? 'ok' : 'warn');
   });
 });
 
