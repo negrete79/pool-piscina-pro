@@ -1,59 +1,75 @@
-# PoolApp Universal — Piscina · Casa
+# PoolApp Universal — Piscina · Casa (v2 PRO FINAL CORRIGIDA)
 
-PWA de manutenção de piscina (100% offline), versão limpa, com assinatura automática via **Pix do Mercado Pago**.
+PWA de manutenção de piscina (100% offline), reconstruído do zero com design profissional, **modo escuro**, hidromassagem opcional e assinatura automática via **Pix do Mercado Pago**.
+
+> **v2.1 — correções dos prints (mobile 360 px):** navegação por âncora com scroll suave + IntersectionObserver (marca a aba ativa com offset do header) · inputs C×L×P nunca mais estouram (texto escuro, largura fixa) · grade de parâmetros sem corte lateral (`minmax(0,1fr)` + `overflow-x:clip`) · menu inferior fixo o tempo todo (`z-index:999` + `safe-area`) · ícone 🌙/☀️ no Clima e chip dia/noite nos Parâmetros · **erro de pagamento resolvido**: o domínio antigo `calculadora-piscina-1.vercel.app` responde 307 SEM CORS — o app agora tenta o próprio domínio e cai automaticamente para o canônico `pool-piscina-pro.vercel.app` (token MP confirmado funcionando), com mensagem de erro clara por causa + botão “Tentar de novo” · modais acima da tabbar.
 
 ## Arquivos
 
 | Arquivo | Função |
 | --- | --- |
-| `index.html` | O app inteiro (HTML + CSS + JS inline, instala como PWA) |
-| `manifest.json` | Manifest PWA (start_url `/`, ícones `/icon-192.png` e `/icon-512.png`) |
-| `sw.js` | Service Worker **v14** (`poolapp-v14`) — limpa caches antigos ao ativar |
-| `admin.html` | **Painel Admin** (`/admin.html`, restrito por senha `SEJA`, `noindex`) — lista pagamentos, gera códigos, reenvia por WhatsApp |
-| `icon-180.png` / `icon-192.png` / `icon-512.png` | Ícones do PWA (mesmo nome, sem espaços) |
-| `api/criar-pix.js` | **POST /api/criar-pix** `{litros, device_id, nome, email}` → QR + copia e cola (R$ 29,90 fixo) |
-| `api/check-status.js` | **GET /api/check-status** `?id=` (polling do pagamento) ou `?code=XXXX-XXXX-XXXX&nome=&email=` (ativação) |
-| `api/webhook-mercadopago.js` | Webhook de notificações do Mercado Pago |
-| `api/ativar-manual.js` | **POST /api/ativar-manual** `{email}` (header `x-admin-key`) → gera código `XXXX-XXXX-XXXX` de 30 dias para o painel admin |
-| `api/listar-pagamentos.js` | **GET /api/listar-pagamentos** (header `x-admin-key`) → pagamentos Pix dos últimos 90 dias no Mercado Pago |
+| `index.html` | O app inteiro (Inter, paleta #0F5C5C/#0A3D3D, cards 20px, dark mode, PWA) |
+| `admin.html` | **Painel Admin** — tela de login profissional + gestão de pagamentos (sem prompt/alert nativos) |
+| `admin/forgot.html` | "Esqueceu a senha?" — envia link de recuperação |
+| `admin/reset.html` | Redefinir senha a partir do link (`?token=XXX`) |
+| `manifest.json` | Manifest PWA (theme #0F5C5C, ícones 192/512) |
+| `sw.js` | Service Worker **v16** (`poolapp-v16`, navegação network-first, `/api/` nunca cacheado) |
+| `icon-180/192/512.png` | Ícones do PWA |
 
-> Senha do painel: `SEJA` (prompt no acesso). Para trocar, edite `SENHA_ADMIN` em `admin.html` e/ou configure a env `ADMIN_KEY` na Vercel.
+## APIs (pasta `api/` — vira serverless na Vercel)
+
+| Endpoint | Função |
+| --- | --- |
+| `criar-pix.js` | **POST** `{litros, device_id, nome, email}` → QR + copia e cola **R$ 29,90 fixo** |
+| `check-status.js` | **GET** `?id=` (polling) ou `?code=XXXX-XXXX-XXXX` (valida código) |
+| `webhook-mercadopago.js` | Notificações do MP |
+| `ativar-manual.js` | **POST** `{email}` → código `XXXX-XXXX-XXXX` (30 dias). Aceita JWT **ou** `x-admin-key` |
+| `listar-pagamentos.js` | **GET** → pagamentos dos últimos 90 dias (+ overrides de nome/e-mail) |
+| `deletar-pagamento.js` | **POST** `{id}` → cancela no MP + marca desistente |
+| `editar-pagamento.js` | **POST** `{id, nome, email}` → corrige os "--" |
+| `admin-login.js` | **POST** `{email, senha}` → JWT 2 h · 3 erros = bloqueio 5 min |
+| `admin-config.js` | **POST** → salva nome/e-mail/senha do admin |
+| `recuperar-senha.js` | **POST** `{email}` → token 30 min (e-mail via Resend se `RESEND_API_KEY`; sem ela, devolve o link direto) |
+| `admin-reset.js` | **POST** `{token, nova_senha}` → nova senha |
+| `_admin.js` | Módulo interno compartilhado (JWT HS256, banco leve em /tmp, CORS) — não é rota |
+
+**Credenciais iniciais:** `admin@poolapp.com` / `pool2026` (ou env `ADMIN_EMAIL`/`ADMIN_PASSWORD`/`ADMIN_NAME`). Troque em ⚙️ Configurações do painel.
+
+## App — recursos
+
+- **Topo glassmorphism** com gota pulsante, botão 🌙/☀️ (salva `theme=dark/light`) e chip de licença em 3 estados: 🟡 Teste ativo · ✅ Licença ativa (X dias, até DD/MM) · ❌ Vencida.
+- **Config**: contador 39900 com −/+, unidades **L / m³ / galões**, C×L×P **com sliders** + Aplicar volume, **"Minha hidro tem?"** (switch que soma o volume da hidro: `Volume Total: Piscina + Hidro = X L`), botão Salvar configurações.
+- **Válvula**: manopla 6 posições com arrasto 360° magnético — a info fica **dentro da mesma caixa** (sem descer a página). **Manual com SVG animado por posição** (Filtrar, Retrolavar, Enxaguar, Recircular, Drenar, Fechado) mostrando bomba, filtro e esgoto.
+- **Registros**: 4 bolões redondos realistas (cinza fechado / verde aberto com risco indicador) + fluxo animado. **SEGURANÇA 1**: DRENO + SKIMMER/ASPIRAÇÃO = `vibrate([200,100,200])` + borda piscando + toast. **SEGURANÇA 2**: HIDRO + outro registro = vibra + toast. Aviso laranja "Desligue a bomba antes de girar".
+- **Parâmetros**: pH/Cloro com slider, Metais (Fe/Cu), Dureza Cálcica e Cianúrico com **"Não sei"** → alerta vermelho "Omissão de parâmetro - cálculo pode não ser preciso" + tooltips (i).
+- **Tratamento**: 3 etapas (pH/AT → cloro → sulfato) com doses pelo volume total e diagnóstico pós-sulfato.
+- **Clima**: Open-Meteo + GPS opcional, horas de filtragem sugeridas.
+- **Licença/Pix**: gate Nome + E-mail (regex), QR + copia e cola, polling 4 s, código XXXX-XXXX-XXXX. Após pagar: chip vira ✅ e o modal mostra "Ativo até DD/MM · e-mail".
+- **Suporte**: "Paguei e não ativou? Clique aqui / Ajuda" → 4 passos + formulário (Nome, E-mail, ID Pix/comprovante, Data/Hora) + WhatsApp `wa.me` (constante `SUPORTE_WA` — **troque `55SEUNUMERO`**). Sem CPF (LGPD).
 
 ## Painel Admin (/admin.html)
 
-- Acesso: `prompt("Senha admin:")` — só abre com `SEJA`; senha errada não abre nada. `<meta name="robots" content="noindex">` impede indexação.
-- Tabela: **Data · Nome · E-mail · Valor (R$ 29,90) · ID · Status (Aprovado/Pendente/…) · Ações**.
-- Busca por e-mail (também nome/ID).
-- **Ativar 30 dias** → `POST /api/ativar-manual` com o e-mail → gera código no formato `XXXX-XXXX-XXXX`.
-- **Reenviar código** → abre o WhatsApp (`wa.me`) com a mensagem pronta (código + instruções "Já tenho código"), copiada para a área de transferência.
-- **Copiar ID** → copia o ID da transação Pix.
-
-## Estrutura do app
-
-Header (logo + Instalar app) · **6 abas** (Config · Válvula · Registro · Parâm. · Tratam. · Clima) trocadas por `display block/none` com **scroll suave ao topo** · **Aba Config**: Volume da água (campo único −/39900/+ de 56px, linha **C: Xm L: Ym P: Zm** alimentada pelos campos COMP/LARG/PROF + litragem rápida + botão "Aplicar volume acima"). Sem seção de hidro, sem cobrança por faixa de litros, sem medição duplicada, sem engrenagem.
-
-## Licença — fluxo
-
-1. **Teste de 15 dias**: salvo em `poolapp_install_date` na primeira abertura.
-2. **Expirou sem licença**: abas Válvula, Registro, Parâmetros, Tratamento e Clima ficam bloqueadas; abre modal profissional de renovação. Os dados não são apagados.
-3. **Assinar**: campos obrigatórios **Nome completo + E-mail** (validados com regex, erros vermelhos "Digite seu nome" / "E-mail inválido", botão só destrava com os dois OK) → botão "⚡ Assinar por R$ 29,90 - Pix (Mercado Pago)" → `POST /api/criar-pix` com nome e e-mail → QR + copia e cola → **polling a cada 4 s** em `GET /api/check-status?id=` → aprovado = salva `poolapp_license {expira: +30 dias, nome, email}` e recarrega liberado. Nome/e-mail também ficam em `poolapp_user`.
-4. **Restaurar compra**: retoma a verificação de um pagamento pendente salvo no aparelho.
-5. **Código de Ativação**: formato `XXXX-XXXX-XXXX`, validado em `GET /api/check-status?code=` (também exige nome/e-mail e salva junto).
-6. **Suporte pós-Pix**: link "Paguei e não ativou?" na licença e no modal de renovação abre 4 passos de recuperação + formulário (Nome, E-mail, ID da transação Pix, Data/Hora) e botão **"Enviar pro WhatsApp"** que monta a mensagem e abre `wa.me` (número configurável na constante `SUPORTE_WA` do `index.html` — troque `55SEUNUMERO` pelo seu número).
+- Login com e-mail/senha (👁️ ver/esconder, "Lembrar de mim", loading, JWT 2 h, bloqueio 5 min após 3 erros), `noindex`.
+- Cards: Total faturado 30 dias · Total ativações · Pendentes · Expirados.
+- Tabela com checkbox, badges (verde pago / amarelo pendente / vermelho cancelado / azul teste), paginação 20, busca instantânea (e-mail/nome/ID), filtros Todos / Só pendentes / Desistentes.
+- Ações: **Ativar 30 dias** (gera código), **Reenviar código** (WhatsApp com mensagem pronta), **Copiar código**, **Editar nome/e-mail** (corrige "--"), **🗑️ Excluir** (modal de confirmação, cancela no MP), **Excluir selecionados**.
+- Exportar CSV, log de atividades ("Ativado por admin em 01/11/26 14:07"), ⚙️ Configurações (nome, e-mail, troca de senha com olho).
 
 ## Configuração na Vercel
 
-1. Importe o repositório (a pasta `api/` vira serverless functions sozinha).
-2. Environment Variables:
-   - `MP_ACCESS_TOKEN` — token de produção do Mercado Pago (já configurado).
-   - `POOL_CODES` (opcional) — códigos de ativação separados por vírgula, ex.: `A1B2-C3D4-E5F6`. Sem essa variável, aceita qualquer código no formato `XXXX-XXXX-XXXX`.
-   - `PAYER_EMAIL` (opcional) — e-mail padrão do pagador.
-3. Painel do Mercado Pago (**Suas integrações → Webhooks**):
-   - URL: `https://SEU-PROJETO.vercel.app/api/webhook-mercadopago`
-   - Evento: **Pagamentos**
-4. Publique. O app funciona offline; pagamento e licença precisam de internet.
+1. Importe o repositório (pasta `api/` vira functions).
+2. Environment Variables: `MP_ACCESS_TOKEN` (produção), opcionais `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, `ADMIN_SECRET`, `ADMIN_KEY` (legado), `RESEND_API_KEY` + `RESEND_FROM` (envio real de e-mail), `POOL_CODES`, `PAYER_EMAIL`.
+3. Webhook MP: `https://SEU-PROJETO.vercel.app/api/webhook-mercadopago` (evento Pagamentos).
+4. Painel: `/admin.html` · Recuperação: `/admin/forgot.html`.
 
 ## PWA
 
-- Android/Chrome: botão **Instalar app** no topo.
-- iPhone/Safari: Compartilhar → **Adicionar à Tela de Início**.
+- Android/Chrome: **Instalar app** no topo (beforeinstallprompt).
+- iPhone/Safari: Compartilhar → Adicionar à Tela de Início.
+- Offline total (cache v16); só clima e pagamento usam internet.
+
+## Domínio / deploy
+
+- **Domínio canônico atual:** `https://pool-piscina-pro.vercel.app` (o antigo `calculadora-piscina-1.vercel.app` só redireciona 307 e **não serve para fetch da API** — o app já contorna sozinho, mas use o canônico para divulgar).
+- Ao renomear o projeto na Vercel, atualize também o fallback `API_BASES` no `index.html` e o webhook no painel do MP.
+- Depois de cada deploy, o SW v16 busca o HTML novo na rede (network-first) — não precisa mais limpar cache do celular.
