@@ -400,6 +400,16 @@ section.tab-panel{scroll-margin-top:84px}
 .ptag{display:block;width:fit-content;max-width:100%;margin:6px 0 3px;padding:3px 10px;border-radius:9px;background:rgba(15,92,92,.08);border:1.5px dashed rgba(15,92,92,.4);color:#0F5C5C;font-size:11px;font-weight:600;line-height:1.5}
 .ptag b{font-weight:800}
 [data-theme="dark"] .ptag{background:rgba(255,255,255,.06);border-color:rgba(150,215,208,.45);color:#a9dcd6}
+/* manual do piscineiro: passo a passo numerado dentro das etapas de tratamento */
+.mh{display:flex;align-items:center;gap:6px;margin:11px 0 3px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.manual{margin:2px 0 4px;padding:0;list-style:none;counter-reset:mp;text-align:left}
+.manual li{position:relative;padding:0 0 9px 31px;counter-increment:mp;font-size:12px;font-weight:600;line-height:1.55;color:var(--ink)}
+.manual li:last-child{padding-bottom:2px}
+.manual li::before{content:counter(mp);position:absolute;left:0;top:1px;width:21px;height:21px;border-radius:50%;background:rgba(15,92,92,.09);color:var(--teal);font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(15,92,92,.3)}
+[data-theme="dark"] .manual li{color:#cfe7e3}
+[data-theme="dark"] .manual li::before{background:rgba(29,233,182,.1);color:#5fd4a8;border-color:rgba(95,212,168,.4)}
+.tstep.flash{border-color:rgba(34,183,132,.75)!important;box-shadow:0 0 0 3px rgba(34,183,132,.18),0 10px 30px rgba(34,183,132,.12);transition:border-color .4s ease,box-shadow .4s ease}
+.ts-badge.pisca{animation:warnBlink 1s ease-in-out infinite}
 .diag{border:1.5px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
 .diag-t{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;
   font-size:13px;font-weight:800;text-align:left;background:var(--bg)}
@@ -678,7 +688,7 @@ section.tab-panel{scroll-margin-top:84px}
         <div class="ts-body" id="tsbody2"></div>
       </div>
       <div class="tstep" id="ts3">
-        <div class="ts-head"><span class="ts-n mono">3</span><div><b>Sulfato de alumínio</b><small>Clarificar por decantação</small></div><span class="ts-badge" id="tsb3"></span></div>
+        <div class="ts-head"><span class="ts-n mono">3</span><div><b id="ts3t">Sulfato de alumínio</b><small id="ts3s">Clarificar por decantação</small></div><span class="ts-badge" id="tsb3"></span></div>
         <div class="ts-body" id="tsbody3"></div>
       </div>
     </div>
@@ -779,6 +789,7 @@ const TAG_BIC   = ptag('Vendido como: <b>Elevador de alcalinidade</b>');
 const TAG_CLORO = ptag('Vendido como: <b>Cloro granulado / Cloro choque</b> · químico: hipoclorito de cálcio ou dicloro');
 const TAG_SULF  = ptag('Vendido como: <b>Decantante / Floculante</b> · químico: sulfato de alumínio');
 const TAG_CLAR  = ptag('Nome de loja: <b>Clarificante</b> · químico: sulfato de alumínio diluído ou polímero');
+const TAG_ALG   = ptag('Nome de loja: <b>Algicida de choque</b> · químico: quaternário de amônio');
 /* comparativo de cor da água — toque na cor igual à da sua piscina */
 const WCORES = [
   {v:0,  nome:'Cristalina',  cor:'#00d4ff'},
@@ -1533,7 +1544,18 @@ function openMeasure(id){
     params[p.id] = v; if(naBox) params[p.id+'NA'] = naBox.checked;
     store.set('poolapp.params', params);
     renderParams(); renderTreat(); renderFilterFromWeather();
-    closeSheet(); toast(p.label+' salvo: '+fmtVal(p,v)+(p.unit?' '+p.unit:''), 'ok');
+    closeSheet();
+    if(p.id==='turbidez' && v>0){
+      /* resultado da turbidez vai direto pro Tratamento orientado: mostra o manual passo a passo */
+      toast('Turbidez salva: '+v+'% — veja o passo a passo no Tratamento', 'ok');
+      setTimeout(()=>{
+        gotoTab('tratam');
+        const e3 = $('#ts3');
+        if(e3){ e3.classList.add('flash'); setTimeout(()=>e3.classList.remove('flash'), 2400); }
+      }, 420);
+    } else {
+      toast(p.label+' salvo: '+fmtVal(p,v)+(p.unit?' '+p.unit:''), 'ok');
+    }
   });
   upd(v,'init');   /* mostra dose + etiqueta do produto já na abertura, sem precisar mexer no slider */
 }
@@ -1597,6 +1619,11 @@ function openMetais(){
   });
 }
 
+/* ================= manual do piscineiro =================
+   Passo a passo numerado, linguagem de leigo: como adicionar cada produto, na ordem. */
+function manualPis(itens){
+  return `<div class="mh">🧑‍🔧 Manual do piscineiro — faça nesta ordem</div><ol class="manual">${itens.map(x=>`<li>${x}</li>`).join('')}</ol>`;
+}
 /* ================= tratamento orientado ================= */
 let treat = store.get('poolapp.treat', null);
 if(!isObj(treat)) treat = null;
@@ -1630,9 +1657,21 @@ function renderTreat(){
   $('#ts1').className = 'tstep ' + (e1.ok?'ok':'todo');
   $('#tsb1').className = 'ts-badge ' + (e1.ok?'okb':'tob');
   $('#tsb1').textContent = e1.ok ? 'OK' : 'Ajustar';
+  const acidoE1 = e1.L.some(l=>l.includes('Ácido muriático'));
   $('#tsbody1').innerHTML = e1.ok
     ? `<div class="dose ok">pH e alcalinidade na faixa — água equilibrada, o cloro rende o máximo.</div>`
-    : e1.L.map(l=>`<div class="dose">${l}</div>`).join('') + `<small>Após aplicar, filtre 2 h e re-meça antes de liberar a Etapa 2.</small>`;
+    : e1.L.map(l=>`<div class="dose">${l}</div>`).join('')
+      + manualPis(acidoE1 ? [
+          'Nunca jogue água sobre o ácido: coloque a ÁGUA no balde primeiro e o ácido depois, devagar.',
+          'Ligue a bomba e deixe a manopla em FILTRAR.',
+          'Despeje o balde devagar no fundo da piscina, caminhando pela borda. Use metade da dose, re-teste em 2 h e complete só se precisar.',
+          'Só libere a Etapa 2 quando o pH e a alcalinidade estiverem na faixa.'
+        ] : [
+          'Ligue a bomba e deixe a manopla em FILTRAR.',
+          'Dissolva o produto em um balde de 20 L com água da piscina, mexendo bem até não sobrar grão.',
+          'Despeje o balde devagar pela borda, caminhando ao redor da piscina inteira.',
+          'Deixe filtrar 2 h e re-meça antes de liberar a Etapa 2.'
+        ]);
   $('#ts2').className = 'tstep ' + (ok2?'ok':'todo');
   $('#tsb2').className = 'ts-badge ' + (ok2?'okb':(cAlto?'rb':'tob'));
   $('#tsb2').textContent = ok2 ? 'OK' : (cAlto?'Aguardar':'Dosar');
@@ -1640,47 +1679,99 @@ function renderTreat(){
     ? `<div class="dose ok">Cloro em ${fmtVal(PARAMS[1],c)} ppm — dentro da faixa 1–3 ppm.</div>`
     : cAlto
       ? `<div class="dose">Cloro em ${fmtVal(PARAMS[1],c)} ppm: <b>aguarde</b> — filtre no sol por 6 h e re-teste antes do sulfato.</div>`
-      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez. Aplique ao entardecer, filtro em RECIRCULAR por 15 min, depois FILTRAR. Vinil/fibra: dilua em balde com água da piscina e espalhe pelas laterais. Azulejo: aplique direto ao longo das laterais.</small></div>`;
-  const g = Math.round(20*getVolume()/1000);
+      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez.</small></div>`
+      + manualPis([
+          'Aplique ao entardecer — o sol destrói o cloro e a dose não rende.',
+          'Meça a dose com um copo medidor (use luva e não respire a poeira).',
+          'Vinil/fibra: dilua o cloro em um balde de 20 L e espalhe pelas laterais. Azulejo: pode aplicar direto ao longo das laterais.',
+          'Manopla em RECIRCULAR por 15 min para espalhar, depois FILTRAR.',
+          'Re-teste o cloro em 24 h antes de liberar a Etapa 3.'
+        ]);
+  /* ---- Etapa 3 orientada pelo RESULTADO DA TURBIDEZ (comparativo de cor) ----
+     1–30%: Algicida de CHOQUE + Clarificante (alerta laranja piscando) — NÃO sulfato.
+     >30%:  Sulfato de alumínio (decantação).
+     0%:    água cristalina, nenhum produto. Doses calculadas pela litragem da piscina. */
+  const m3 = getVolume()/1000;
+  const turb = params.turbidez;
+  const clarMode = turb>0 && turb<=30;
+  const sulMode  = turb>30;
+  const g = Math.round(20*m3);
   const decantando = treat && (Date.now()-treat.ts) < 24*3600e3;
   const elapsed = treat ? Date.now()-treat.ts : 0;
   const eh = Math.floor(elapsed/3600e3), em = Math.floor(elapsed%3600e3/60e3);
-  let cls3, b3t, b3c, body3;
-  const sul = podeUsarSulfato(params.ph, params.alcalinidade, params.turbidez);
-  if(!sul.libera){
-    cls3='lock'; b3t='Bloqueada'; b3c='rb';
-    body3 = `<div class="dose err">🛑 Equilibre pH e alcalinidade na Etapa 1 antes do sulfato — senão ele não decanta direito.</div>`;
-  } else if(cAlto){
-    cls3='lock'; b3t='🛑 Não aplicar'; b3c='rb';
-    body3 = `<div class="dose">🛑 <b>Cloro alto (${fmtVal(PARAMS[1],c)} ppm)</b> + sulfato turva tudo. Aguarde a Etapa 2 resolver.</div>`;
-  } else if(cBaixo){
-    cls3='lock'; b3t='Bloqueada'; b3c='tob';
-    body3 = `<div class="dose">Faça a supercloração da Etapa 2 primeiro — sulfato em água sem cloro pode virar algas.</div>`;
-  } else if(decantando){
-    cls3='ok'; b3t='Em decantação'; b3c='okb';
-    body3 = `<div class="dose ok">Apliquei há <b>${eh}h${em?' '+em+'min':''}</b>. Não ligue o filtro e não mexa na água por 12 h — o sulfato está assentando a sujeira no fundo. Aspire amanhã.</div>
-      <button class="btn ghost" id="btnDiag">Já apliquei e continua verde → diagnóstico</button>`;
-  } else {
-    const doseHtml = `<div class="dose"><b>Dose: ${fmtG(g)}</b> (20 g por m³)${TAG_SULF}<small>Junta a sujeira e assenta no fundo pra aspirar. Dilua em balde, bomba em RECIRCULAR por 15 min. Depois desligue TUDO e deixe decantar 12–24 h.</small></div>
-      <button class="btn" id="btnConfirm">Confirmar que apliquei — ${fmtG(g)}</button>`;
-    if(sul.tipo === 'aviso_turbidez'){
-      cls3='todo'; b3t='Liberada'; b3c='tob';
-      body3 = `<div class="dose warn-pisca">✅ <b>Água muito turva detectada — Sulfato liberado!</b> Para eficiência máxima, mantenha alcalinidade em 100 ppm. Turbidez alta exige decantação.</div>` + doseHtml;
-    } else if(sul.tipo === 'aviso_100'){
-      cls3='todo'; b3t='Liberada'; b3c='tob';
-      body3 = `<div class="dose warn-pisca">✅ Liberado. Para melhor eficiência, alcalinidade ideal é 100 ppm.</div>` + doseHtml;
+  let cls3, b3t, b3c, body3, blink = null;
+  const t3 = $('#ts3t'), s3 = $('#ts3s');
+  if(!clarMode && !sulMode){
+    t3.textContent='Turbidez'; s3.textContent='Água cristalina — nada a aplicar';
+    cls3='ok'; b3t='Cristalina'; b3c='okb';
+    body3 = `<div class="dose ok">Água cristalina (${turb}%) — transparência ideal. Não precisa de clarificante nem sulfato: mantenha a filtragem e o cloro na faixa.</div>`;
+  } else if(clarMode){
+    t3.textContent='Choque + Clarificante'; s3.textContent='Tirar a turbidez da água (até 30%)';
+    if(cAlto){
+      cls3='lock'; b3t='Aguardar'; b3c='rb';
+      body3 = `<div class="dose">🛑 <b>Cloro alto (${fmtVal(PARAMS[1],c)} ppm)</b>: choque agora só sobe mais. Filtre no sol por 6 h e re-teste antes.</div>`;
+    } else if(cBaixo){
+      cls3='lock'; b3t='Bloqueada'; b3c='rb';
+      body3 = `<div class="dose">Faça a supercloração da Etapa 2 primeiro — sem cloro, algas voltam e a água não clareia.</div>`;
+    } else if(!e1.ok){
+      cls3='lock'; b3t='Bloqueada'; b3c='rb';
+      body3 = `<div class="dose">🛑 Equilibre pH e alcalinidade na Etapa 1 antes — em água desequilibrada o clarificante não rende.</div>`;
     } else {
-      cls3='ok'; b3t='Pronta'; b3c='okb';
-      body3 = doseHtml;
+      cls3='todo'; b3t='Aplicar agora'; b3c='tob pisca'; blink='clar';
+      body3 = `<div class="dose warn-pisca">⚠️ <b>Água turva (${turb}%) — adicione AGORA:</b> Algicida de CHOQUE <b>${fmtMl(6*m3)}</b> (6 mL por m³) + Clarificante <b>${fmtMl(8*m3)}</b> (8 mL por m³). Filtrar 12 h. <b>NÃO use sulfato ainda! Só se passar de 30%.</b></div>${TAG_ALG}${TAG_CLAR}`
+        + manualPis([
+          'Ligue a bomba e deixe a manopla em FILTRAR durante toda a aplicação.',
+          `<b>Primeiro, o algicida:</b> meça ${fmtMl(6*m3)} com um copo medidor e despeje direto na água, caminhando pela borda.`,
+          `<b>Depois, o clarificante:</b> dilua ${fmtMl(8*m3)} em um balde de 20 L com água da piscina, mexendo bem.`,
+          'Despeje o balde devagar pela borda, caminhando ao redor da piscina inteira.',
+          'Deixe a bomba filtrando por <b>12 h</b> — pode deixar de dia e de noite.',
+          'Sujeira no fundo no dia seguinte? Aspire em modo ASPIRAR e retro-lave o filtro.'
+        ]);
+    }
+  } else {
+    t3.textContent='Sulfato de alumínio'; s3.textContent='Clarificar por decantação';
+    const sul = podeUsarSulfato(params.ph, params.alcalinidade, params.turbidez);
+    const doseHtml = `<div class="dose"><b>Dose: ${fmtG(g)}</b> (20 g por m³)${TAG_SULF}<small>Junta a sujeira e assenta no fundo pra aspirar.</small></div>`
+      + manualPis([
+        `Meça ${fmtG(g)} de sulfato de alumínio com um copo medidor ou balança de cozinha.`,
+        'Dilua o sulfato em um balde de 20 L com água morna, mexendo até dissolver tudo.',
+        'Bomba ligada, manopla em <b>RECIRCULAR</b>: despeje o balde devagar pela borda.',
+        'Deixe recircular 1 h para espalhar o produto na água toda.',
+        '<b>Desligue TUDO</b> (bomba e timer) e não mexa na água por 12–24 h — a sujeira assenta no fundo.',
+        'Aspire o fundo com a manopla em <b>DRENAR</b> — a sujeira sai direto no esgoto.',
+        'Volte a manopla para FILTRAR, filtre 8 h e retro-lave o filtro.'
+      ])
+      + `<button class="btn" id="btnConfirm">Confirmar que apliquei — ${fmtG(g)}</button>`;
+    if(!sul.libera){
+      cls3='lock'; b3t='Bloqueada'; b3c='rb';
+      body3 = `<div class="dose err">🛑 Equilibre pH e alcalinidade na Etapa 1 antes do sulfato — senão ele não decanta direito.</div>`;
+    } else if(cAlto){
+      cls3='lock'; b3t='🛑 Não aplicar'; b3c='rb';
+      body3 = `<div class="dose">🛑 <b>Cloro alto (${fmtVal(PARAMS[1],c)} ppm)</b> + sulfato turva tudo. Aguarde a Etapa 2 resolver.</div>`;
+    } else if(cBaixo){
+      cls3='lock'; b3t='Bloqueada'; b3c='tob';
+      body3 = `<div class="dose">Faça a supercloração da Etapa 2 primeiro — sulfato em água sem cloro pode virar algas.</div>`;
+    } else if(decantando){
+      cls3='ok'; b3t='Em decantação'; b3c='okb';
+      body3 = `<div class="dose ok">Apliquei há <b>${eh}h${em?' '+em+'min':''}</b>. Não ligue o filtro e não mexa na água por 12 h — o sulfato está assentando a sujeira no fundo. Aspire amanhã.</div>
+      <button class="btn ghost" id="btnDiag">Já apliquei e continua verde → diagnóstico</button>`;
+    } else {
+      if(sul.tipo === 'aviso_turbidez'){
+        cls3='todo'; b3t='Aplicar agora'; b3c='tob pisca'; blink='sul';
+        body3 = `<div class="dose warn-pisca">✅ <b>Água muito turva (${turb}%) — sulfato liberado!</b> Alcalinidade em 100 ppm garante máxima eficiência. Turbidez alta exige decantação.</div>` + doseHtml;
+      } else {
+        cls3='todo'; b3t='Aplicar agora'; b3c='tob pisca'; blink='sul';
+        body3 = `<div class="dose warn-pisca">✅ Liberado. Para melhor eficiência, alcalinidade ideal é 100 ppm.</div>` + doseHtml;
+      }
     }
   }
   $('#ts3').className='tstep '+cls3;
   $('#tsb3').className='ts-badge '+b3c; $('#tsb3').textContent=b3t;
   $('#tsbody3').innerHTML = body3;
-  if((sul.tipo==='aviso_turbidez' || sul.tipo==='aviso_100') && renderTreat._vib !== sul.tipo){
-    buzz([80,50,80]);                       /* vibra uma vez quando o aviso aparece/troca */
+  if(blink && renderTreat._vib !== blink){
+    buzz([80,50,80]);                       /* vibra uma vez quando o alerta laranja aparece/troca */
   }
-  renderTreat._vib = sul.tipo;
+  renderTreat._vib = blink;
 }
 $('#tab-tratam').addEventListener('click', e=>{
   if(e.target.closest('#btnConfirm')){
