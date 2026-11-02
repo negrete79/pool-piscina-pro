@@ -123,6 +123,47 @@ function setOverride(id, patch){
 function getOverrides(){ return getDB().overrides; }
 function saveDB(d){ writeDB(d); }
 
+/* ---------- planos de licença por CÓDIGO (duração embutida no código) ----------
+   O painel gera códigos com duração: 30 d, 60 d, 6 meses, 1 ano ou vitalício.
+   O código continua no formato XXXX-XXXX-XXXX, mas nos planos diferentes de
+   30 dias ele carrega: 10 caracteres aleatórios + 1 letra do plano + 1 dígito
+   verificador (FNV-1a com segredo = env ADMIN_KEY). O /api/check-status lê o
+   plano do próprio código — não precisa de banco (o /tmp da Vercel é efêmero).
+   Letras: B=60 dias · S=6 meses (180 d) · A=1 ano (365 d) · V=vitalício.
+   Códigos de 30 dias continuam TOTALMENTE aleatórios (compatibilidade com os
+   já emitidos). Se a env ADMIN_KEY mudar, códigos antigos com plano passam a
+   valer 30 dias (caem no fallback de formato) — sem travar ninguém.       */
+const COD_ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   /* sem I, O, 0 e 1 */
+const COD_PLANOS = { B: 60, S: 180, A: 365, V: 0 };        /* 0 = vitalício  */
+const COD_VITAL_DIAS = 3650;   /* vitalício expira daqui a 10 anos (data exibida no app); o painel mostra "Vitalício" */
+function codFnv1a(s){
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h >>> 0;
+}
+function codSecret(){ return process.env.ADMIN_KEY || 'SEJA'; }
+/* gera um código com o plano embutido — só para durações diferentes de 30 */
+function gerarCodigoPlano(dias){
+  const letra = { 60: 'B', 180: 'S', 365: 'A', 0: 'V' }[Number(dias)];
+  if (!letra) return null;
+  let base = '';
+  for (let i = 0; i < 10; i++) base += COD_ALFABETO[Math.floor(Math.random() * COD_ALFABETO.length)];
+  const check = COD_ALFABETO[codFnv1a(codSecret() + base + letra) % 32];
+  const raw = base + letra + check;
+  return raw.slice(0, 4) + '-' + raw.slice(4, 8) + '-' + raw.slice(8, 12);
+}
+/* valida um código e devolve o plano embutido (ou null se não for código com plano) */
+function planoDeCodigo(code){
+  const c = String(code || '').toUpperCase().replace(/-/g, '');
+  if (!/^[A-HJ-NP-Z2-9]{12}$/.test(c)) return null;
+  const letra = c[10];
+  const dias = COD_PLANOS[letra];
+  if (dias === undefined) return null;
+  const esperado = COD_ALFABETO[codFnv1a(codSecret() + c.slice(0, 10) + letra) % 32];
+  if (c[11] !== esperado) return null;
+  return { dias, base: c.slice(0, 10) };
+}
+
 /* ---------- resposta padrão com CORS ---------- */
 function CORS(){
   return {
@@ -143,6 +184,7 @@ function preflight(req, res){
 
 module.exports = {
   JWT_HOURS, MAX_FAILS, LOCK_MINUTES,
+  COD_VITAL_DIAS, gerarCodigoPlano, planoDeCodigo,
   getDB, saveDB, sign, verify, bearer,
   isLocked, lockMinutes, registerFail, clearFails,
   saveResetToken, takeResetToken,
