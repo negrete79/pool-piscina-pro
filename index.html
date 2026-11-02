@@ -380,6 +380,9 @@ section.tab-panel{scroll-margin-top:84px}
 @keyframes warnShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 .dose.warn-pisca{background:rgba(226,135,67,.2);border:1.5px solid rgba(226,135,67,.6);color:#8a4a0f;animation:warnBlink 1s ease-in-out infinite,warnShake .9s ease-in-out infinite}
 [data-theme="dark"] .dose.warn-pisca{color:#ffc98a}
+.ptag{display:block;width:fit-content;max-width:100%;margin:6px 0 3px;padding:3px 10px;border-radius:9px;background:rgba(15,92,92,.08);border:1.5px dashed rgba(15,92,92,.4);color:#0F5C5C;font-size:11px;font-weight:600;line-height:1.5}
+.ptag b{font-weight:800}
+[data-theme="dark"] .ptag{background:rgba(255,255,255,.06);border-color:rgba(150,215,208,.45);color:#a9dcd6}
 .diag{border:1.5px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
 .diag-t{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;
   font-size:13px;font-weight:800;text-align:left;background:var(--bg)}
@@ -747,6 +750,15 @@ const fmt  = n => Math.round(n).toLocaleString('pt-BR');
 const fmt1 = n => n.toLocaleString('pt-BR',{minimumFractionDigits:1, maximumFractionDigits:1});
 const fmtG = g => g>=1000 ? fmt1(g/1000)+' kg' : fmt(g)+' g';
 const fmtMl= m => m>=1000 ? (m/1000).toLocaleString('pt-BR',{maximumFractionDigits:2})+' L' : fmt(m)+' mL';
+/* etiquetas de produto: nome popular de loja + nome químico — aparecem junto da indicação */
+const ptag = html => `<span class="ptag">🏷️ ${html}</span>`;
+const TAG_MUR   = ptag('Vendido como: <b>Diminuidor de pH / Redutor de pH</b> · químico: ácido clorídrico (HCl)');
+const TAG_BARR  = ptag('Vendido como: <b>Elevador de pH</b> · químico: carbonato de sódio');
+const TAG_BIC   = ptag('Vendido como: <b>Elevador de alcalinidade</b>');
+const TAG_CLORO = ptag('Vendido como: <b>Cloro granulado / Cloro choque</b> · químico: hipoclorito de cálcio ou dicloro');
+const TAG_SULF  = ptag('Vendido como: <b>Decantante / Floculante</b> · químico: sulfato de alumínio');
+const TAG_CLAR  = ptag('Nome de loja: <b>Clarificante</b> · químico: sulfato de alumínio diluído ou polímero');
+const TAG_MET   = ptag('Vendido como: <b>Sequestrante de metais / Antiferrugem</b> · químico: EDTA ou HEDP');
 const buzz = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
 const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
 const num = i => { const el = document.getElementById(i); return parseFloat((el && el.value || '').toString().replace(',','.')) || 0; };
@@ -1390,23 +1402,23 @@ $('#paramGrid').addEventListener('input', e=>{
 function doseFor(p,v){
   const m3 = getVolume()/1000;
   if(p.id==='ph'){
-    if(v<7)  return {tone:'t-act', h:`<b>Barrilha leve (elevar pH):</b> ${fmtG(10*Math.ceil((7-v)*10)*m3)} até pH 7,2<small>10 g por 0,1 de pH a cada 10.000 L — dissolva em balde e despeje com o filtro em FILTRAR.</small>`};
-    if(v>7.4)return {tone:'t-act', h:`<b>Ácido muriático (baixar pH):</b> ${fmtMl(12*Math.ceil((v-7.4)*10)*m3)} até pH 7,4<small>Dose fracionada: aplique metade do diminuidor de PH, re-teste em 2 h antes de completar.</small>`};
+    if(v<7)  return {tone:'t-act', h:`<b>Barrilha leve (elevar pH):</b> ${fmtG(10*Math.ceil((7-v)*10)*m3)} até pH 7,2${TAG_BARR}<small>10 g por 0,1 de pH a cada 10.000 L — dissolva em balde e despeje com o filtro em FILTRAR.</small>`};
+    if(v>7.4)return {tone:'t-act', h:`<b>Ácido muriático (baixar pH):</b> ${fmtMl(12*Math.ceil((v-7.4)*10)*m3)} até pH 7,4${TAG_MUR}<small>Dose fracionada: aplique metade, re-teste em 2 h antes de completar.</small>`};
     return {tone:'t-ok', h:'pH estável nessa faixa — o cloro rende até 3x mais. Só manter a rotina.'};
   }
   if(p.id==='cloro'){
-    if(v<1)  return {tone:'t-act', h:`<b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))}<small>28 g por 1.000 L — aplique ao entardecer com filtro em RECIRCULAR por 15 min, depois FILTRAR.</small>`};
+    if(v<1)  return {tone:'t-act', h:`<b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))}${TAG_CLORO}<small>Mata bactérias e algas de uma vez. 28 g por 1.000 L — aplique ao entardecer com filtro em RECIRCULAR por 15 min, depois FILTRAR.</small>`};
     if(v>3.5)return {tone:'t-warn', h:'<b>Cloro alto:</b> não trate nada agora — filtre no sol por 6 h e re-teste amanhã.'};
     return {tone:'t-ok', h:'Cloro na faixa de 1–3 ppm — água protegida contra algas e bactérias.'};
   }
   if(p.id==='turbidez'){
-    if(v>60) return {tone:'t-warn', h:'<b>Água muito turva:</b> aplique Sulfato de alumínio na Etapa 3, filtre 8 h e aspire o fundo.'};
-    if(v>20) return {tone:'t-act', h:`<b>Clarificante:</b> ${fmtMl(8*m3)}<small>Ou vá direto para a Etapa 3: sulfato de alumínio decanta e resolve melhor.</small>`};
+    if(v>60) return {tone:'t-warn', h:'<b>Água muito turva:</b> aplique Sulfato de alumínio na Etapa 3, filtre 8 h e aspire o fundo.'+TAG_SULF};
+    if(v>20) return {tone:'t-act', h:`<b>Clarificante:</b> ${fmtMl(8*m3)}${TAG_CLAR}<small>Junta a sujeira fina pra o filtro reter. Ou vá direto para a Etapa 3: o sulfato de alumínio decanta e resolve melhor.</small>`};
     return {tone:'t-ok', h:'Água cristalina — transparência dentro do ideal.'};
   }
   if(p.id==='alcalinidade'){
-    if(v<80) return {tone:'t-act', h:`<b>Bicarbonato de sódio:</b> ${fmtG(Math.ceil(1.8*(100-v)*m3))} para chegar a 100 ppm<small>AT baixa deixa o pH dançando — estabilize antes do cloro.</small>`};
-    if(v>120)return {tone:'t-act', h:`<b>AT alta:</b> baixe com ácido muriático em doses de ${fmtMl(Math.ceil((v-120)*1.5*m3))}<small>Aplique uma dose, circule 2 h e re-teste antes de repetir.</small>`};
+    if(v<80) return {tone:'t-act', h:`<b>Bicarbonato de sódio:</b> ${fmtG(Math.ceil(1.8*(100-v)*m3))} para chegar a 100 ppm${TAG_BIC}<small>AT baixa deixa o pH dançando — estabilize antes do cloro.</small>`};
+    if(v>120)return {tone:'t-act', h:`<b>AT alta:</b> baixe com ácido muriático em doses de ${fmtMl(Math.ceil((v-120)*1.5*m3))}${TAG_MUR}<small>Aplique uma dose, circule 2 h e re-teste antes de repetir.</small>`};
     return {tone:'t-ok', h:'Alcalinidade estável — o pH se mantém no lugar.'};
   }
   if(p.id==='dureza'){
@@ -1450,7 +1462,7 @@ function openMeasure(id){
     if(isNaN(nv)) return;
     v = Math.min(p.max, Math.max(p.min, nv));
     if(from!=='r') range.value = v;
-    if(from!=='n') numEl.value = v;
+    if(from!=='n') numEl.value = String(v).replace('.',',');
     const st = statusOf(p,v), kn = Math.min(100, Math.max(0,(v-p.min)/(p.max-p.min)*100));
     const now=$('#mNow'), bd=$('#mBadge'), knob=$('#mKnob');
     now.innerHTML = fmtVal(p,v)+' <i>'+p.unit+'</i>'; now.style.color = st.c;
@@ -1467,6 +1479,7 @@ function openMeasure(id){
     renderParams(); renderTreat(); renderFilterFromWeather();
     closeSheet(); toast(p.label+' salvo: '+fmtVal(p,v)+(p.unit?' '+p.unit:''), 'ok');
   });
+  upd(v,'init');   /* mostra dose + etiqueta do produto já na abertura, sem precisar mexer no slider */
 }
 function openMetais(){
   const mFe = {id:'ferro', label:'Ferro', unit:'ppm', min:0, max:5, step:0.1, lo:0, hi:0.3, dec:1};
@@ -1488,9 +1501,9 @@ function openMetais(){
     const box = $('#mMetDose');
     if(params.metaisNA){ box.className='m-dose t-warn'; box.innerHTML='<b>Metais não medidos:</b> sem essa medição o app não detecta risco de manchas no vinil/fibra/azulejo. Meça com teste próprio de metais ou leve uma amostra a uma loja de piscina.'; return; }
     const f = params.ferro > 0.3, c = params.cobre > 0.2;
-    if(f && c){ box.className='m-dose t-warn'; box.innerHTML='<b>Ferro e cobre altos:</b> aplique sequestrante de metais (quelante) conforme a bula, filtre 8 h e retro-lave. As duas manchas saem com tratamento ácido.'; }
-    else if(f){ box.className='m-dose t-act'; box.innerHTML='<b>Ferro alto — mancha marrom:</b> aplique sequestrante de metais conforme a bula, com o filtro em FILTRAR por 8 h. Origem comum: água de poço.'; }
-    else if(c){ box.className='m-dose t-act'; box.innerHTML='<b>Cobre alto — mancha verde-azulada:</b> suspenda algicida ou equipamento com cobre e aplique sequestrante de metais.'; }
+    if(f && c){ box.className='m-dose t-warn'; box.innerHTML='<b>Ferro e cobre altos:</b> aplique sequestrante de metais (quelante) conforme a bula, filtre 8 h e retro-lave. As duas manchas saem com tratamento ácido.'+TAG_MET; }
+    else if(f){ box.className='m-dose t-act'; box.innerHTML='<b>Ferro alto — mancha marrom:</b> aplique sequestrante de metais conforme a bula, com o filtro em FILTRAR por 8 h. Origem comum: água de poço.'+TAG_MET; }
+    else if(c){ box.className='m-dose t-act'; box.innerHTML='<b>Cobre alto — mancha verde-azulada:</b> suspenda algicida ou equipamento com cobre e aplique sequestrante de metais.'+TAG_MET; }
     else { box.className='m-dose t-ok'; box.innerHTML='Metais sob controle — sem risco de manchar a estrutura.'; }
   }
   function bind(p){
@@ -1534,10 +1547,10 @@ if(!isObj(treat)) treat = null;
 function etapa1(){
   const ph=params.ph, at=params.alcalinidade, m3=getVolume()/1000, L=[];
   let ok=true;
-  if(ph<7){ ok=false; L.push(`<b>Barrilha leve (sobe pH):</b> ${fmtG(10*Math.ceil((7-ph)*10)*m3)} até pH 7,2`); }
-  else if(ph>7.4){ ok=false; L.push(`<b>Ácido muriático (desce pH):</b> ${fmtMl(12*Math.ceil((ph-7.4)*10)*m3)} — metade agora, re-teste em 2 h`); }
-  if(at<100){ ok=false; L.push(`<b>Bicarbonato de sódio (sobe AT):</b> ${fmtG(Math.ceil(1.8*(100-at)*m3))} → alvo 100 ppm`); }
-  else if(at>120){ ok=false; L.push(`<b>AT em ${at} ppm:</b> baixe aos poucos com ácido muriático, re-teste a cada dose`); }
+  if(ph<7){ ok=false; L.push(`<b>Barrilha leve (sobe pH):</b> ${fmtG(10*Math.ceil((7-ph)*10)*m3)} até pH 7,2${TAG_BARR}`); }
+  else if(ph>7.4){ ok=false; L.push(`<b>Ácido muriático (desce pH):</b> ${fmtMl(12*Math.ceil((ph-7.4)*10)*m3)} — metade agora, re-teste em 2 h${TAG_MUR}`); }
+  if(at<100){ ok=false; L.push(`<b>Bicarbonato de sódio (sobe AT):</b> ${fmtG(Math.ceil(1.8*(100-at)*m3))} → alvo 100 ppm${TAG_BIC}`); }
+  else if(at>120){ ok=false; L.push(`<b>AT em ${at} ppm:</b> baixe aos poucos com ácido muriático, re-teste a cada dose${TAG_MUR}`); }
   return {ok, L};
 }
 /* ================= liberação do sulfato de alumínio (Etapa 3) =================
@@ -1571,7 +1584,7 @@ function renderTreat(){
     ? `<div class="dose ok">Cloro em ${fmtVal(PARAMS[1],c)} ppm — dentro da faixa 1–3 ppm.</div>`
     : cAlto
       ? `<div class="dose">Cloro em ${fmtVal(PARAMS[1],c)} ppm: <b>aguarde</b> — filtre no sol por 6 h e re-teste antes do sulfato.</div>`
-      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)<small>Aplique ao entardecer, filtro em RECIRCULAR por 15 min, depois FILTRAR. Vinil/fibra: dilua em balde com água da piscina e espalhe pelas laterais. Azulejo: aplique direto ao longo das laterais.</small></div>`;
+      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez. Aplique ao entardecer, filtro em RECIRCULAR por 15 min, depois FILTRAR. Vinil/fibra: dilua em balde com água da piscina e espalhe pelas laterais. Azulejo: aplique direto ao longo das laterais.</small></div>`;
   const g = Math.round(20*getVolume()/1000);
   const decantando = treat && (Date.now()-treat.ts) < 24*3600e3;
   const elapsed = treat ? Date.now()-treat.ts : 0;
@@ -1592,7 +1605,7 @@ function renderTreat(){
     body3 = `<div class="dose ok">Apliquei há <b>${eh}h${em?' '+em+'min':''}</b>. Não ligue o filtro e não mexa na água por 12 h — o sulfato está assentando a sujeira no fundo. Aspire amanhã.</div>
       <button class="btn ghost" id="btnDiag">Já apliquei e continua verde → diagnóstico</button>`;
   } else {
-    const doseHtml = `<div class="dose"><b>Dose: ${fmtG(g)}</b> (20 g por m³)<small>Dilua em balde, bomba em RECIRCULAR por 15 min. Depois desligue TUDO e deixe decantar 12–24 h.</small></div>
+    const doseHtml = `<div class="dose"><b>Dose: ${fmtG(g)}</b> (20 g por m³)${TAG_SULF}<small>Junta a sujeira e assenta no fundo pra aspirar. Dilua em balde, bomba em RECIRCULAR por 15 min. Depois desligue TUDO e deixe decantar 12–24 h.</small></div>
       <button class="btn" id="btnConfirm">Confirmar que apliquei — ${fmtG(g)}</button>`;
     if(sul.tipo === 'aviso_turbidez'){
       cls3='todo'; b3t='Liberada'; b3c='tob';
@@ -1628,10 +1641,10 @@ function renderAllDoses(){ renderParams(); renderTreat(); }
 function diagList(){
   const vol = getVolume();
   return [
-   {t:'Ainda verde (algas)', r:[`Supercloração: ${fmtG(Math.round(vol*0.028))} (28 g por 1.000 L) + algicida de choque (${fmtMl(20*vol/1000)}).`,'Escove paredes e fundo antes de aplicar.','Filtro em FILTRAR por 8 h; retro-lave se a pressão subir.']},
-   {t:'Turva branca', r:['É alumínio em suspensão: filtre 4–6 h direto.',`Não assentou? Clarificante: ${fmtMl(8*vol/1000)}.`,'Retro-lave 2x ao dia até o visor limpar.']},
-   {t:'Amarelada / sépia (metais)', r:['Ferro/cobre/manganês precipitou: NÃO aplique cloro agora.',`Diminuidor de metais: ${fmtMl(15*vol/1000)} (15 mL/1.000 L), filtro ligado.`,'Filtre 6 h e retro-lave.']},
-   {t:'Esverdeada clara', r:[`Início de algas: choque de ${fmtG(Math.round(15*vol/1000))} (15 g/m³).`,'Escove a linha d’água e os cantos.','Filtre 8 h e re-teste o cloro em 24 h.']},
+   {t:'Ainda verde (algas)', r:[`Supercloração (na loja: cloro granulado ou cloro choque — químico hipoclorito de cálcio): ${fmtG(Math.round(vol*0.028))} (28 g por 1.000 L) + algicida de choque (matador de algas — químico quaternário de amônio): ${fmtMl(20*vol/1000)}.`,'Escove paredes e fundo antes de aplicar.','Filtro em FILTRAR por 8 h; retro-lave se a pressão subir.']},
+   {t:'Turva branca', r:['É alumínio em suspensão: filtre 4–6 h direto.',`Não assentou? Clarificante (químico: sulfato de alumínio diluído ou polímero — junta a sujeira fina pro filtro): ${fmtMl(8*vol/1000)}.`,'Retro-lave 2x ao dia até o visor limpar.']},
+   {t:'Amarelada / sépia (metais)', r:['Ferro/cobre/manganês precipitou: NÃO aplique cloro agora.',`Diminuidor de metais (na loja: sequestrante de metais ou antiferrugem — químico EDTA/HEDP): ${fmtMl(15*vol/1000)} (15 mL/1.000 L), filtro ligado.`,'Filtre 6 h e retro-lave.']},
+   {t:'Esverdeada clara', r:[`Início de algas: choque de cloro granulado: ${fmtG(Math.round(15*vol/1000))} (15 g/m³).`,'Escove a linha d’água e os cantos.','Filtre 8 h e re-teste o cloro em 24 h.']},
    {t:'Fundo sujo / manchado', r:['Sedimento assentou certo! Aspire em modo ASPIRAR (dreno fechado, aspiração aberta).','Movimento lento e reto, sem levantar a nuvem.']},
    {t:'Cristalina — deu certo!', r:['Aspire o fundo em modo ASPIRAR para tirar o sedimento.','Volte os registros: DRENO fechado, SKIMMER e ASPIRAÇÃO abertos.','Manopla em FILTRAR e filtre o tempo indicado pelo clima.']}
   ];
