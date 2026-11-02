@@ -106,6 +106,9 @@ svg{display:block}
 /* ============ layout / cards ============ */
 #app{max-width:600px;margin:0 auto;padding:14px 16px 8px;overflow-x:clip}
 section.tab-panel{scroll-margin-top:84px}
+.footcred{padding:12px 16px 28px;text-align:center;font-size:11.5px;font-weight:600;color:var(--muted)}
+.footcred b{color:var(--teal);font-weight:800;white-space:nowrap}
+[data-theme="dark"] .footcred b{color:#7BD9C2}
 .lic-locked section.lic-sec{display:none !important}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
   padding:18px 16px;margin-bottom:14px;transition:transform .25s,box-shadow .25s}
@@ -115,8 +118,9 @@ section.tab-panel{scroll-margin-top:84px}
   display:grid;place-items:center}
 [data-theme="dark"] .sic{background:rgba(123,217,194,.12);color:#7BD9C2}
 .shead h2{font-size:15.5px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0}
-.shead .chip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+.shead .chip,.wmain .chip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
   border:1px solid var(--line);padding:4px 9px;border-radius:99px;white-space:nowrap}
+.wmain .chip{margin-left:auto;flex:none}
 .chip.net{display:inline-flex;align-items:center;gap:5px}
 .chip.net i{width:7px;height:7px;border-radius:99px;background:var(--mint)}
 .chip.net.off i{background:var(--red)}
@@ -308,8 +312,10 @@ section.tab-panel{scroll-margin-top:84px}
 .pcard{position:relative;display:flex;flex-direction:column;gap:8px;padding:13px 12px;border-radius:16px;min-width:0;
   max-width:100%;border:1.5px solid var(--line);background:var(--bg);transition:transform .2s,border-color .2s}
 .pcard:hover{transform:translateY(-2px);border-color:rgba(15,92,92,.3)}
-.ph{display:flex;align-items:center;gap:6px;max-width:100%}
-.ph b{font-size:12.5px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ph{display:flex;align-items:center;gap:6px;max-width:100%;flex-wrap:wrap}
+.ph b{font-size:12.5px;font-weight:800;flex:1 1 auto;min-width:0;overflow:hidden;white-space:normal;overflow-wrap:break-word;
+  line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ph .badge{flex:none}
 .pcard .p-slider,.pcard .pbar{max-width:100%}
 .badge{font-size:9.5px;font-weight:800;color:#fff;padding:3px 8px;border-radius:99px;letter-spacing:.03em}
 .pval{font-family:var(--mono);font-size:21px;font-weight:700;letter-spacing:-.02em}
@@ -681,6 +687,7 @@ section.tab-panel{scroll-margin-top:84px}
       <div class="wmain">
         <span class="wemoji" id="wEmoji">☁️</span>
         <div class="wcur"><b id="wTemp">—</b><span id="wCity">buscando clima…</span></div>
+        <span class="chip" id="wDN" title="Período do dia agora no seu relógio">☀️ dia</span>
       </div>
       <div class="wstats">
         <span>Umidade <b id="wHum">—</b></span>
@@ -696,6 +703,9 @@ section.tab-panel{scroll-margin-top:84px}
       </div>
     </div>
   </section>
+
+  <!-- Crédito do criador -->
+  <footer class="footcred">Criado por <b>Elias costa NEGRET'S</b></footer>
 
   <!-- Aviso de licença vencida: aparece só quando travado -->
   <section class="tab-panel" id="lockedTeaser" hidden>
@@ -792,9 +802,15 @@ function setActiveTab(name){
 }
 function headerOffset(){
   const t = document.querySelector('.top');
-  const lic = document.getElementById('licBanner');
   let off = (t ? t.offsetHeight : 60) + 10;
-  if(lic && !lic.hidden && lic.offsetHeight) off += lic.offsetHeight + 10;
+  /* o banner de licença ROLA junto com a página: só conta o pedaço que ainda
+     está visível abaixo do header fixo — antes ele somava inteiro mesmo
+     fora da tela e a âncora parava ~80px mais embaixo (bug da válvula) */
+  const lic = document.getElementById('licBanner');
+  if(lic && !lic.hidden && lic.offsetHeight){
+    const visivel = lic.getBoundingClientRect().bottom - (t ? t.offsetHeight : 60);
+    if(visivel > 0) off += Math.min(visivel, lic.offsetHeight) + 10;
+  }
   return off;
 }
 function visibleSections(){
@@ -827,21 +843,30 @@ function buildSpy(){
   SECTIONS.forEach(n=>{ const el = document.getElementById('tab-'+n); if(el) spy.observe(el); });
   spyPick();
 }
-/* clique no menu de baixo: scroll suave AUTO-CORRETIVO — recalcula o alvo a cada quadro,
-   então mudança de layout no meio do caminho não interrompe: a âncora SEMPRE chega */
-let animCancel = false;
-addEventListener('touchstart', ()=>{ animCancel = true; }, {passive:true});
-addEventListener('wheel', ()=>{ animCancel = true; }, {passive:true});
+/* clique no menu de baixo: scroll suave AUTO-CORRETIVO — recalcula o alvo a cada quadro
+   e volta a conferir depois de pousar: se o navegador descartar o scroll (fling do
+   dedo, layout mudando, barra de URL sumindo), a âncora é reaplicada e PARA NO LUGAR */
+let animToken = 0;
+addEventListener('touchstart', ()=>{ animToken++; }, {passive:true});
+addEventListener('wheel', ()=>{ animToken++; }, {passive:true});
 function gotoTab(name){
   if(LIC_LOCKED && LOCKED_TABS.indexOf(name) !== -1){ openPaywall(); return; }
   const el = document.getElementById('tab-'+name); if(!el) return;
   setActiveTab(name);
   lockScrollSpy = true;
   clearTimeout(spyT);
-  animCancel = false;
+  const tok = ++animToken;
   const t0 = performance.now(), DUR = 700;
+  function done(){
+    spyT = setTimeout(()=>{ if(tok === animToken){ lockScrollSpy = false; spyPick(); } }, 160);
+    [350, 900, 1800].forEach(ms=> setTimeout(()=>{
+      if(tok !== animToken) return;
+      const delta = el.getBoundingClientRect().top - headerOffset();
+      if(Math.abs(delta) > 2) window.scrollTo(0, (window.pageYOffset||0) + delta);
+    }, ms));
+  }
   function frame(now){
-    if(animCancel){ spyT = setTimeout(()=>{ lockScrollSpy = false; spyPick(); }, 150); return; }
+    if(tok !== animToken){ return; }
     const target = Math.max(0, el.getBoundingClientRect().top + (window.pageYOffset||0) - headerOffset());
     const cur = window.pageYOffset || 0;
     const diff = target - cur;
@@ -849,7 +874,7 @@ function gotoTab(name){
     const step = Math.abs(diff) < 1.5 ? diff : diff * (0.3 - 0.18 * k);
     window.scrollTo(0, cur + step);
     if(Math.abs(target - (window.pageYOffset||0)) > 1.5 && now - t0 < DUR + 600){ requestAnimationFrame(frame); }
-    else { window.scrollTo(0, target); spyT = setTimeout(()=>{ lockScrollSpy = false; spyPick(); }, 160); }
+    else { window.scrollTo(0, Math.max(0, el.getBoundingClientRect().top + (window.pageYOffset||0) - headerOffset())); done(); }
   }
   requestAnimationFrame(frame);
 }
@@ -1742,23 +1767,26 @@ async function updateWeather(force){
 }
 function isNightHour(){ const h = new Date().getHours(); return h >= 18 || h < 6; }
 function codeInfo(c, noite){
-  if(c===0) return [(noite?'🌙':'☀️'),'Céu limpo'];
-  if(c<=2)  return [(noite?'🌙':'⛅'),'Parcialmente nublado'];
-  if(c===3) return ['☁️','Nublado'];
-  if(c<=48) return ['🌫️','Neblina'];
-  if(c<=57) return ['🌦️','Garoa'];
-  if(c<=67) return ['🌧️','Chuva'];
-  if(c<=77) return ['🌨️','Neve'];
-  if(c<=82) return ['🌧️','Pancadas de chuva'];
-  if(c<=86) return ['🌨️','Neve'];
+  if(c===0)  return [(noite?'🌙':'☀️'),'Céu limpo'];
+  if(c===1)  return [(noite?'🌙':'🌤️'),'Sol predominante'];
+  if(c===2)  return [(noite?'🌙':'⛅'),'Parcialmente nublado'];
+  if(c===3)  return ['☁️','Nublado'];
+  if(c<=48)  return ['🌫️','Neblina'];
+  if(c<=57)  return ['🌦️','Garoa'];
+  if(c<=67)  return ['🌧️','Chuva'];
+  if(c<=77)  return ['🌨️','Neve'];
+  if(c<=82)  return ['🌧️','Pancadas de chuva'];
+  if(c<=86)  return ['🌨️','Neve'];
   return ['⛈️','Tempestade'];
 }
 function renderDayNight(){
-  const c = document.getElementById('dnChip'); if(!c) return;
   const n = isNightHour();
-  c.textContent = n ? '🌙 noite' : '☀️ dia';
-  c.title = n ? 'Noite: hora ideal de aplicar o cloro — perde menos pelo sol'
-              : 'Dia: meça o cloro e aplique ao entardecer para render mais';
+  const tip = n ? 'Noite: hora ideal de aplicar o cloro — perde menos pelo sol'
+                : 'Dia: meça o cloro e aplique ao entardecer para render mais';
+  const c = document.getElementById('dnChip');
+  if(c){ c.textContent = n ? '🌙 noite' : '☀️ dia'; c.title = tip; }
+  const d = document.getElementById('wDN');
+  if(d){ d.textContent = n ? '🌙 noite' : '☀️ dia'; d.title = tip; }
 }
 function weatherTip(w){
   const [, lab] = codeInfo(w.code);
@@ -1776,7 +1804,8 @@ function renderWeather(w, fromCache){
   $('#wCity').textContent = w.city || 'Sua região';
   $('#wHum').textContent = Math.round(w.hum)+'%';
   $('#wWind').textContent = Math.round(w.wind)+' km/h';
-  $('#wTime').textContent = new Date(w.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  $('#wTime').textContent = new Date(w.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+    + (isNightHour() ? ' · 🌙 noite' : ' · ☀️ dia');
   $('#wTip').textContent = weatherTip(w);
   $('#wSrc').textContent = (fromCache ? 'Dados salvos no aparelho · última busca ' : 'Open-Meteo · atualizado agora ')
     + (w.gps ? '· coordenadas do GPS' : '· Uberlândia (padrão)');
@@ -2226,6 +2255,8 @@ try{ initTabs(); }catch(e){}
 try{ renderDayNight(); }catch(e){}
 try{ (function(){ const tzb = document.getElementById('teaserAssinar'); if(tzb) tzb.addEventListener('click', openPaywall); })(); }catch(e){}
 setInterval(()=>{ try{ renderDayNight(); }catch(e){} }, 60000);
+/* ícone do clima acompanha o relógio: se virar dia/noite com o app aberto, troca sozinho */
+setInterval(()=>{ try{ const w = store.get('poolapp.weather', null); if(w) renderWeather(w, true); }catch(e){} }, 60000);
 
 addEventListener('online',  ()=>{ renderOnline(); toast('Conectado — atualizando clima…'); updateWeather(); });
 addEventListener('offline', ()=>{ renderOnline(); toast('Você está offline — tudo continua funcionando', 'warn'); });
