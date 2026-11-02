@@ -359,6 +359,17 @@ section.tab-panel{scroll-margin-top:84px}
 .m-dose.t-act{background:rgba(226,135,67,.13)}
 .m-dose.t-warn{background:rgba(214,69,69,.12)}
 .m-save{margin-top:12px}
+/* comparativo de cor da água (medição de turbidez) */
+.wcomp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 8px;margin:2px 0 12px}
+.wc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0}
+.wc .sw{width:64px;height:64px;border-radius:16px;border:2px solid var(--line);position:relative;transition:border-color .2s,box-shadow .2s;box-shadow:inset 0 -10px 16px rgba(0,0,0,.12)}
+.wc .ck{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:99px;background:var(--mint);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800;opacity:0;transform:scale(.4);transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.wc b{font-size:11px;font-weight:700;line-height:1.2;color:var(--ink)}
+.wc small{font-size:10px;font-weight:600;color:var(--muted)}
+.wc.on .sw{border-color:var(--mint);box-shadow:0 0 0 3px rgba(34,183,132,.28)}
+.wc.on .ck{opacity:1;transform:scale(1)}
+.m-dose .choque{display:block;padding:9px 11px;border-radius:11px;background:rgba(226,135,67,.2);border:1.5px solid rgba(226,135,67,.6);color:#8a4a0f;font-weight:800;animation:warnBlink 1s ease-in-out infinite}
+[data-theme="dark"] .m-dose .choque{color:#ffc98a}
 
 /* ============ tratamento ============ */
 .tstep{border:1.5px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:10px;background:var(--bg)}
@@ -768,6 +779,15 @@ const TAG_BIC   = ptag('Vendido como: <b>Elevador de alcalinidade</b>');
 const TAG_CLORO = ptag('Vendido como: <b>Cloro granulado / Cloro choque</b> · químico: hipoclorito de cálcio ou dicloro');
 const TAG_SULF  = ptag('Vendido como: <b>Decantante / Floculante</b> · químico: sulfato de alumínio');
 const TAG_CLAR  = ptag('Nome de loja: <b>Clarificante</b> · químico: sulfato de alumínio diluído ou polímero');
+/* comparativo de cor da água — toque na cor igual à da sua piscina */
+const WCORES = [
+  {v:0,  nome:'Cristalina',  cor:'#00d4ff'},
+  {v:10, nome:'Leve',        cor:'#7dd3e0'},
+  {v:25, nome:'Turva',       cor:'#c8e0e8'},
+  {v:45, nome:'Muito turva', cor:'#e8e8e8'},
+  {v:70, nome:'Verde algas', cor:'#7da87d'},
+  {v:90, nome:'Fechada',     cor:'#4a6a3a'}
+];
 const TAG_MET   = ptag('Vendido como: <b>Sequestrante de metais / Antiferrugem</b> · químico: EDTA ou HEDP');
 const buzz = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
 const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -1437,9 +1457,9 @@ function doseFor(p,v){
     return {tone:'t-ok', h:'Cloro na faixa de 1–3 ppm — água protegida contra algas e bactérias.'};
   }
   if(p.id==='turbidez'){
-    if(v>60) return {tone:'t-warn', h:'<b>Água muito turva:</b> aplique Sulfato de alumínio na Etapa 3, filtre 8 h e aspire o fundo.'+TAG_SULF};
-    if(v>20) return {tone:'t-act', h:`<b>Clarificante:</b> ${fmtMl(8*m3)}${TAG_CLAR}<small>Junta a sujeira fina pra o filtro reter. Ou vá direto para a Etapa 3: o sulfato de alumínio decanta e resolve melhor.</small>`};
-    return {tone:'t-ok', h:'Água cristalina — transparência dentro do ideal.'};
+    if(v>30) return {tone:'t-warn', h:`<b>Sulfato de alumínio:</b> ${fmtG(Math.round(20*m3))} (20 g por m³)${TAG_SULF}<small>Recircular 1 h, repouso 12 h e aspire em DRENAR — não ligue o filtro nesse período. Depois filtre 8 h e retro-lave.</small>`};
+    if(v>0)  return {tone:'t-act', h:`<span class="choque">⚠️ Adicione agora — Algicida de CHOQUE: ${fmtMl(6*m3)} (6 mL por m³)</span><b style="display:block;margin-top:9px">Clarificante:</b> ${fmtMl(8*m3)}${TAG_CLAR}<small>Aplique o choque + o clarificante e filtre 12 h. <b>NÃO use sulfato ainda!</b> Só se passar de 30%.</small>`};
+    return {tone:'t-ok', h:'Água cristalina — transparência dentro do ideal. Só manter a rotina.'};
   }
   if(p.id==='alcalinidade'){
     if(v<80) return {tone:'t-act', h:`<b>Bicarbonato de sódio:</b> ${fmtG(Math.ceil(1.8*(100-v)*m3))} para chegar a 100 ppm${TAG_BIC}<small>AT baixa deixa o pH dançando — estabilize antes do cloro.</small>`};
@@ -1474,6 +1494,8 @@ function openMeasure(id){
       <input type="range" id="mRange" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}">
       <input type="text" id="mNum" inputmode="decimal" value=${String(v).replace('.',',')}>
     </div>
+    ${(p.id==='turbidez')?`<span class="m-lab" style="margin-top:14px">Olhe sua piscina e toque na cor igual</span>
+    <div class="wcomp" id="wComp">${WCORES.map(c=>`<button type="button" class="wc" data-v="${c.v}" aria-label="${c.nome} ${c.v}%"><span class="sw" style="background:${c.cor}"><span class="ck">✓</span></span><b>${c.nome}</b><small>${c.v}%</small></button>`).join('')}</div>`:''}
     ${(p.id==='dureza'||p.id==='cianurico')?`<label class="m-na"><input type="checkbox" id="mNA"> Não sei / Não medido</label><div class="m-na-alert" id="mNAAlert" hidden>🔴 Omissão de parâmetro - cálculo pode não ser preciso</div>`:''}
     <div class="m-dose t-ok" id="mDose"></div>
     <button class="btn m-save" id="mSave">✓ Salvar medição</button>`);
@@ -1495,9 +1517,18 @@ function openMeasure(id){
     knob.style.left = kn+'%'; knob.style.color = st.c;
     const d = doseFor(p,v);
     const box=$('#mDose'); box.className='m-dose '+d.tone; box.innerHTML=d.h;
+    if(wComp) Array.prototype.forEach.call(wComp.children, x=>x.classList.toggle('on', parseFloat(x.dataset.v)===v));
   }
   range.addEventListener('input', ()=> upd(parseFloat(range.value),'r'));
   numEl.addEventListener('input', ()=> upd(parseFloat(String(numEl.value).replace(',','.')),'n'));
+  const wComp = $('#wComp');
+  if(wComp){
+    wComp.addEventListener('click', e=>{
+      const b = e.target.closest('.wc'); if(!b) return;
+      buzz(8);
+      upd(parseFloat(b.dataset.v),'c');
+    });
+  }
   $('#mSave').addEventListener('click', ()=>{
     params[p.id] = v; if(naBox) params[p.id+'NA'] = naBox.checked;
     store.set('poolapp.params', params);
