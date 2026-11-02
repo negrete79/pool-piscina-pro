@@ -65,7 +65,9 @@ module.exports = async (req, res) => {
         nome: (p.metadata && p.metadata.nome)
               || [p.payer && p.payer.first_name, p.payer && p.payer.last_name].filter(Boolean).join(' ')
               || '',
-        email: (p.payer && p.payer.email) || '',
+        /* e-mail que o cliente digitou na licença do app (metadata) tem prioridade;
+           payer.email do MP vem como fallback (o MP às vezes devolve vazio) */
+        email: (p.metadata && p.metadata.email) || (p.payer && p.payer.email) || '',
         valor: p.transaction_amount,
         status: p.status,
         device_id: (p.metadata && p.metadata.device_id) || ''
