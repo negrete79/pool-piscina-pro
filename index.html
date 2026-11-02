@@ -1391,7 +1391,7 @@ function doseFor(p,v){
   const m3 = getVolume()/1000;
   if(p.id==='ph'){
     if(v<7)  return {tone:'t-act', h:`<b>Barrilha leve (elevar pH):</b> ${fmtG(10*Math.ceil((7-v)*10)*m3)} até pH 7,2<small>10 g por 0,1 de pH a cada 10.000 L — dissolva em balde e despeje com o filtro em FILTRAR.</small>`};
-    if(v>7.4)return {tone:'t-act', h:`<b>Ácido muriático (baixar pH):</b> ${fmtMl(12*Math.ceil((v-7.4)*10)*m3)} até pH 7,4<small>Dose fracionada: aplique metade, re-teste em 2 h antes de completar.</small>`};
+    if(v>7.4)return {tone:'t-act', h:`<b>Ácido muriático (baixar pH):</b> ${fmtMl(12*Math.ceil((v-7.4)*10)*m3)} até pH 7,4<small>Dose fracionada: aplique metade do diminuidor de PH, re-teste em 2 h antes de completar.</small>`};
     return {tone:'t-ok', h:'pH estável nessa faixa — o cloro rende até 3x mais. Só manter a rotina.'};
   }
   if(p.id==='cloro'){
