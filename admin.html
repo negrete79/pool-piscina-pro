@@ -75,7 +75,70 @@ table.tbl tbody tr:hover{background:#f9fafb}
 }
 @media (max-width:640px){.acts{display:flex;flex-wrap:wrap;gap:5px}}
 @media (max-width:460px){.hidel{display:none}#btnWa,#btnCfg,#btnSair{padding-left:11px;padding-right:11px}}
+/* ================= MODO ESCURO (pa_theme no localStorage) ================= */
+html.dark body{background:#0e1618;color:#d7e0e0}
+html.dark .bg-white{background-color:#132023!important}
+html.dark .bg-\[\#f3f5f5\]{background-color:#0e1618!important}
+html.dark .bg-\[\#f9fafb\]{background-color:#0f1a1d!important}
+html.dark .bg-gray-50{background-color:#0f1a1d!important}
+html.dark .hover\:bg-gray-50:hover{background-color:#1a2b2f!important}
+html.dark .hover\:bg-\[\#eef6f6\]:hover{background-color:#16302f!important}
+html.dark .hover\:bg-red-50:hover{background-color:#2a1414!important}
+html.dark .focus\:bg-white:focus{background-color:#132023!important}
+html.dark .text-gray-900{color:#e8f0ef!important}
+html.dark .text-gray-800{color:#d7e0e0!important}
+html.dark .text-gray-700{color:#c2cfce!important}
+html.dark .text-gray-600{color:#9db3b2!important}
+html.dark .text-gray-500{color:#82999b!important}
+html.dark .text-gray-400{color:#648082!important}
+html.dark .text-gray-300{color:#52696b!important}
+html.dark .text-red-600{color:#ff8f8f!important}
+html.dark .text-green-700{color:#5fd4a8!important}
+html.dark .text-yellow-700{color:#f0b95e!important}
+html.dark .text-\[\#0F5C5C\]{color:#7fd0c8!important}
+html.dark .border-gray-200{border-color:#233639!important}
+html.dark .border-gray-300{border-color:#2b4144!important}
+html.dark .border-gray-100{border-color:#1c2f32!important}
+html.dark .border-red-200{border-color:#4a2226!important}
+html.dark .border-\[\#0F5C5C\]{border-color:#2e6b64!important}
+html.dark .bg-red-50{background-color:#241315!important}
+html.dark .bg-red-50\/40{background-color:#1a1214!important}
+html.dark .bg-red-100{background-color:#3a1d20!important}
+html.dark header{background:rgba(14,22,24,.85)!important}
+html.dark .field input,html.dark .mcard input[type=text],html.dark .mcard input[type=email],html.dark .mcard input[type=password],html.dark #busca{background:#0f1a1d;border-color:#2b4144;color:#e8f0ef}
+html.dark .field input:focus,html.dark .mcard input:focus,html.dark #busca:focus{background:#132023;border-color:#2e6b64;box-shadow:0 0 0 3px rgba(127,208,200,.12)}
+html.dark .icon-left{color:#82999b}
+html.dark .eyeBtn{color:#82999b}
+html.dark .eyeBtn:hover{background:#1a2b2f;color:#e8f0ef}
+html.dark .spin.dark{border-color:#2b4144;border-top-color:#7fd0c8}
+html.dark .b-ok{background:#123527;color:#5fd4a8}
+html.dark .b-pend{background:#33270e;color:#f0b95e}
+html.dark .b-can{background:#351416;color:#ff8f8f}
+html.dark .b-test{background:#14263a;color:#7db4f0}
+html.dark .act{background:#132023;border-color:#2b4144;color:#c2cfce}
+html.dark .act:hover{background:#1a2b2f;border-color:#3a5558}
+html.dark .act.pri{background:#0F5C5C;border-color:#0F5C5C;color:#fff}
+html.dark .act.del{border-color:#5a2a2e;color:#ff8f8f}
+html.dark .act.del:hover{background:#241315}
+html.dark .modal{background:rgba(0,0,0,.62)}
+html.dark .mcard{background:#132023;border-color:#233639;color:#e8f0ef}
+html.dark .mcard label{color:#82999b}
+html.dark .logline{border-bottom-color:#1c2f32;color:#9db3b2}
+html.dark .stcard{background:#132023;border-color:#233639;box-shadow:none}
+html.dark .stcard b{color:#e8f0ef}
+html.dark table.tbl th{background:#0f1a1d;color:#82999b}
+html.dark table.tbl td{border-top-color:#1c2f32}
+html.dark table.tbl tbody tr{border-top-color:#1c2f32}
+html.dark table.tbl tbody tr:hover{background:#162729}
 </style>
+<script>
+/* aplica o tema salvo ANTES de pintar a página (evita flash claro) */
+(function(){ try{
+  var t = localStorage.getItem('pa_theme');
+  if(!t) t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  if(t === 'dark') document.documentElement.classList.add('dark');
+}catch(e){} })();
+</script>
 </head>
 <body class="bg-[#f3f5f5] text-gray-900">
 
@@ -123,7 +186,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
 <a href="/admin/forgot.html" class="text-[12px] font-semibold text-[#0F5C5C] hover:underline">Esqueceu a senha?</a>
 </div>
 </div>
-<p class="text-center text-[11px] text-gray-400 mt-4">PoolApp Universal · Área restrita</p>
+<p class="text-center text-[11px] text-gray-400 mt-4">PoolApp Universal · Área restrita · Criado por <span class="font-bold text-[#0F5C5C]">Elias Costa NEGRET'S</span></p>
 </div>
 </div>
 
@@ -137,6 +200,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
 <button id="btnEditNome" class="text-[11px] align-middle opacity-60 hover:opacity-100" title="Editar nome">✏️</button></p>
 <p class="text-[11px] font-medium text-gray-500 truncate" id="admEmail">admin@poolapp.com</p>
 </div>
+<button id="btnTema" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50" title="Alternar modo claro/escuro">🌙<span class="hidel"> Tema</span></button>
 <button id="btnWa" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">📱<span class="hidel"> WhatsApp</span></button>
 <button id="btnCfg" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">⚙️<span class="hidel"> Configurações</span></button>
 <button id="btnSair" class="h-10 px-3.5 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">Sair</button>
@@ -163,6 +227,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
 </div>
 <button id="btnAtualizar" class="h-11 px-4 rounded-xl bg-white border border-[#0F5C5C] text-[#0F5C5C] text-[12.5px] font-semibold hover:bg-[#eef6f6] flex items-center gap-2"><span id="updSpin" class="spin dark hidden"></span><span id="updTxt">↻ Atualizar</span></button>
 <button id="btnCsv" class="h-11 px-4 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-gray-600 hover:bg-gray-50">⬇ Exportar CSV</button>
+<button id="btnLixClear" hidden class="h-11 px-4 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">🗑️ Esvaziar lixeira</button>
 </div>
 
 <!-- barra de seleção -->
@@ -209,6 +274,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
 </div>
 
 <p class="text-center text-[11px] font-medium text-gray-400 mt-5">PoolApp Universal · Pagamentos Pix processados pelo Mercado Pago · sessão expira em 2 h</p>
+<p class="text-center text-[12px] font-semibold text-gray-500 mt-1.5">🛠️ Criado por <span class="font-bold text-[#0F5C5C]">Elias Costa NEGRET'S</span></p>
 </main>
 </div>
 
@@ -270,6 +336,14 @@ function getDelInfo(){ /* id -> {data, quando} para exibir na Lixeira */
 }
 function saveDelInfo(info){ try{ localStorage.setItem(DEL_KEY + '_info', JSON.stringify(info)); }catch(e){} }
 let DEL = getDel(), DELINFO = getDelInfo();
+/* excluídos DEFINITIVAMENTE: saem da Lixeira e nunca mais aparecem no painel */
+const FOREVER_KEY = 'pa_del_forever';
+function getForever(){
+  try{ const a = JSON.parse(localStorage.getItem(FOREVER_KEY) || '[]'); return new Set(a.map(String)); }
+  catch(e){ return new Set(); }
+}
+function saveForever(){ try{ localStorage.setItem(FOREVER_KEY, JSON.stringify([...FOREVER])); }catch(e){} }
+let FOREVER = getForever();
 function getOvr(){
   try{ return JSON.parse(localStorage.getItem(OVR_KEY) || '{}'); }catch(e){ return {}; }
 }
@@ -381,7 +455,7 @@ function aplicarLocal(){
       const o = ovr[String(p.id)];
       return o ? { ...p, nome: o.nome || p.nome, email: o.email || p.email } : p;
     })
-    .filter(p=>!DEL.has(String(p.id)));
+    .filter(p=>!DEL.has(String(p.id)) && !FOREVER.has(String(p.id)));
 }
 async function carregar(){
   if(!sessaoValida()){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
@@ -416,7 +490,7 @@ function buscarEm(q, p){
 }
 function filtrar(){
   const q = ($('#busca').value || '').trim().toLowerCase();
-  if(FILTRO === 'lixeira') return RAW.filter(p=>DEL.has(String(p.id)) && buscarEm(q, p));
+  if(FILTRO === 'lixeira') return RAW.filter(p=>DEL.has(String(p.id)) && !FOREVER.has(String(p.id)) && buscarEm(q, p));
   return LISTA.filter(p=>{
     if(FILTRO === 'pendentes' && !(p.status === 'pending' || p.status === 'in_process')) return false;
     if(FILTRO === 'desistentes' && !(p.status === 'cancelled' || p.status === 'rejected')) return false;
@@ -456,6 +530,7 @@ function render(){
   const nSel = Object.keys(SELECAO).filter(k=>SELECAO[k]).length;
   $('#selBar').hidden = FILTRO === 'lixeira' || nSel === 0;
   $('#selTxt').textContent = nSel + ' selecionado' + (nSel === 1 ? '' : 's');
+  $('#btnLixClear').hidden = !(FILTRO === 'lixeira' && DEL.size > 0);
   const lista = filtrar();
   const totalPag = Math.max(1, Math.ceil(lista.length / PER_PAGE));
   if(PAGINA > totalPag) PAGINA = totalPag;
@@ -473,6 +548,7 @@ function render(){
         <td class="p-3" data-l="Status">${statusBadge(p)}</td>
         <td class="p-3 acts whitespace-nowrap" data-l="Ações">
           <button class="act" data-act="restaurar">↩ Restaurar</button>
+          <button class="act del" data-act="excluir-def" title="Sai da Lixeira e some do painel para sempre">🗑️ Excluir definitivo</button>
           ${info.quando ? `<span class="block text-[10.5px] text-gray-400 mt-1">oculto em ${esc(info.quando)}</span>` : ''}
         </td></tr>`;
     }).join('') : '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">A Lixeira está vazia.</td></tr>';
@@ -553,6 +629,7 @@ $('#tbody').addEventListener('click', async e=>{
   if(act === 'editar') editarModal(p);
   if(act === 'excluir') excluirModal(p);
   if(act === 'restaurar') restaurar(id);
+  if(act === 'excluir-def') excluirDefModal(id);
 });
 $('#btnDelSel').addEventListener('click', async ()=>{
   if(FILTRO === 'lixeira') return;
@@ -714,6 +791,74 @@ function restaurar(id){
   addLog('Restaurado da Lixeira — ' + id);
   toast('Pagamento restaurado', 'ok');
 }
+
+/* ================= excluir DEFINITIVAMENTE (sai da Lixeira e some do painel) ================= */
+function excluirDefModal(id){
+  const p = linhaPorId(id) || DELINFO[id] || {};
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🗑️ Excluir definitivamente?</h3>
+    <p class="text-[13px] text-gray-500 mb-1">Pagamento <b>${esc(id)}</b>${p && p.email ? ' — ' + esc(p.email) : ''}.</p>
+    <p class="text-[13px] text-gray-500 mb-1">Ele sai da Lixeira e <b>desaparece do painel para sempre</b> — não dá para restaurar.</p>
+    <p class="text-[12px] text-gray-400 mb-4">O registro continua no Mercado Pago (ninguém apaga de lá), mas nunca mais aparece aqui.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="defYes">🗑️ Excluir definitivo</button>
+      <button class="act flex-1 h-11" id="defNo">Cancelar</button>
+    </div>`);
+  $('#defNo').addEventListener('click', closeModal);
+  $('#defYes').addEventListener('click', async ()=>{
+    closeModal();
+    await excluirDefinitivo(id);
+    addLog('Excluído DEFINITIVAMENTE — ' + id);
+    toast('Excluído para sempre', 'ok');
+  });
+}
+async function excluirDefinitivo(id){
+  FOREVER.add(String(id));
+  DEL.delete(String(id));
+  delete DELINFO[String(id)];
+  saveForever(); saveDel(); saveDelInfo(DELINFO);
+  delete SELECAO[String(id)];
+  aplicarLocal();
+  render();
+  /* best-effort no servidor: cancela pendente no MP + grava override (reuso da API que já existe) */
+  try{ await api('/api/deletar-pagamento', { method:'POST', headers: authHeaders(true), body: JSON.stringify({id}) }); }catch(e){}
+  return true;
+}
+$('#btnLixClear').addEventListener('click', ()=>{
+  const ids = [...DEL];
+  if(!ids.length) return;
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🗑️ Esvaziar a Lixeira?</h3>
+    <p class="text-[13px] text-gray-500 mb-1"><b>${ids.length}</b> pagamento(s) vão sair da Lixeira e <b>desaparecer do painel para sempre</b>.</p>
+    <p class="text-[12px] text-gray-400 mb-4">Os registros continuam no Mercado Pago, mas nunca mais aparecem aqui.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="lixYes">🗑️ Esvaziar tudo</button>
+      <button class="act flex-1 h-11" id="lixNo">Cancelar</button>
+    </div>`);
+  $('#lixNo').addEventListener('click', closeModal);
+  $('#lixYes').addEventListener('click', async ()=>{
+    closeModal();
+    for(const id of ids) await excluirDefinitivo(id);
+    addLog('Lixeira esvaziada — ' + ids.length + ' pagamento(s) excluído(s) definitivamente.');
+    toast('Lixeira esvaziada', 'ok');
+  });
+});
+
+/* ================= modo escuro ================= */
+function temaAplicar(){
+  const dark = document.documentElement.classList.contains('dark');
+  const b = $('#btnTema');
+  if(b) b.innerHTML = (dark ? '☀️' : '🌙') + '<span class="hidel"> Tema</span>';
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', dark ? '#0e1618' : '#0F5C5C');
+}
+$('#btnTema').addEventListener('click', ()=>{
+  const dark = document.documentElement.classList.toggle('dark');
+  try{ localStorage.setItem('pa_theme', dark ? 'dark' : 'light'); }catch(e){}
+  temaAplicar();
+  toast(dark ? 'Modo escuro ativado 🌙' : 'Modo claro ativado ☀️', 'info');
+});
+temaAplicar();
 
 /* ================= configurações do admin ================= */
 $('#btnCfg').addEventListener('click', ()=>{

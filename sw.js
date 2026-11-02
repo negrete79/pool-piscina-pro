@@ -1,4 +1,4 @@
-const CACHE='poolapp-v21';
+const CACHE='poolapp-v22';
 const ASSETS=['/','/index.html','/manifest.json','/icon-192.png','/icon-512.png','/icon-180.png','/admin.html','/admin/forgot.html','/admin/reset.html'];
 self.addEventListener('install',e=>{
   self.skipWaiting();
