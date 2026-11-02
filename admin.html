@@ -33,6 +33,9 @@ body{font-family:'Inter',sans-serif}
 .badge{display:inline-block;padding:4px 11px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
 .b-ok{background:#dcfce7;color:#15803d}.b-pend{background:#fef9c3;color:#a16207}
 .b-can{background:#fee2e2;color:#b91c1c}.b-test{background:#dbeafe;color:#1d4ed8}
+.b-src{background:#e0f2fe;color:#0369a1}.b-cod{background:#ede9fe;color:#6d28d9}
+.dot-on{width:10px;height:10px;border-radius:99px;background:#22c55e;display:inline-block;box-shadow:0 0 0 3px rgba(34,197,94,.16);animation:pp 2.2s ease-in-out infinite}
+@keyframes pp{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,.16)}50%{box-shadow:0 0 0 7px rgba(34,197,94,.06)}}
 .act{padding:7px 10px;border-radius:10px;font-size:11.5px;font-weight:600;border:1px solid #d1d5db;color:#374151;background:#fff;transition:all .15s;white-space:nowrap;cursor:pointer}
 .act:hover{background:#f9fafb;border-color:#9ca3af}
 .act:disabled{opacity:.4;cursor:default}
@@ -63,7 +66,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
   table.tbl, table.tbl tbody{display:block}
   table.tbl tbody tr{display:block;border-top:1px solid #e5e7eb;padding:12px 40px 12px 14px;position:relative}
   table.tbl tbody tr:hover{background:#fff}
-  table.tbl td{display:flex;align-items:center;gap:10px;border:0;padding:3px 0;font-size:13px}
+  table.tbl td{display:flex;align-items:center;gap:10px;border:0;padding:3px 0;font-size:13px;flex-wrap:wrap}
   table.tbl td[data-l]::before{content:attr(data-l);flex:none;width:72px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b7280}
   table.tbl td[data-nolabel]::before{display:none}
   table.tbl td.ckcell{position:absolute;top:12px;right:12px}
@@ -74,7 +77,9 @@ table.tbl tbody tr:hover{background:#f9fafb}
   #filtros .fil{flex:none}
 }
 @media (max-width:640px){.acts{display:flex;flex-wrap:wrap;gap:5px}}
-@media (max-width:460px){.hidel{display:none}#btnWa,#btnCfg,#btnSair{padding-left:11px;padding-right:11px}}
+/* header no celular: nome do admin precisa caber — aperta botões e ícone */
+@media (max-width:640px){.hdicon{width:36px!important;height:36px!important;font-size:17px!important}}
+@media (max-width:460px){.hidel{display:none}#btnTema,#btnWa,#btnCfg,#btnSair{padding-left:9px;padding-right:9px}}
 /* ================= MODO ESCURO (pa_theme no localStorage) ================= */
 html.dark body{background:#0e1618;color:#d7e0e0}
 html.dark .bg-white{background-color:#132023!important}
@@ -115,6 +120,8 @@ html.dark .b-ok{background:#123527;color:#5fd4a8}
 html.dark .b-pend{background:#33270e;color:#f0b95e}
 html.dark .b-can{background:#351416;color:#ff8f8f}
 html.dark .b-test{background:#14263a;color:#7db4f0}
+html.dark .b-src{background:#14263a;color:#7db4f0}
+html.dark .b-cod{background:#26203f;color:#b9a5f5}
 html.dark .act{background:#132023;border-color:#2b4144;color:#c2cfce}
 html.dark .act:hover{background:#1a2b2f;border-color:#3a5558}
 html.dark .act.pri{background:#0F5C5C;border-color:#0F5C5C;color:#fff}
@@ -193,10 +200,10 @@ html.dark table.tbl tbody tr:hover{background:#162729}
 <!-- ================= PAINEL ================= -->
 <div id="viewPainel" hidden>
 <header class="sticky top-0 z-40 border-b border-gray-200" style="background:rgba(243,245,245,.85);backdrop-filter:blur(12px)">
-<div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-<span class="w-10 h-10 rounded-xl grid place-items-center text-[19px] flex-none" style="background:linear-gradient(145deg,#0F5C5C,#0A3D3D)">🔧</span>
+<div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 md:gap-3">
+<span class="w-10 h-10 rounded-xl grid place-items-center text-[19px] flex-none hdicon" style="background:linear-gradient(145deg,#0F5C5C,#0A3D3D)">🔧</span>
 <div class="min-w-0 flex-1">
-<p class="text-[14.5px] font-bold leading-tight truncate">Olá, <span id="admNome">Admin</span>
+<p class="text-[14.5px] font-bold leading-tight truncate">Olá, <span id="admNome" class="md:hidden">Admin</span><span id="admNomeFull" class="hidden md:inline">Admin</span>
 <button id="btnEditNome" class="text-[11px] align-middle opacity-60 hover:opacity-100" title="Editar nome">✏️</button></p>
 <p class="text-[11px] font-medium text-gray-500 truncate" id="admEmail">admin@poolapp.com</p>
 </div>
@@ -209,7 +216,8 @@ html.dark table.tbl tbody tr:hover{background:#162729}
 
 <main class="max-w-6xl mx-auto px-4 py-5 pb-14">
 <!-- métricas -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+<div class="stcard col-span-2 lg:col-span-1"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Ativos agora</span><b id="kAtivos" class="text-green-700">—</b></div>
 <div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Faturado · 30 dias</span><b id="kFat" class="text-[#0F5C5C]">—</b></div>
 <div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Ativações pagas</span><b id="kAtiv" class="text-green-700">—</b></div>
 <div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Pendentes</span><b id="kPend" class="text-yellow-700">—</b></div>
@@ -221,7 +229,8 @@ html.dark table.tbl tbody tr:hover{background:#162729}
 <input type="search" id="busca" placeholder="🔎 Buscar por e-mail, nome ou ID…" class="flex-1 min-w-[200px] h-11 rounded-xl border border-gray-300 bg-[#f9fafb] px-3.5 text-[14px] font-medium outline-none focus:bg-white focus:border-[#0F5C5C]">
 <div class="flex rounded-xl border border-gray-200 overflow-hidden text-[12px] font-semibold bg-white" id="filtros">
 <button data-f="todos" class="fil px-3.5 h-11 bg-[#0F5C5C] text-white">Todos</button>
-<button data-f="pendentes" class="fil px-3.5 h-11 border-x border-gray-200 text-gray-600">Pendentes</button>
+<button data-f="ativos" class="fil px-3.5 h-11 border-x border-gray-200 text-gray-600">🟢 Ativos <span id="atvCnt" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold align-middle">0</span></button>
+<button data-f="pendentes" class="fil px-3.5 h-11 border-r border-gray-200 text-gray-600">Pendentes</button>
 <button data-f="desistentes" class="fil px-3.5 h-11 text-gray-600">Desistentes</button>
 <button data-f="lixeira" class="fil px-3.5 h-11 text-gray-600">Lixeira <span id="lixCnt" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold align-middle">0</span></button>
 </div>
@@ -229,6 +238,9 @@ html.dark table.tbl tbody tr:hover{background:#162729}
 <button id="btnCsv" class="h-11 px-4 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-gray-600 hover:bg-gray-50">⬇ Exportar CSV</button>
 <button id="btnLixClear" hidden class="h-11 px-4 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">🗑️ Esvaziar lixeira</button>
 </div>
+
+<!-- nota da aba Ativos -->
+<p id="atvNota" hidden class="text-[11.5px] text-gray-500 mb-3 px-1 leading-snug">🟢 Mostra quem está com a <b>licença válida agora</b>: ativação por <b>Pix</b> (pagamento aprovado — 30 dias fixos) ou por <b>código</b> gerado no painel com a duração escolhida (30 dias, 60 dias, 6 meses, 1 ano ou vitalício). Quem expira primeiro aparece em cima.</p>
 
 <!-- barra de seleção -->
 <div id="selBar" hidden class="bg-red-50 border border-red-200 rounded-[20px] px-4 py-2.5 mb-4 flex flex-wrap items-center gap-3 text-[13px] font-semibold text-red-600">
@@ -349,6 +361,34 @@ function getOvr(){
 }
 function saveOvr(o){ try{ localStorage.setItem(OVR_KEY, JSON.stringify(o)); }catch(e){} }
 
+/* ================= ativações por CÓDIGO (registro do painel) =================
+   O servidor não guarda quem ativou — ele só valida. O painel mantém o próprio
+   registro (pa_codigos: código → { email, nome, quando, dias }):
+   - Pagamento Pix aprovado  → ativo por 30 dias a partir da data do pagamento;
+   - Código gerado no painel → ativo pela duração escolhida (30 dias, 60 dias,
+     6 meses, 1 ano ou vitalício — o código carrega o plano embutido e o
+     /api/check-status devolve o expira certo quando o cliente digita no app).
+   Códigos gerados antes deste recurso são recuperados do log do admin (30 dias). */
+const COD_KEY = 'pa_codigos';
+function getCodigos(){ try{ return JSON.parse(localStorage.getItem(COD_KEY) || '{}'); }catch(e){ return {}; } }
+function saveCodigos(){ try{ localStorage.setItem(COD_KEY, JSON.stringify(CODS)); }catch(e){} }
+let CODS = getCodigos();
+function seedCodigosDoLog(){
+  let add = 0;
+  getLog().forEach(l=>{
+    const c = l.match(/[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}/);
+    const e = l.match(/para\s+([^\s,]+)/);
+    if(!c || !e) return;
+    const code = c[0].toUpperCase(), email = e[1].toLowerCase();
+    if(CODS[code] || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    const d = l.match(/^\[(\d{2})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2})\]/);
+    const quando = d ? new Date(2000 + Number(d[3]), Number(d[2]) - 1, Number(d[1]), Number(d[4]), Number(d[5])).getTime() : Date.now();
+    CODS[code] = { email, nome: '', code, quando, dias: 30 };
+    add++;
+  });
+  if(add) saveCodigos();
+}
+
 /* ================= sessão JWT (2 h) ================= */
 function tokenGet(){
   try{ return localStorage.getItem('pa_token') || sessionStorage.getItem('pa_token') || ''; }catch(e){ return ''; }
@@ -428,11 +468,20 @@ $('#loginForm').addEventListener('submit', async e=>{
 /* ================= painel ================= */
 const PER_PAGE = 20;
 let LISTA = [], RAW = [], PAGINA = 1, FILTRO = 'todos', CODIGOS = {}, SELECAO = {};
+/* nome do admin: completo no desktop, primeiro nome no celular (cabe no header) */
+let ADM_NOME = 'Admin';
+function primeiroNome(n){ const t = String(n || '').trim(); return t ? t.split(/\s+/)[0] : 'Admin'; }
+function setNome(n){
+  ADM_NOME = String(n || '').trim() || 'Admin';
+  const a = $('#admNome'), b = $('#admNomeFull');
+  if(a) a.textContent = primeiroNome(ADM_NOME);
+  if(b) b.textContent = ADM_NOME;
+}
 function abrirPainel(nome, email){
   const p = sessaoValida();
   if(!p){ mostrarLogin('Sessão expirada — entre novamente.'); return; }
   const saved = (()=>{ try{ return localStorage.getItem('pa_admin_nome'); }catch(e){ return null; } })();
-  $('#admNome').textContent = nome || saved || p.n || 'Admin';
+  setNome(nome || saved || p.n || 'Admin');
   $('#admEmail').textContent = email || p.e || '';
   $('#viewLogin').hidden = true;
   $('#viewPainel').hidden = false;
@@ -490,12 +539,54 @@ function buscarEm(q, p){
 }
 function filtrar(){
   const q = ($('#busca').value || '').trim().toLowerCase();
+  if(FILTRO === 'ativos') return ativosLista().filter(p=>buscarEm(q, p));
   if(FILTRO === 'lixeira') return RAW.filter(p=>DEL.has(String(p.id)) && !FOREVER.has(String(p.id)) && buscarEm(q, p));
   return LISTA.filter(p=>{
     if(FILTRO === 'pendentes' && !(p.status === 'pending' || p.status === 'in_process')) return false;
     if(FILTRO === 'desistentes' && !(p.status === 'cancelled' || p.status === 'rejected')) return false;
     return buscarEm(q, p);
   });
+}
+/* ================= usuários com licença ATIVA (Pix + código) ================= */
+function ativosLista(){
+  const agora = Date.now(), VITAL = 3650 * 864e5;   /* vitalício ≈ 10 anos (o painel mostra “não expira”) */
+  const mapa = {};
+  const nomeDe = em => { const f = LISTA.find(x => String(x.email || '').toLowerCase() === em); return (f && f.nome) || ''; };
+  const add = (email, nome, origem, ativado, extra)=>{
+    email = String(email || '').trim().toLowerCase();
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    if(!ativado) return;
+    const dias = (extra.dias === 0 || extra.dias === '0') ? 0 : (Number(extra.dias) || 30);
+    const expira = dias === 0 ? ativado + VITAL : ativado + dias * 864e5;
+    if(dias !== 0 && expira <= agora) return;                 /* expirado não entra */
+    const cur = mapa[email];
+    if(cur && expira <= cur.expira) return;                   /* fica a validade mais distante */
+    mapa[email] = {
+      id: extra.id, idcod: extra.idcod || '', data: new Date(ativado).toISOString(),
+      nome: nome || (cur && cur.nome) || (origem === 'Código' ? nomeDe(email) : '') || '',
+      email, valor: extra.valor, origem, ativado, expira, dias,
+      status: origem === 'Pix' ? 'ativo via pix' : 'ativo via codigo'
+    };
+  };
+  LISTA.forEach(p=>{
+    if(p.status === 'approved' && Number(p.valor) >= 1)
+      add(p.email, p.nome, 'Pix', new Date(p.data).getTime() || 0, { id: String(p.id), valor: p.valor, dias: 30 });   /* Pix: 30 dias fixos */
+  });
+  Object.keys(CODS).forEach(k=>{
+    const c = CODS[k];
+    const dias = (c.dias === 0 || c.dias === '0') ? 0 : (Number(c.dias) || 30);
+    add(c.email, c.nome || nomeDe(String(c.email || '').toLowerCase()), 'Código', Number(c.quando) || 0, { id: 'cod:' + k, idcod: k, valor: null, dias });
+  });
+  return Object.values(mapa).sort((a,b)=>a.expira - b.expira);   /* quem expira primeiro em cima */
+}
+/* dica de licença nas linhas normais (pagamento aprovado = licença de 30 dias) */
+function licInfo(p){
+  if(p.status !== 'approved' || Number(p.valor) < 1) return '';
+  const ts = new Date(p.data).getTime();
+  if(!ts) return '';
+  const expira = ts + 30 * 864e5, ativo = expira > Date.now();
+  return '<span class="block text-[10.5px] font-bold mt-1 ' + (ativo ? 'text-green-700' : 'text-red-600') + '">'
+    + (ativo ? '🟢 licença ativa até ' : '🔴 licença expirou em ') + fmtData(new Date(expira).toISOString()) + '</span>';
 }
 function kpis(){
   const agora = Date.now(), d30 = 30*864e5;
@@ -512,6 +603,11 @@ function kpis(){
   $('#kAtiv').textContent = String(ativ);
   $('#kPend').textContent = String(pend);
   $('#kExp').textContent = String(exp);
+  const atv = ativosLista();
+  $('#kAtivos').textContent = String(atv.length);
+  const ac = $('#atvCnt');
+  ac.textContent = String(atv.length);
+  ac.classList.toggle('hidden', atv.length === 0);
   const n = DEL.size, el = $('#lixCnt');
   el.textContent = String(n);
   el.classList.toggle('hidden', n === 0);
@@ -528,15 +624,40 @@ function render(){
   kpis();
   pintarFiltros();
   const nSel = Object.keys(SELECAO).filter(k=>SELECAO[k]).length;
-  $('#selBar').hidden = FILTRO === 'lixeira' || nSel === 0;
+  $('#selBar').hidden = FILTRO === 'lixeira' || FILTRO === 'ativos' || nSel === 0;
   $('#selTxt').textContent = nSel + ' selecionado' + (nSel === 1 ? '' : 's');
   $('#btnLixClear').hidden = !(FILTRO === 'lixeira' && DEL.size > 0);
+  $('#atvNota').hidden = FILTRO !== 'ativos';
   const lista = filtrar();
   const totalPag = Math.max(1, Math.ceil(lista.length / PER_PAGE));
   if(PAGINA > totalPag) PAGINA = totalPag;
   const page = lista.slice((PAGINA-1)*PER_PAGE, PAGINA*PER_PAGE);
   const tb = $('#tbody');
-  if(FILTRO === 'lixeira'){
+  if(FILTRO === 'ativos'){
+    tb.innerHTML = page.length ? page.map(u=>{
+      const vital = Number(u.dias) === 0;
+      const dias = vital ? 0 : Math.max(1, Math.ceil((u.expira - Date.now()) / 864e5));
+      const st = vital
+        ? '<span class="badge b-ok">Vitalício</span>'
+        : (dias <= 5
+          ? '<span class="badge b-pend">expira em ' + (dias === 1 ? '1 dia' : dias + ' dias') + '</span>'
+          : '<span class="badge b-ok">Ativo · ' + dias + ' dias</span>');
+      const orig = u.origem === 'Pix' ? '<span class="badge b-src">⚡ via Pix</span>' : '<span class="badge b-cod">🔑 via Código</span>';
+      const acoes = u.origem === 'Pix'
+        ? '<button class="act" data-act="ver-pag">🔎 Ver na lista</button>'
+        : '<button class="act" data-act="reenv-cod">📱 Reenviar</button>'
+        + '<button class="act" data-act="cop-cod">🔑 Copiar</button>'
+        + '<button class="act del" data-act="rem-cod" title="Remover da lista de ativos">🗑️</button>';
+      return `<tr data-key="${esc(u.email)}" data-email="${esc(u.email)}" data-nome="${esc(u.nome || '')}" data-cod="${esc(u.idcod)}" data-dias="${vital ? 0 : (Number(u.dias) || 30)}">
+        <td class="p-3" data-nolabel><span class="dot-on" title="Licença ativa"></span></td>
+        <td class="p-3 whitespace-nowrap font-semibold" data-l="Ativado">${fmtData(u.data)}</td>
+        <td class="p-3 font-semibold" data-l="Nome">${u.nome ? esc(u.nome) : '<span class="text-gray-400">—</span>'}</td>
+        <td class="p-3" data-l="E-mail">${esc(u.email)}</td>
+        <td class="p-3 font-bold whitespace-nowrap" data-l="Valor">${u.valor != null ? fmtValor(u.valor) : '—'}</td>
+        <td class="p-3" data-l="Status">${st}<span class="block mt-1">${orig}</span><span class="block text-[10.5px] text-gray-500 mt-1">${vital ? 'não expira — ativação vitalícia' : 'válido até ' + fmtData(new Date(u.expira).toISOString())}</span></td>
+        <td class="p-3 acts whitespace-nowrap" data-l="Ações">${acoes}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">Nenhum usuário com licença ativa agora — ativações por Pix aprovado ou por código aparecem aqui.</td></tr>';
+  } else if(FILTRO === 'lixeira'){
     tb.innerHTML = page.length ? page.map(p=>{
       const id = String(p.id), info = DELINFO[id] || {};
       return `<tr class="bg-red-50/40" data-id="${id}">
@@ -566,9 +687,9 @@ function render(){
         <td class="p-3 font-semibold" data-l="Nome">${p.nome ? esc(p.nome) : '<span class="text-red-600 font-bold">— editar</span>'}</td>
         <td class="p-3" data-l="E-mail">${p.email ? esc(p.email) : '<span class="text-red-600 font-bold">— editar</span>'}</td>
         <td class="p-3 font-bold whitespace-nowrap" data-l="Valor">${fmtValor(p.valor)}</td>
-        <td class="p-3" data-l="Status">${statusBadge(p)}</td>
+        <td class="p-3" data-l="Status">${statusBadge(p)}${licInfo(p)}</td>
         <td class="p-3 acts whitespace-nowrap" data-l="Ações">
-          <button class="act pri" data-act="ativar">Ativar 30 dias</button>
+          <button class="act pri" data-act="ativar">🔑 Ativar código</button>
           <button class="act" data-act="reenviar">Reenviar código</button>
           <button class="act" data-act="copiar">Copiar código</button>
           <button class="act" data-act="editar">Editar</button>
@@ -577,7 +698,9 @@ function render(){
         </td></tr>`;
     }).join('');
   }
-  $('#pagInfo').textContent = lista.length + ' pagamento' + (lista.length === 1 ? '' : 's') + ' · página ' + PAGINA + ' de ' + totalPag;
+  $('#pagInfo').textContent = FILTRO === 'ativos'
+    ? lista.length + ' usuário' + (lista.length === 1 ? '' : 's') + ' ativo' + (lista.length === 1 ? '' : 's') + ' · página ' + PAGINA + ' de ' + totalPag
+    : lista.length + ' pagamento' + (lista.length === 1 ? '' : 's') + ' · página ' + PAGINA + ' de ' + totalPag;
 }
 
 /* ================= controles ================= */
@@ -588,7 +711,7 @@ document.querySelectorAll('.fil').forEach(b=>b.addEventListener('click', ()=>{
 $('#pgPrev').addEventListener('click', ()=>{ if(PAGINA > 1){ PAGINA--; render(); } });
 $('#pgNext').addEventListener('click', ()=>{ if(PAGINA < Math.max(1, Math.ceil(filtrar().length / PER_PAGE))){ PAGINA++; render(); } });
 $('#ckAll').addEventListener('change', ()=>{
-  if(FILTRO === 'lixeira') return;
+  if(FILTRO === 'lixeira' || FILTRO === 'ativos') return;
   const on = $('#ckAll').checked;
   filtrar().slice((PAGINA-1)*PER_PAGE, PAGINA*PER_PAGE).forEach(p=>{ SELECAO[String(p.id)] = on; });
   render();
@@ -598,8 +721,8 @@ $('#btnAtualizar').addEventListener('click', carregar);
 $('#btnCsv').addEventListener('click', ()=>{
   const lista = filtrar();
   if(!lista.length) return toast('Nada para exportar com esse filtro', 'warn');
-  const linhas = [['Data','Nome','E-mail','Valor','Status','ID']].concat(lista.map(p=>[
-    fmtData(p.data), (p.nome||''), (p.email||''), String(Number(p.valor||0).toFixed(2)).replace('.',','), p.status||'', String(p.id)
+  const linhas = [['Data','Nome','E-mail','Valor','Status','Validade','ID']].concat(lista.map(p=>[
+    fmtData(p.data), (p.nome||''), (p.email||''), String(Number(p.valor||0).toFixed(2)).replace('.',','), p.status||'', (p.expira ? fmtData(new Date(p.expira).toISOString()) : ''), String(p.id)
   ]));
   const csv = '\uFEFF' + linhas.map(l=>l.map(c=>'"' + String(c).replace(/"/g,'""') + '"').join(';')).join('\r\n');
   const a = document.createElement('a');
@@ -620,10 +743,20 @@ $('#tbody').addEventListener('click', async e=>{
   const ck = e.target.closest('.ck');
   if(ck){ SELECAO[ck.dataset.id] = ck.checked; render(); return; }
   const b = e.target.closest('[data-act]'); if(!b) return;
-  const id = b.closest('tr').dataset.id;
+  const tr = b.closest('tr');
+  /* linhas da aba Ativos (Pix + código) têm tratamento próprio */
+  if(tr.dataset.key){
+    const d = tr.dataset, act = b.dataset.act;
+    if(act === 'ver-pag'){ FILTRO = 'todos'; $('#busca').value = d.email || ''; PAGINA = 1; render(); }
+    if(act === 'reenv-cod') reenviarCodigoDireto(d.email, d.nome, d.cod, Number(d.dias));
+    if(act === 'cop-cod') copiarTexto(d.cod);
+    if(act === 'rem-cod') removerCodigoModal(d.cod, d.email);
+    return;
+  }
+  const id = tr.dataset.id;
   const p = linhaPorId(id); if(!p) return;
   const act = b.dataset.act;
-  if(act === 'ativar') ativar(p, b);
+  if(act === 'ativar') ativarModal(p);
   if(act === 'reenviar') reenviar(p, b);
   if(act === 'copiar') copiarCodigo(p);
   if(act === 'editar') editarModal(p);
@@ -654,23 +787,57 @@ $('#btnDelSel').addEventListener('click', async ()=>{
   });
 });
 
-async function ativar(p, btn){
+/* ================= ativar por CÓDIGO (com duração) =================
+   Durações só para ativação por código — o Pix segue com 30 dias fixos.
+   O código gerado carrega o plano embutido (ver api/_admin.js) e o
+   /api/check-status devolve o expira certo quando o cliente digita no app. */
+function rotuloDuracao(d){
+  d = Number(d);
+  if(d === 0) return 'vitalícia';
+  if(d === 180) return '6 meses';
+  if(d === 365) return '1 ano';
+  return d + ' dias';
+}
+function ativarModal(p){
   const email = (p.email || '').trim();
   if(!email){ return editarModal(p, 'Este pagamento está sem e-mail — preencha antes de ativar.'); }
-  btn.disabled = true;
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🔑 Ativar por código</h3>
+    <p class="text-[12.5px] text-gray-500 mb-1"><b>${esc(p.id)}</b> — ${esc(email)}</p>
+    <p class="text-[12px] text-gray-400 mb-3">Escolha a duração da licença e toque para gerar o código. Vale só para a ativação por código — pelo Pix continua 30 dias fixos. O cliente digita o código no app em “Já tenho código”.</p>
+    <div class="grid gap-2">
+      <button class="act h-11 text-left" data-dur="30"><b>30 dias</b> <span class="font-normal text-gray-400">· igual ao Pix</span></button>
+      <button class="act h-11 text-left" data-dur="60"><b>60 dias</b> <span class="font-normal text-gray-400">· 2 meses</span></button>
+      <button class="act h-11 text-left" data-dur="180"><b>6 meses</b> <span class="font-normal text-gray-400">· semestre</span></button>
+      <button class="act h-11 text-left" data-dur="365"><b>1 ano</b> <span class="font-normal text-gray-400">· 12 meses</span></button>
+      <button class="act h-11 text-left" data-dur="0"><b>Vitalício</b> <span class="font-normal text-gray-400">· não expira nunca</span></button>
+      <button class="act h-11" id="durCancel">Cancelar</button>
+    </div>`);
+  $('#durCancel').addEventListener('click', closeModal);
+  $('#modalCard').querySelectorAll('[data-dur]').forEach(b=>b.addEventListener('click', ()=>ativar(p, b, Number(b.dataset.dur))));
+}
+async function ativar(p, btn, dias){
+  const email = (p.email || '').trim();
+  if(!email || !(dias === 0 || dias === 30 || dias === 60 || dias === 180 || dias === 365)) return;
+  const original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = 'Gerando…';
   try{
     const r = await api('/api/ativar-manual', {
       method:'POST', headers: authHeaders(true),
-      body: JSON.stringify({email})
+      body: JSON.stringify({ email, dias })
     });
     const j = await r.json();
     if(!r.ok || !j.ok){ toast(j.error || 'Falha ao gerar código', 'err'); return; }
+    const dj = (j.dias === 0) ? 0 : (Number(j.dias) || 30);
     CODIGOS[String(p.id)] = j.code;
-    addLog('Ativado por admin em ' + fmtData(new Date().toISOString()) + ' — código ' + j.code + ' para ' + email);
-    toast('Código ' + j.code + ' gerado para ' + email, 'ok');
+    CODS[j.code] = { email, nome: p.nome || '', code: j.code, quando: Date.now(), dias: dj };
+    saveCodigos();
+    addLog('Ativado por admin — código ' + j.code + ' (' + rotuloDuracao(dj) + ') para ' + email);
+    toast('Código ' + j.code + ' gerado — licença ' + rotuloDuracao(dj) + ' para ' + email, 'ok');
+    closeModal();
     render();
   }catch(e){ toast('Sem conexão: ' + e.message, 'err'); }
-  finally{ btn.disabled = false; }
+  finally{ btn.disabled = false; btn.innerHTML = original; }
 }
 async function reenviar(p, btn){
   const id = String(p.id);
@@ -681,17 +848,15 @@ async function reenviar(p, btn){
       const j = await r.json();
       if(!r.ok || !j.ok){ toast(j.error || 'Falha ao gerar código', 'err'); return; }
       CODIGOS[id] = j.code;
-      addLog('Código ' + j.code + ' gerado para ' + (p.email || '?'));
+      CODS[j.code] = { email:(p.email||'').trim().toLowerCase(), nome: p.nome || '', code: j.code, quando: Date.now(), dias: (j.dias === 0) ? 0 : (Number(j.dias) || 30) };
+      saveCodigos();
+      addLog('Código ' + j.code + ' (' + rotuloDuracao((j.dias === 0) ? 0 : (Number(j.dias) || 30)) + ') gerado para ' + (p.email || '?'));
     }catch(e){ toast('Sem conexão: ' + e.message, 'err'); return; }
     finally{ btn.disabled = false; }
   }
   const cod = CODIGOS[id];
-  const nome1 = (p.nome && p.nome !== '—') ? p.nome.split(' ')[0] + ', ' : '';
-  const msg = '🌊 *PoolApp Universal — Ativação da licença*\n\n'
-    + 'Olá, ' + nome1 + 'tudo bem? Seu pagamento foi confirmado ✅\n\n'
-    + 'Código de ativação: *' + cod + '*\n\n'
-    + 'No app: toque em “Licença” → “Já tenho código” e digite o código acima.\n'
-    + 'Licença válida por 30 dias. 🏊';
+  const infoC = CODS[cod] || {};
+  const msg = textoAtivacao(p.nome, p.email, cod, (infoC.dias === 0) ? 0 : (Number(infoC.dias) || 30));
   try{ await navigator.clipboard.writeText(msg); }catch(e){}
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   addLog('Reenviado por WhatsApp — código ' + cod + ' para ' + (p.email || '?'));
@@ -700,9 +865,52 @@ async function reenviar(p, btn){
 }
 async function copiarCodigo(p){
   const cod = CODIGOS[String(p.id)];
-  if(!cod) return toast('Gere o código primeiro em "Ativar 30 dias"', 'warn');
+  if(!cod) return toast('Gere o código primeiro — botão “🔑 Ativar código”', 'warn');
   try{ await navigator.clipboard.writeText(cod); addLog('Código ' + cod + ' copiado.'); toast('Código ' + cod + ' copiado', 'ok'); }
   catch(e){ toast('Não foi possível copiar automaticamente', 'warn'); }
+}
+
+/* ================= ações da aba Ativos ================= */
+function textoAtivacao(nome, email, cod, dias){
+  const nome1 = (nome && nome !== '—') ? nome.split(' ')[0] + ', ' : '';
+  const d = (Number(dias) === 0) ? 0 : (Number(dias) || 30);
+  const dur = d === 0
+    ? 'Licença VITALÍCIA — não expira nunca. 🏊'
+    : 'Licença válida por ' + rotuloDuracao(d) + '. 🏊';
+  return '🌊 *PoolApp Universal — Ativação da licença*\n\n'
+    + 'Olá, ' + nome1 + 'tudo bem? Seu pagamento foi confirmado ✅\n\n'
+    + 'Código de ativação: *' + cod + '*\n\n'
+    + 'No app: toque em “Licença” → “Já tenho código” e digite o código acima.\n'
+    + dur;
+}
+async function copiarTexto(t){
+  if(!t) return toast('Registro sem código armazenado', 'warn');
+  try{ await navigator.clipboard.writeText(t); addLog('Código ' + t + ' copiado.'); toast('Código ' + t + ' copiado', 'ok'); }
+  catch(e){ toast('Não foi possível copiar automaticamente', 'warn'); }
+}
+async function reenviarCodigoDireto(email, nome, cod, dias){
+  if(!cod) return toast('Registro sem código armazenado', 'warn');
+  const msg = textoAtivacao(nome, email, cod, dias);
+  try{ await navigator.clipboard.writeText(msg); }catch(e){}
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  addLog('Reenviado por WhatsApp — código ' + cod + ' para ' + (email || '?'));
+  toast('Mensagem pronta — escolha o contato do cliente', 'ok');
+}
+function removerCodigoModal(cod, email){
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">Remover da lista de ativos?</h3>
+    <p class="text-[13px] text-gray-500 mb-1">Código <b>${esc(cod)}</b> — ${esc(email || 'sem e-mail')}.</p>
+    <p class="text-[12px] text-gray-400 mb-4">Só tira da aba “Ativos”. O pagamento (se existir) continua na lista normal.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="rmYes">Remover</button>
+      <button class="act flex-1 h-11" id="rmNo">Cancelar</button>
+    </div>`);
+  $('#rmNo').addEventListener('click', closeModal);
+  $('#rmYes').addEventListener('click', ()=>{
+    delete CODS[cod]; saveCodigos(); closeModal(); render();
+    addLog('Ativação por código removida dos ativos — ' + cod + ' (' + (email || '?') + ')');
+    toast('Removido da lista de ativos', 'ok');
+  });
 }
 
 /* ================= editar (agora persiste no painel) ================= */
@@ -865,7 +1073,7 @@ $('#btnCfg').addEventListener('click', ()=>{
   openModal(`
     <h3 class="text-[16px] font-bold mb-1">⚙️ Configurações do Admin</h3>
     <p class="text-[12px] text-gray-500">Nome e e-mail aparecem no painel. A senha é validada antes de trocar.</p>
-    <label>Nome do Admin</label><input type="text" id="cfNome" value="${esc($('#admNome').textContent)}">
+    <label>Nome do Admin</label><input type="text" id="cfNome" value="${esc(ADM_NOME)}">
     <label>E-mail de acesso</label><input type="email" id="cfEmail" value="${esc($('#admEmail').textContent)}">
     <label>Senha atual (só se for trocar a senha)</label>
     <div class="mfield"><span class="icon-left"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="14" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg></span><input type="password" id="cfAtual" placeholder="••••••"><button type="button" class="eyeBtn" data-eye="cfAtual" tabindex="-1"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 10s2.5-5 7.5-5 7.5 5 7.5 5-2.5 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button></div>
@@ -902,7 +1110,7 @@ $('#btnCfg').addEventListener('click', ()=>{
       const j = await r.json();
       if(r.status === 401){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
       if(!r.ok || !j.ok){ toast(j.error || 'Falha ao salvar', 'err'); return; }
-      $('#admNome').textContent = j.nome || nome;
+      setNome(j.nome || nome);
       $('#admEmail').textContent = j.email || email;
       try{ localStorage.setItem('pa_admin_nome', j.nome || nome); }catch(e){}
       addLog('Configurações do admin salvas.');
@@ -913,7 +1121,7 @@ $('#btnCfg').addEventListener('click', ()=>{
 $('#btnEditNome').addEventListener('click', ()=>{
   openModal(`
     <h3 class="text-[16px] font-bold mb-3">✏️ Como quer ser chamado?</h3>
-    <input type="text" id="nmInp" value="${esc($('#admNome').textContent)}" placeholder="Seu nome">
+    <input type="text" id="nmInp" value="${esc(ADM_NOME)}" placeholder="Seu nome">
     <div class="flex gap-2 mt-4">
       <button class="act pri flex-1 h-11" id="nmSave">Salvar</button>
       <button class="act flex-1 h-11" id="nmCancel">Cancelar</button>
@@ -925,7 +1133,7 @@ $('#btnEditNome').addEventListener('click', ()=>{
     try{
       await api('/api/admin-config', { method:'POST', headers: authHeaders(true), body: JSON.stringify({nome}) });
     }catch(e){}
-    $('#admNome').textContent = nome;
+    setNome(nome);
     try{ localStorage.setItem('pa_admin_nome', nome); }catch(e){}
     closeModal(); toast('Nome atualizado', 'ok');
   });
@@ -1006,10 +1214,18 @@ $('#btnWa').addEventListener('click', ()=>{
 
 /* ================= boot ================= */
 (function boot(){
+  seedCodigosDoLog();          /* recupera códigos gerados antes deste recurso */
   const p = sessaoValida();
   if(p){
-    let nome = 'Admin';
-    try{ nome = localStorage.getItem('pa_admin_nome') || p.n || 'Admin'; }catch(e){}
+    /* nome do admin: o JWT guarda o nome do SERVIDOR no último login (p.n) —
+       vale mais que o localStorage antigo, que podia estar travado em “Admin”.
+       Se não vier nome do servidor, usa o salvo pelo ✏️ / Configurações. */
+    const gen = n => { const t = String(n || '').trim(); return !t || /^admin$/i.test(t); };
+    const saved = (()=>{ try{ return localStorage.getItem('pa_admin_nome') || ''; }catch(e){ return ''; } })();
+    let nome = '';
+    if(!gen(p.n)) nome = p.n;
+    else if(!gen(saved)) nome = saved;
+    if(!nome) nome = 'Admin';
     abrirPainel(nome, p.e);
   } else {
     $('#viewLogin').hidden = false;

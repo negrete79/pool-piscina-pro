@@ -713,7 +713,7 @@ section.tab-panel{scroll-margin-top:84px}
       <div class="pw-ico">🔒</div>
       <h3 style="font-size:18px;font-weight:800;margin-bottom:8px">Recursos bloqueados</h3>
       <p class="pw-txt">Sua licença venceu. Assine por R$ 29,90/mês para voltar a usar válvula, registros, parâmetros, tratamento e clima.</p>
-      <button class="btn" id="teaserAssinar">⚡ Assinar por R$ 29,90 — Pix (Mercado Pago)</button>
+      <button class="btn" id="teaserAssinar">⚡ Assinar por R$ 29,90 — Pix</button>
     </div>
   </section>
 
@@ -746,7 +746,7 @@ section.tab-panel{scroll-margin-top:84px}
 'use strict';
 /* ============================================================
    PoolApp Universal v2 PRO · Piscina · Casa
-   Licença fixa R$ 29,90/mês via Pix (Mercado Pago)
+   Licença fixa R$ 29,90/mês via Pix
    Persistência: localStorage — chaves mantidas das versões anteriores
    ============================================================ */
 
@@ -1919,7 +1919,7 @@ $('#themeBtn').addEventListener('click', ()=>{
   toast(t === 'dark' ? 'Modo escuro ativado 🌙' : 'Modo claro ativado ☀️');
 });
 
-/* ---- pagamento Pix (Mercado Pago) ---- */
+/* ---- pagamento Pix (QR Code) ---- */
 let pollTimer = null;
 /* ---- gate obrigatório: nome completo + e-mail válido ---- */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1991,14 +1991,14 @@ function openSuporte(){
     <div id="suporteModal">
       <p class="sh-intro">Calma — quase sempre libera em 1 minuto. Tente nesta ordem:</p>
       <div class="vs-step"><span class="n">1</span><span><b>Espere 1 minuto</b> com o app aberto: o Pix cai em segundos e a licença ativa sozinha, sem fechar nada.</span></div>
-      <div class="vs-step"><span class="n">2</span><span><b>Feche e reabra o app</b>. Ao abrir, o PoolApp consulta o pagamento no Mercado Pago e ativa.</span></div>
+      <div class="vs-step"><span class="n">2</span><span><b>Feche e reabra o app</b>. Ao abrir, o PoolApp confirma o pagamento do Pix e ativa.</span></div>
       <div class="vs-step"><span class="n">3</span><span><b>Restaurar compra</b> — na tela da licença, toque em “Restaurar compra”: o app procura o Pix pendente deste aparelho.</span></div>
       <div class="vs-step"><span class="n">4</span><span><b>Recebeu um código?</b> Toque em “Já tenho código” e digite no formato XXXX-XXXX-XXXX.</span></div>
       <p class="mtit" style="margin-top:14px">Nada resolvido? Fale com o suporte</p>
       <div class="ugate">
         <label class="ug-lab" for="supNome">Nome completo<input type="text" class="ug-in" id="supNome" autocomplete="name" placeholder="Seu nome completo" value="${escS(u && u.nome)}"></label>
         <label class="ug-lab" for="supEmail">E-mail<input type="email" class="ug-in" id="supEmail" autocomplete="email" placeholder="voce@email.com" value="${escS(u && u.email)}"></label>
-        <label class="ug-lab" for="supPixId">ID da transação Pix ou comprovante<input type="text" class="ug-in" id="supPixId" inputmode="numeric" placeholder="Ex.: 1234567890" value="${escS(lp && lp.id)}"><span class="ug-hint">Opcional — aparece no comprovante do Mercado Pago</span></label>
+        <label class="ug-lab" for="supPixId">ID da transação Pix ou comprovante<input type="text" class="ug-in" id="supPixId" inputmode="numeric" placeholder="Ex.: 1234567890" value="${escS(lp && lp.id)}"><span class="ug-hint">Opcional — é o número que aparece no comprovante do Pix</span></label>
         <label class="ug-lab" for="supDataHora">Data/Hora do pagamento<input type="text" class="ug-in" id="supDataHora" placeholder="dd/mm/aaaa hh:mm" value="${escS(dh)}"></label>
       </div>
       <button class="btn" id="supWa" style="margin-top:12px">🟢 Enviar pro WhatsApp</button>
@@ -2058,7 +2058,7 @@ function startPoll(id, area){
 function pixErroMsg(j){
   const e = String((j && j.error) || '');
   if(e.indexOf('MP_ACCESS_TOKEN') !== -1 || e.indexOf('MERCADOPAGO') !== -1)
-    return 'O servidor está sem o token do Mercado Pago. Configure a env var MP_ACCESS_TOKEN na Vercel e faça o deploy de novo.';
+    return 'O Pix está temporariamente indisponível no servidor. Confira a env var MP_ACCESS_TOKEN na Vercel e faça o deploy de novo.';
   if(e.indexOf('recusou') !== -1){
     let extra = '';
     const d = j && j.detail;
@@ -2069,7 +2069,7 @@ function pixErroMsg(j){
         if(extra) extra = ' (' + extra.slice(0,140) + ')';
       }catch(e2){}
     }
-    return 'O Mercado Pago recusou a criação do Pix' + extra + '. Tente de novo em instantes.';
+    return 'Não foi possível criar o QR Code do Pix agora' + extra + '. Tente de novo em instantes.';
   }
   if(e) return 'Erro do servidor: ' + e.slice(0,160);
   return 'Não foi possível gerar o Pix agora. Verifique a internet e tente novamente.';
@@ -2137,9 +2137,9 @@ function openLicense(){
   openSheet('Licença do PoolApp', `
     ${licBadgeHTML()}
     ${ativa ? `<div class="ativo-box"><b>✅ Ativo até ${ddMM(licExpira())}</b><span>${(lic && lic.email) ? lic.email : ''}</span></div>` : `
-    <p class="sh-intro">O PoolApp Universal é licenciado por assinatura mensal de <b>R$ 29,90</b>, paga via Pix com confirmação automática do Mercado Pago. Aprovado o pagamento, todos os recursos ficam liberados neste aparelho por 30 dias — e seus dados continuam salvos.</p>
+    <p class="sh-intro">O PoolApp Universal é licenciado por assinatura mensal de <b>R$ 29,90</b>, paga via Pix com confirmação automática. Aprovado o pagamento, todos os recursos ficam liberados neste aparelho por 30 dias — e seus dados continuam salvos.</p>
     ${userGateHTML('lic')}
-    <button class="btn" id="licAssinar" disabled style="margin-top:10px">⚡ Assinar por R$ ${PRECO_TXT} - Pix (Mercado Pago)</button>
+    <button class="btn" id="licAssinar" disabled style="margin-top:10px">⚡ Assinar por R$ ${PRECO_TXT} - Pix</button>
     <div id="licPixArea"></div>
     <div class="lic-mini">
       <button class="btn ghost sm" id="licRestaurar">Restaurar compra</button>
@@ -2169,10 +2169,10 @@ function openPaywall(){
   c.innerHTML = `<button class="pw-x" id="pwX">✕</button>
     <div class="pw-ico">💧</div>
     <h3>Assine o PoolApp Universal</h3>
-    <p class="pw-txt">O app é licenciado por assinatura mensal de <b>R$ ${PRECO_TXT}</b>, paga via Pix com confirmação automática do Mercado Pago. Aprovado o pagamento, todos os recursos ficam liberados neste aparelho por 30 dias. Seus dados e histórico continuam salvos.</p>
+    <p class="pw-txt">O app é licenciado por assinatura mensal de <b>R$ ${PRECO_TXT}</b>, paga via Pix com confirmação automática. Aprovado o pagamento, todos os recursos ficam liberados neste aparelho por 30 dias. Seus dados e histórico continuam salvos.</p>
     ${licBadgeHTML()}
     ${userGateHTML('pw')}
-    <button class="btn" id="pwAssinar" disabled style="margin-top:10px">⚡ Assinar por R$ ${PRECO_TXT} - Pix (Mercado Pago)</button>
+    <button class="btn" id="pwAssinar" disabled style="margin-top:10px">⚡ Assinar por R$ ${PRECO_TXT} - Pix</button>
     <div id="pwPixArea"></div>
     <div class="lic-mini"><button class="btn ghost sm" id="pwCodigo">Já tenho código</button></div>
     <div id="pwCodeArea"></div>

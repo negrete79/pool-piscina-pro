@@ -50,10 +50,12 @@ PWA de manutenção de piscina (100% offline), reconstruído do zero com design 
 ## Painel Admin (/admin.html)
 
 - Login com e-mail/senha (👁️ ver/esconder, "Lembrar de mim", loading, JWT 2 h, bloqueio 5 min após 3 erros), `noindex`.
-- Cards: Total faturado 30 dias · Total ativações · Pendentes · Expirados.
-- Tabela com checkbox, badges (verde pago / amarelo pendente / vermelho cancelado / azul teste), paginação 20, busca instantânea (e-mail/nome/ID), filtros Todos / Só pendentes / Desistentes.
+- Cards: **Ativos agora** (licenças válidas, verde) · Total faturado 30 dias · Total ativações · Pendentes · Expirados.
+- **Aba 🟢 Ativos**: usuários com licença válida **mesmo se ativados por Pix ou por código** — pagamento aprovado = 30 dias desde a data; código gerado no painel = 30 dias desde a geração (registro `pa_codigos` no navegador, com recuperação do log para códigos antigos). Dedupe por e-mail (fica a validade mais distante), ordena por quem expira primeiro, dot verde pulsante, chip de origem (⚡ via Pix / 🔑 via Código), ações: 🔎 Ver na lista (Pix), 📱 Reenviar / 🔑 Copiar / 🗑️ Remover (Código).
+- Tabela com checkbox, badges (verde pago / amarelo pendente / vermelho cancelado / azul teste) + dica "🟢 licença ativa até …" nos pagos, paginação 20, busca instantânea (e-mail/nome/ID), filtros Todos / Ativos / Pendentes / Desistentes / Lixeira.
 - Ações: **Ativar 30 dias** (gera código), **Reenviar código** (WhatsApp com mensagem pronta), **Copiar código**, **Editar nome/e-mail** (corrige "--"), **🗑️ Excluir** (modal de confirmação, cancela no MP), **Excluir selecionados**.
-- Exportar CSV, log de atividades ("Ativado por admin em 01/11/26 14:07"), ⚙️ Configurações (nome, e-mail, troca de senha com olho).
+- Exportar CSV (com coluna Validade), log de atividades ("Ativado por admin em 01/11/26 14:07"), ⚙️ Configurações (nome, e-mail, troca de senha com olho).
+- Saudação "Olá, Elias" fixa no topo (primeiro nome no celular — nunca mais some atrás dos botões; nome completo no desktop) + modo claro/escuro.
 
 ## Configuração na Vercel
 
