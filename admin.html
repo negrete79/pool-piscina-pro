@@ -295,6 +295,7 @@ html.dark table.tbl tbody tr:hover{background:#162729}
 
 <script>
 'use strict';
+const API_BASE = 'https://pool-piscina-pro.vercel.app';
 /* ================= util ================= */
 const $ = s => document.querySelector(s);
 function toast(msg, kind){
@@ -312,8 +313,7 @@ function fmtData(iso){
 }
 function fmtValor(v){ return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 async function api(path, opts){
-  try{ const r = await fetch(path, opts); if(r.status !== 404) return r; }catch(e){}
-  return await fetch(path + '.js', opts);
+  return await fetch(API_BASE + path, opts);
 }
 function openModal(html){ $('#modalCard').innerHTML = html; $('#modal').hidden = false; }
 function closeModal(){ $('#modal').hidden = true; }
