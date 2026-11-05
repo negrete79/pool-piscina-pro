@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0F5C5C">
 <!-- PWA do PAINEL — instalação separada do site principal (não usa os ícones/manifest do site) -->
 <link rel="manifest" href="/manifest-admin.json">
-<link rel="apple-touch-icon" href="/icon-admin-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Painel Pool">
 <title>PoolApp · Admin</title>
@@ -84,7 +84,7 @@ table.tbl tbody tr:hover{background:#f9fafb}
 @media (max-width:640px){.acts{display:flex;flex-wrap:wrap;gap:5px}}
 /* header no celular: nome do admin precisa caber — aperta botões e ícone */
 @media (max-width:640px){.hdicon{width:36px!important;height:36px!important;font-size:17px!important}}
-@media (max-width:460px){.hidel{display:none}#btnTema,#btnWa,#btnCfg,#btnSair{padding-left:9px;padding-right:9px}}
+@media (max-width:460px){.hidel{display:none}#btnTema,#btnWa,#btnCfg,#btnInstalar,#btnSair{padding-left:9px;padding-right:9px}}
 /* ================= MODO ESCURO (pa_theme no localStorage) ================= */
 html.dark body{background:#0e1618;color:#d7e0e0}
 html.dark .bg-white{background-color:#132023!important}
@@ -215,6 +215,7 @@ html.dark table.tbl tbody tr:hover{background:#162729}
 <button id="btnTema" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50" title="Alternar modo claro/escuro">🌙<span class="hidel"> Tema</span></button>
 <button id="btnWa" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">📱<span class="hidel"> WhatsApp</span></button>
 <button id="btnCfg" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">⚙️<span class="hidel"> Configurações</span></button>
+<button id="btnInstalar" hidden class="h-10 px-3.5 rounded-xl bg-white border border-[#0F5C5C] text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-[#eef6f6]" title="Instalar o painel como app na tela inicial">⬇<span class="hidel"> Instalar App</span></button>
 <button id="btnSair" class="h-10 px-3.5 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">Sair</button>
 </div>
 </header>
@@ -1252,6 +1253,83 @@ try{
     });
   }
 }catch(e){ /* silencioso — o painel nunca depende do SW */ }
+
+/* ============ botão Instalar App (beforeinstallprompt) ============ */
+var installPromptEvt = null;
+var btnInstalar = document.getElementById('btnInstalar');
+function ehIOS(){
+  try{
+    return /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }catch(e){ return false; }
+}
+function jaInstalado(){
+  try{
+    return (window.matchMedia && matchMedia('(display-mode: standalone)').matches)
+      || window.navigator.standalone === true;
+  }catch(e){ return false; }
+}
+function mostrarBtnInstalar(){
+  try{
+    if(!btnInstalar) return;
+    if(jaInstalado()){ btnInstalar.hidden = true; console.log('[Painel] já está instalado como app — botão fica escondido'); return; }
+    btnInstalar.hidden = false;
+    console.log('[Painel] botão “Instalar App” visível');
+  }catch(e){ console.log('[Painel] falha ao mostrar botão instalar: ' + e.message); }
+}
+window.addEventListener('beforeinstallprompt', function(e){
+  try{
+    e.preventDefault();
+    installPromptEvt = e;
+    console.log('[Painel] beforeinstallprompt capturado — Chrome liberou a instalação');
+    mostrarBtnInstalar();
+  }catch(err){ console.log('[Painel] erro no beforeinstallprompt: ' + err.message); }
+});
+window.addEventListener('appinstalled', function(){
+  try{
+    installPromptEvt = null;
+    if(btnInstalar) btnInstalar.hidden = true;
+    addLog('Painel instalado como app (PWA).');
+    toast('Painel instalado! Abra pelo ícone 🔧 da tela inicial.', 'ok');
+    console.log('[Painel] appinstalled — instalação concluída');
+  }catch(e){}
+});
+if(btnInstalar) btnInstalar.addEventListener('click', async function(){
+  try{
+    if(ehIOS()){
+      openModal(
+        '<h3 class="text-[16px] font-bold mb-2">📱 Instalar no iPhone/iPad</h3>' +
+        '<p class="text-[13px] text-gray-600 mb-2">O iPhone não tem o botão automático — são 2 toques:</p>' +
+        '<ol class="text-[13.5px] text-gray-700 list-decimal pl-5 space-y-1.5 mb-3">' +
+        '<li>Toque no botão <b>Compartilhar</b> (quadrado com seta para cima ⬆️) no Safari.</li>' +
+        '<li>Toque em <b>“Adicionar à Tela de Início”</b> e confirme.</li></ol>' +
+        '<p class="text-[12px] text-gray-400">O painel abre em tela cheia, sem barra do navegador, direto no /admin.html.</p>' +
+        '<div class="flex gap-2 mt-3"><button class="act pri flex-1 h-11" id="mInstOk">Entendi</button></div>');
+      try{ document.getElementById('mInstOk').addEventListener('click', closeModal); }catch(e){}
+      return;
+    }
+    if(!installPromptEvt){
+      toast('O Chrome ainda não liberou a instalação nesta página. Feche TODAS as abas do painel, abra de novo e aguarde 5 segundos — ou use o menu ⋮ > “Instalar app”.', 'warn');
+      console.log('[Painel] clique em instalar sem beforeinstallprompt (critérios ainda não atendidos)');
+      return;
+    }
+    installPromptEvt.prompt();
+    const choice = await installPromptEvt.userChoice;
+    console.log('[Painel] resultado da instalação: ' + choice.outcome);
+    if(choice.outcome === 'accepted'){
+      addLog('Instalação do painel aceita (PWA).');
+      toast('Instalando o painel… depois abra pelo ícone 🔧 da tela inicial.', 'ok');
+    } else {
+      toast('Instalação cancelada. O botão continua aqui quando você quiser.', 'info');
+    }
+    installPromptEvt = null;
+  }catch(e){
+    console.log('[Painel] erro no clique de instalar: ' + e.message);
+    toast('Não consegui abrir o instalador: ' + e.message, 'err');
+  }
+});
+/* iOS não dispara beforeinstallprompt: mostra o botão direto, com o modo de usar */
+try{ if(ehIOS() && !jaInstalado()) mostrarBtnInstalar(); }catch(e){}
 </script>
 </body>
 </html>
