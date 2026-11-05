@@ -1606,7 +1606,7 @@ function doseFor(p,v){
   const m3 = getVolume()/1000;
   if(p.id==='ph'){
     if(v<7)  return {tone:'t-act', h:`<b>Barrilha leve (elevar pH):</b> ${fmtG(10*Math.ceil((7-v)*10)*m3)} até pH 7,2${TAG_BARR}<small>10 g por 0,1 de pH a cada 10.000 L — dissolva em balde e despeje com o filtro em FILTRAR.</small>`};
-    if(v>7.4)return {tone:'t-act', h:`<b>Ácido muriático (baixar pH):</b> ${fmtMl(12*Math.ceil((v-7.4)*10)*m3)} até pH 7,4${TAG_MUR}<small>Dose fracionada: aplique metade, re-teste em 2 h antes de completar.</small>`};
+    if(v>7.6)return {tone:'t-act', h:`<b>Ácido muriático (baixar pH):</b> ${fmtMl(12*Math.ceil((v-7.4)*10)*m3)} até pH 7,4${TAG_MUR}<small>Dose fracionada: aplique metade, re-teste em 2 h antes de completar.</small>`};
     return {tone:'t-ok', h:'pH estável nessa faixa — o cloro rende até 3x mais. Só manter a rotina.'};
   }
   if(p.id==='cloro'){
@@ -1620,7 +1620,9 @@ function doseFor(p,v){
     return {tone:'t-ok', h:'Água cristalina — transparência dentro do ideal. Só manter a rotina.'};
   }
   if(p.id==='alcalinidade'){
-    if(v<80) return {tone:'t-act', h:`<b>Bicarbonato de sódio:</b> ${fmtG(Math.ceil(1.8*(100-v)*m3))} para chegar a 100 ppm${TAG_BIC}<small>AT baixa deixa o pH dançando — estabilize antes do cloro.</small>`};
+    if(v<80) return params.ph>7.6
+      ? {tone:'t-warn', h:'🔒 <b>Bicarbonato de sódio escondido por enquanto</b> — com o pH acima de 7,6 nunca mostramos ácido e bicarbonato juntos (um anula o outro). Corrija o pH, filtre 2 h, re-teste e a dose aparece aqui.'}
+      : {tone:'t-act', h:`<b>Bicarbonato de sódio:</b> ${fmtG(Math.ceil(1.8*(100-v)*m3))} para chegar a 100 ppm${TAG_BIC}<small>AT baixa deixa o pH dançando — estabilize antes do cloro.</small>`};
     if(v>120)return {tone:'t-act', h:`<b>AT alta:</b> baixe com ácido muriático em doses de ${fmtMl(Math.ceil((v-120)*1.5*m3))}${TAG_MUR}<small>Aplique uma dose, circule 2 h e re-teste antes de repetir.</small>`};
     return {tone:'t-ok', h:'Alcalinidade estável — o pH se mantém no lugar.'};
   }
@@ -1762,13 +1764,13 @@ function etapa1(){
   const ph=params.ph, at=params.alcalinidade, m3=getVolume()/1000, L=[];
   let ok=true;
   if(ph<7){ ok=false; L.push(`<b>Barrilha leve (sobe pH):</b> ${fmtG(10*Math.ceil((7-ph)*10)*m3)} até pH 7,2${TAG_BARR}`); }
-  else if(ph>7.4){ ok=false; L.push(`<b>Ácido muriático (desce pH):</b> ${fmtMl(12*Math.ceil((ph-7.4)*10)*m3)} — metade agora, re-teste em 2 h${TAG_MUR}`); }
-  /* item 1: NUNCA exibir Ácido e Bicarbonato juntos — com pH acima de 7,4 a etapa
+  else if(ph>7.6){ ok=false; L.push(`<b>Ácido muriático (desce pH):</b> ${fmtMl(12*Math.ceil((ph-7.4)*10)*m3)} até pH 7,4 — metade agora, re-teste em 2 h${TAG_MUR}`); }
+  /* calculadora item 3: NUNCA exibir Ácido e Bicarbonato juntos — com pH acima de 7,6 a etapa
      mostra SÓ ácido; o bicarbonato fica escondido até o pH ser corrigido e re-testado. */
   if(at<100){
     ok=false;
-    if(ph>7.4){
-      L.push(`🔒 <b>Bicarbonato de sódio escondido por enquanto</b> — com o pH acima de 7,4 nunca mostramos ácido e bicarbonato juntos. Corrija o pH, filtre 2 h, <b>re-teste</b> e a dose do bicarbonato aparece aqui.`);
+    if(ph>7.6){
+      L.push(`🔒 <b>Bicarbonato de sódio escondido por enquanto</b> — com o pH acima de 7,6 nunca mostramos ácido e bicarbonato juntos (um anula o outro). Corrija o pH, filtre 2 h, <b>re-teste</b> e a dose do bicarbonato aparece aqui.`);
     } else {
       L.push(`<b>Bicarbonato de sódio (sobe AT):</b> ${fmtG(Math.ceil(1.8*(100-at)*m3))} → alvo 100 ppm${TAG_BIC}`);
     }
@@ -1794,12 +1796,13 @@ function podeUsarSulfato(ph, alcalinidade, turbPct){
 /* ================= Etapa 0 · dreno obrigatório (cianúrico / dureza) =================
    Cianúrico > 100 ppm OU dureza > 400 ppm: drena o MAIOR percentual pedido (NUNCA a soma),
    UMA VEZ SÓ, repõe a água e re-testa. Cianúrico → alvo ~90 ppm (150 ppm = 40% do volume).
-   Dureza → alvo ~400 ppm (420 ppm = 5%). Parâmetro marcado “não medido” não dispara. */
+   Dureza → excesso sobre 400 dividido por 400 (460 ppm = 15%). Parâmetro marcado “não medido” não dispara. */
 function drenoEstado(){
   const cianNA = !!params.cianuricoNA, durNA = !!params.durezaNA;
   const cian = params.cianurico, dur = params.dureza;
   const pCian = (!cianNA && cian > 100) ? Math.ceil((cian - 90) * 100 / cian) : 0;
-  const pDur  = (!durNA  && dur  > 400) ? Math.ceil((dur - 400) * 100 / dur ) : 0;
+  /* calculadora item 2: dureza 460 ppm = 15% (excesso/400) — teto 100% por segurança */
+  const pDur  = (!durNA  && dur  > 400) ? Math.min(100, Math.ceil((dur - 400) * 100 / 400)) : 0;
   const pct = Math.max(pCian, pDur);
   return { ativo: pct > 0, pct, pCian, pDur, cian, dur, cianNA, durNA };
 }
@@ -2131,6 +2134,12 @@ function renderFilterFromWeather(){
   let h = w.temp>=30 ? 8 : w.temp>=28 ? 6 : 4;
   const extra = (params.ph<7 || params.ph>7.4) ? 1 : 0;
   $('#wHours').textContent = (h+extra)+' h';
+  /* calculadora item 4: com cloro acima de 3,0 ppm NUNCA sugerir janela de sol (9h–17h) —
+     manda filtrar à noite ou de manhã cedo */
+  if(params.cloro > 3){
+    $('#wNote').textContent = 'Cloro em '+fmtVal(PARAMS[1],params.cloro)+' ppm (ACIMA de 3): filtre à NOITE ou de MANHÃ CEDO — nunca no sol. Aguarde 6 h e re-teste.';
+    return;
+  }
   $('#wNote').textContent = Math.round(w.temp)+'°C pede '+h+' h de filtro (janela sugerida: 9h–17h)'
     + (extra ? ' + 1 h extra: o pH fora da faixa reduz a eficiência da cloração.' : '.');
 }
