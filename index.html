@@ -566,11 +566,9 @@ section.tab-panel{scroll-margin-top:84px}
       <div class="uchips grid4" id="tipoRow" role="group" aria-label="Tipo de piscina">
         <button type="button" class="uchip on" data-t="vinil">Vinil</button>
         <button type="button" class="uchip" data-t="fibra">Fibra</button>
-        <button type="button" class="uchip" data-t="azulejo">Azulejo/Cerâmica</button>
         <button type="button" class="uchip" data-t="alvenaria">Alvenaria</button>
         <button type="button" class="uchip" data-t="infinita">Infinita</button>
       </div>
-      <div class="alerta a-warn" id="infinitaAviso" hidden style="margin-top:10px">⚠️ <b>Borda infinita:</b> o volume do reservatório/calha NÃO entra na conta acima. Adicione o volume da borda infinita manualmente no Volume da água (botão + ou digitando).</div>
 
       <div class="blk-div"></div>
 
@@ -595,15 +593,15 @@ section.tab-panel{scroll-margin-top:84px}
       </div>
       <div id="unitDisplay">39.900 L</div>
       <div id="dimsDisplay">C: — L: — P: —</div>
-      <p class="vol-note" id="formulaNote">Piscina retangular: comprimento × largura × profundidade média (m) × 1.000 = litros</p>
+      <p class="vol-note">Piscina retangular: comprimento × largura × profundidade média (m) × 1.000 = litros</p>
 
       <div class="mtit">Litragem rápida · C × L × P</div>
       <div class="dim-grid">
-        <div class="dim-row"><label id="labComp">Comprimento (m)<span id="compOut">—</span></label><div class="dim-ctl"><input type="range" id="compRange" min="1" max="20" step="0.1" value="0" aria-label="Comprimento"><input type="text" id="compInput" inputmode="decimal" placeholder="0,00"></div></div>
-        <div class="dim-row" id="rowLarg"><label>Largura (m)<span id="largOut">—</span></label><div class="dim-ctl"><input type="range" id="largRange" min="1" max="15" step="0.1" value="0" aria-label="Largura"><input type="text" id="largInput" inputmode="decimal" placeholder="0,00"></div></div>
+        <div class="dim-row"><label>Comprimento (m)<span id="compOut">—</span></label><div class="dim-ctl"><input type="range" id="compRange" min="1" max="20" step="0.1" value="0" aria-label="Comprimento"><input type="text" id="compInput" inputmode="decimal" placeholder="0,00"></div></div>
+        <div class="dim-row"><label>Largura (m)<span id="largOut">—</span></label><div class="dim-ctl"><input type="range" id="largRange" min="1" max="15" step="0.1" value="0" aria-label="Largura"><input type="text" id="largInput" inputmode="decimal" placeholder="0,00"></div></div>
         <div class="dim-row"><label>Prof. média (m)<span id="profOut">—</span></label><div class="dim-ctl"><input type="range" id="profRange" min="0.2" max="3" step="0.05" value="0" aria-label="Profundidade"><input type="text" id="profInput" inputmode="decimal" placeholder="0,00"></div></div>
       </div>
-      <div class="lf-total"><span id="lfLabel">Total: C × L × P × 1.000</span><b id="lfTotal">—</b></div>
+      <div class="lf-total"><span>Total: C × L × P × 1.000</span><b id="lfTotal">—</b></div>
       <button class="btn" id="btnAplicar" style="margin-top:12px">Aplicar volume acima</button>
       <button class="btn ghost" id="btnManual" style="margin-top:8px">Abrir Manual</button>
       </div>
@@ -695,7 +693,6 @@ section.tab-panel{scroll-margin-top:84px}
   <section class="tab-panel lic-sec" id="tab-param">
     <div class="card" id="sec-params">
       <div class="shead"><span class="sic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3h4M11 3v5l-5.1 8.4A2.7 2.7 0 0 0 8.2 20.5h7.6a2.7 2.7 0 0 0 2.3-4.1L13 8V3"/><path d="M8.3 14.5h7.4"/></svg></span><h2>Parâmetros</h2><span class="chip" id="dnChip" title="O cloro rende mais quando aplicado ao entardecer">☀️ dia</span></div>
-      <div class="dose" style="margin-bottom:12px">⚠️ <b>Confira o rótulo do produto. Nunca misture produtos. Nunca jogue produto direto na piscina sem diluir se o rótulo pedir.</b></div>
       <div class="pgrid" id="paramGrid"></div>
     </div>
   </section>
@@ -705,7 +702,6 @@ section.tab-panel{scroll-margin-top:84px}
     <div class="card" id="sec-treat">
       <div class="shead"><span class="sic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.7 8l4.6 1.4-4.6 1.4L12 15.4l-1.7-4.6L5.7 9.4 10.3 8 12 3.5Z"/><path d="M18.5 15.5v4M16.5 17.5h4"/></svg></span><h2>Tratamento orientado</h2><span class="chip" id="tsChip">3 etapas, nesta ordem</span></div>
       <!-- regra de liberação oficial: muda conforme a turbidez medida (Cristalina/Turva) -->
-      <div class="dose" style="margin-bottom:12px">⚠️ <b>Confira o rótulo do produto. Nunca misture produtos. Nunca jogue produto direto na piscina sem diluir se o rótulo pedir.</b></div>
       <div id="libRegra" style="margin:-6px 0 12px"></div>
       <!-- Etapa 0 · DRENO obrigatório — aparece quando cianúrico > 100 ppm OU dureza > 400 ppm (trava as etapas 1, 2 e 3 até o novo teste) -->
       <div class="tstep" id="ts0" hidden>
@@ -733,11 +729,10 @@ section.tab-panel{scroll-margin-top:84px}
         <button type="button" class="diag-t" id="bordaT" aria-expanded="false"><span>Selecione o tipo de revestimento para ver a dosagem correta.</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
         <div class="diag-b" id="bordaB" hidden>
           <p class="sh-intro">Produtos fixos: <b>Redutor de pH líquido</b> · <b>Escova conforme o revestimento</b> · <b>Borrifador 500 ml</b>.</p>
-          <div class="dose">⚠️ <b>Confira o rótulo do produto. Nunca misture produtos. Nunca jogue produto direto na piscina sem diluir se o rótulo pedir.</b></div>
           <div class="poschips" id="bordaChips">
             <button type="button" class="pchip on" data-b="vinil">Vinil</button>
+            <button type="button" class="pchip" data-b="ceramica">Cerâmica · Azulejo · Pastilhas</button>
             <button type="button" class="pchip" data-b="fibra">Fibra</button>
-            <button type="button" class="pchip" data-b="ceramica">Azulejo/Cerâmica</button>
           </div>
           <div id="bordaDose"></div>
         </div>
@@ -748,24 +743,22 @@ section.tab-panel{scroll-margin-top:84px}
     <div class="card" id="secAguaColor">
       <div class="shead"><span class="sic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.2 6 7.7 6 10.5a6 6 0 1 1-12 0C6 10.7 8.5 7.2 12 3Z"/><path d="M9.5 14a2.5 2.5 0 0 0 2.5 2.5"/></svg></span><h2>Água colorida &amp; manchas</h2><span class="chip">guia de resgate</span></div>
       <p class="hint">Coloração esverdeada, amarelada ou sépia quase sempre é metal (ferro, cobre, manganês) reagindo com o cloro — mais comum ainda em água de poço, caminhão-pipa, rio ou lago. Identificar a cor e ver o fundo é o primeiro passo.</p>
-      <div class="dose" style="margin-bottom:12px">⚠️ <b>Confira o rótulo do produto. Nunca misture produtos. Nunca jogue produto direto na piscina sem diluir se o rótulo pedir.</b></div>
       <div class="diag">
         <button type="button" class="diag-t" aria-expanded="false"><span>🧪 Guia de recuperação — 3 passos</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
         <div class="diag-b" id="ac1" hidden>
           <p class="mtit">Recuperação de água colorida</p>
-          <p class="hint" id="acIntro">Método em 3 passos para água esverdeada, amarelada ou sépia — dosado para o volume da sua piscina.</p>
+          <p class="hint" id="acIntro">Método em 3 passos para água esverdeada, amarelada ou sépia — dosado para os seus 45.000 L.</p>
           <p class="mtit">Passo 1 · Avalie antes de tudo</p>
           <div class="dose ok">✓ Alcalinidade 80–120 ppm · pH 7,0–7,4 · Cloro livre 1–3 ppm — ajuste pelos Parâmetros antes de tratar.</div>
           <div class="dose">⚠️ Ácido cianúrico acima de 100 ppm: drene 40% da água, complete com água nova e suspenda o cloro estabilizado — o cianúrico só sai com reposição de água.</div>
           <p class="mtit">Passo 2 · Elimine o metal (diminuidor de metais / sequestrante)</p>
-          <div class="dose"><b>Fundo visível (caso leve): <span id="acLeve">—</span></b> — 15 mL por 1.000 L<small>Com a filtração ligada, adicione o diminuidor de metais direto na piscina.</small></div>
-          <div class="dose"><b>Fundo não visível (caso grave): <span id="acGrave">—</span></b> — 50 mL por 1.000 L<small>Com a filtração ligada. Muitas manchas espalhadas também usam esta dose.</small></div>
-          <div class="dose">⚠️ Não aplique cloro enquanto usa o diminuidor de metais. A água pode turvar — faz parte do processo.</div>
+          <div class="dose"><b>Fundo visível (caso leve): <span id="acLeve">—</span></b> — 15 mL por 1.000 L<small>Com a filtração ligada, adicione direto na piscina.</small></div>
+          <div class="dose"><b>Fundo não visível (caso grave): <span id="acGrave">—</span></b> — 50 mL por 1.000 L<small>Com a filtração ligada. Várias manchas espalhadas também usam esta dose.</small></div>
+          <div class="dose">⚠️ Não aplique cloro enquanto usa o removedor de metais. A água pode turvar — faz parte do processo.</div>
           <p class="mtit">Passo 3 · Sanitize (supercloração)</p>
           <div class="dose"><b>Após a água voltar ao normal, com o filtro ligado:</b> <span id="acConc">—</span> (14 g/1.000 L, cloros concentrados) ou <span id="acComum">—</span> (28 g/1.000 L, cloro comum ~65%)<small>Confira sempre o rótulo do seu produto — concentrações variam.</small></div>
-          <p class="mtit">Como aplicar o cloro · por revestimento</p>
-          <div class="vs-step"><span class="n">1</span><span><b>Vinil ou Fibra:</b> dilua o cloro em um balde com água da própria piscina, mexa bem e espalhe pelas laterais.</span></div>
-          <div class="vs-step"><span class="n">2</span><span><b>Azulejo/Cerâmica ou Alvenaria:</b> com o filtro ligado, aplique o cloro direto na água, caminhando ao longo das laterais.</span></div>
+          <div class="vs-step"><span class="n">1</span><span><b>Vinil ou fibra:</b> dilua o cloro em balde com água da própria piscina e espalhe pelas laterais.</span></div>
+          <div class="vs-step"><span class="n">2</span><span><b>Azulejo:</b> com o filtro ligado, aplique o cloro direto na água ao longo das laterais.</span></div>
           <div class="dose ok">Re-teste o cloro em 24 h — deve voltar a 1–3 ppm.</div>
         </div>
       </div>
@@ -773,7 +766,7 @@ section.tab-panel{scroll-margin-top:84px}
         <button type="button" class="diag-t" aria-expanded="false"><span>🎯 Manchas no fundo da piscina</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
         <div class="diag-b" id="ac2" hidden>
           <p class="mtit">Manchas no fundo — tratamento pontual</p>
-          <p class="hint" id="ac2Intro">Para poucas manchas localizadas (pontos no fundo), o tratamento é dirigido direto na mancha — dosado para o volume da sua piscina:</p>
+          <p class="hint" id="ac2Intro">Para poucas manchas localizadas (pontos no fundo), o tratamento é dirigido direto na mancha — dosado para os seus 45.000 L:</p>
           <div class="vs-step"><span class="n">1</span><span><b>Aplicação direcionada:</b> use um cano de PVC como guia — uma extremidade sobre a mancha, a outra fora da água.</span></div>
           <div class="vs-step"><span class="n">2</span><span><b>Despeje pelo cano:</b> com funil e usando luvas, despeje <b id="acPonto">—</b> de diminuidor de metais dentro do cano, direto sobre a mancha.</span></div>
           <div class="vs-step"><span class="n">3</span><span><b>Aguarde e esfregue:</b> retire o cano, espere 5 minutos para o produto reagir e esfregue a área para soltar a mancha.</span></div>
@@ -792,12 +785,16 @@ section.tab-panel{scroll-margin-top:84px}
       <div class="diag">
         <button type="button" class="diag-t" aria-expanded="false"><span>Ver lista completa de segurança</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
         <div class="diag-b" id="seg1" hidden>
-          <p class="mtit">Regras complementares · 5 a 8</p>
-          <p class="hint">As regras 1 a 4 são as caixas acima — aqui só o que falta para a lista completa. Vale para qualquer produto de piscina: cloro, corretor, algicida, clarificante.</p>
-          <div class="vs-step"><span class="n">5</span><span>Use somente produtos específicos para piscina e siga as instruções e dosagens da embalagem.</span></div>
-          <div class="vs-step"><span class="n">6</span><span>Não fume durante o manuseio dos produtos.</span></div>
-          <div class="vs-step"><span class="n">7</span><span>Não devolva o produto excedente à embalagem — risco de contaminação e reação química.</span></div>
-          <div class="vs-step"><span class="n">8</span><span>Não use embalagens danificadas ou estufadas e não armazene perto de fontes de calor — forno, churrasqueira, motor do filtro.</span></div>
+          <p class="mtit">Manuseio seguro de produtos</p>
+          <p class="hint">Vale para qualquer produto de piscina — cloro, corretor, algicida, clarificante.</p>
+          <div class="vs-step"><span class="n">1</span><span>Use somente produtos específicos para piscina e siga as instruções e dosagens da embalagem.</span></div>
+          <div class="vs-step"><span class="n">2</span><span>Manuseie com luva, máscara e óculos de proteção. Não fume durante o manuseio.</span></div>
+          <div class="vs-step"><span class="n">3</span><span>Nunca misture cloros de marcas e/ou composições diferentes — risco de explosão. Nunca misture produtos antes de aplicar.</span></div>
+          <div class="vs-step"><span class="n">4</span><span>Sempre coloque o produto na água do balde — nunca a água sobre o produto.</span></div>
+          <div class="vs-step"><span class="n">5</span><span>Mantenha o dosador sempre seco e dentro da embalagem. Use um medidor por produto — não compartilhe entre químicos.</span></div>
+          <div class="vs-step"><span class="n">6</span><span>Não devolva o produto excedente à embalagem — risco de contaminação e reação química.</span></div>
+          <div class="vs-step"><span class="n">7</span><span>Mantenha longe de crianças e animais, embalagem sempre fechada após o uso.</span></div>
+          <div class="vs-step"><span class="n">8</span><span>Evite embalagens danificadas e não armazene perto de fontes de calor — forno, churrasqueira, motor do filtro.</span></div>
         </div>
       </div>
     </div>
@@ -897,7 +894,7 @@ const TAG_BARR  = ptag('Vendido como: <b>Elevador de pH</b> · químico: carbona
 const TAG_BIC   = ptag('Vendido como: <b>Elevador de alcalinidade</b>');
 const TAG_CLORO = ptag('Vendido como: <b>Cloro granulado / Cloro choque</b> · químico: hipoclorito de cálcio ou dicloro');
 const TAG_SULF  = ptag('Vendido como: <b>Decantante / Floculante</b> · químico: sulfato de alumínio');
-const TAG_CLAR  = ptag('Nome de loja: <b>Clarificante coagulante</b> · age NO FILTRO (não decanta — decantação é do sulfato/floculante)');
+const TAG_CLAR  = ptag('Nome de loja: <b>Clarificante</b> · químico: sulfato de alumínio diluído ou polímero');
 /* comparativo de cor da água — toque na cor igual à da sua piscina */
 const WCORES = [
   {v:0,  nome:'Cristalina',  cor:'#00d4ff'},
@@ -911,9 +908,9 @@ const TAG_MET   = ptag('Vendido como: <b>Sequestrante de metais / Antiferrugem</
 const buzz = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
 const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
 const num = i => { const el = document.getElementById(i); return parseFloat((el && el.value || '').toString().replace(',','.')) || 0; };
-const fmtNum = n => Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});
 function dimsText(c,l,p){
-  return 'C: '+fmtNum(c)+'m L: '+fmtNum(l)+'m P: '+fmtNum(p)+'m';
+  const f = n => Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});
+  return 'C: '+f(c)+'m L: '+f(l)+'m P: '+f(p)+'m';
 }
 
 /* ================= modo escuro ================= */
@@ -1066,13 +1063,6 @@ function poolVolume(){
   const saved = Number(store.get('pool_volume', null));
   return (isFinite(saved) && saved >= 1000) ? Math.round(saved) : 39900;
 }
-/* G: volume digitado é obrigatório para gerar o plano — 0/vazio bloqueia com “Preencha as medidas primeiro” */
-function volumeValido(){
-  const el = document.getElementById('volumeInput');
-  if(!el) return false;
-  const v = parseInt(el.value, 10);
-  return isFinite(v) && v > 0;
-}
 let hidro = store.get('poolapp.hidro', {ativa:false, c:0, l:0, p:0});
 if(!isObj(hidro)) hidro = {ativa:false, c:0, l:0, p:0};
 hidro = {ativa:!!hidro.ativa, c:Number(hidro.c)||0, l:Number(hidro.l)||0, p:Number(hidro.p)||0};
@@ -1137,23 +1127,30 @@ document.querySelectorAll('.uchip[data-u]').forEach(b=>b.addEventListener('click
     $('#compInput').value = String(dims.c).replace('.',',');
     $('#largInput').value = String(dims.l).replace('.',',');
     $('#profInput').value = String(dims.p).replace('.',',');
-  } else {
-    /* sem medidas salvas: sliders já começam preenchidos para bater com o volume inicial (9,5 × 4,2 × 1,0 m = 39.900 L) */
-    $('#compInput').value = '9,5';
-    $('#largInput').value = '4,2';
-    $('#profInput').value = '1';
   }
   if(hidro.ativa){
     const set = (id, v)=>{ const el = document.getElementById(id); if(el && v>0) el.value = String(v).replace('.',','); };
     set('hCompInput', hidro.c); set('hLargInput', hidro.l); set('hProfInput', hidro.p);
   }
   bindHidroDims();
-  bindDim('compInput','compRange','compOut', lfRecalc);
-  bindDim('largInput','largRange','largOut', lfRecalc);
-  bindDim('profInput','profRange','profOut', lfRecalc);
+  bindDim('compInput','compRange','compOut', ()=>{
+    const t = Math.round(num('compInput') * num('largInput') * num('profInput') * 1000);
+    $('#lfTotal').textContent = t > 0 ? fmt(t)+' L' : '—';
+  });
+  bindDim('largInput','largRange','largOut', ()=>{
+    const t = Math.round(num('compInput') * num('largInput') * num('profInput') * 1000);
+    $('#lfTotal').textContent = t > 0 ? fmt(t)+' L' : '—';
+  });
+  bindDim('profInput','profRange','profOut', ()=>{
+    const t = Math.round(num('compInput') * num('largInput') * num('profInput') * 1000);
+    $('#lfTotal').textContent = t > 0 ? fmt(t)+' L' : '—';
+  });
+  const dd = document.getElementById('dimsDisplay');
+  if(dd) dd.textContent = (isObj(dims) && dims.c>0 && dims.l>0 && dims.p>0) ? dimsText(dims.c,dims.l,dims.p) : 'C: — L: — P: —';
   renderHidroState();
   updateM3();
-  lfRecalc();   /* dimsDisplay + lfTotal pela forma selecionada */
+  const t = Math.round(num('compInput') * num('largInput') * num('profInput') * 1000);
+  $('#lfTotal').textContent = t > 0 ? fmt(t)+' L' : '—';
 })();
 document.getElementById('volumeInput').addEventListener('change', updateM3);
 document.getElementById('volumeInput').addEventListener('input', ()=>{ store.set('pool_volume', poolVolume()); updateM3(); });
@@ -1169,23 +1166,20 @@ document.getElementById('volumeInput').addEventListener('input', ()=>{ store.set
 });
 $('#btnAplicar').addEventListener('click', ()=>{
   const c = num('compInput'), l = num('largInput'), p = num('profInput');
-  if(fforma === 'red'){
-    if(c<=0 || p<=0){ toast('Preencha o diâmetro (C) e a profundidade', 'warn'); return; }
-  } else if(c<=0 || l<=0 || p<=0){ toast('Preencha comprimento, largura e profundidade', 'warn'); return; }
-  const total = calcVolShape(c,l,p);
-  if(total <= 0){ toast('Preencha as medidas primeiro', 'warn'); return; }
+  const total = Math.round(c*l*p*1000);
+  if(total <= 0){ toast('Preencha comprimento, largura e profundidade', 'warn'); return; }
   const inp = document.getElementById('volumeInput');
   inp.value = total;
   store.set('pool_volume', total);
   store.set('poolapp.dims', {c,l,p});
-  lfRecalc();
+  const dd = $('#dimsDisplay'); if(dd) dd.textContent = dimsText(c,l,p);
   updateM3(); buzz(10);
   toast('Volume aplicado: '+fmt(total)+' L','ok');
 });
 $('#btnSalvar').addEventListener('click', ()=>{
   store.set('pool_volume', poolVolume());
   const c = num('compInput'), l = num('largInput'), p = num('profInput');
-  if(c>0 && p>0 && (fforma === 'red' || l>0)){ store.set('poolapp.dims', {c,l,p}); lfRecalc(); }
+  if(c>0 && l>0 && p>0){ store.set('poolapp.dims', {c,l,p}); $('#dimsDisplay').textContent = dimsText(c,l,p); }
   saveHidro();
   store.set('poolapp.unit', unit);
   buzz(12);
@@ -1202,74 +1196,35 @@ const FT_FORMAS = {
 const FT_TIPOS = {
   vinil:{ nome:'Vinil' },
   fibra:{ nome:'Fibra' },
-  azulejo:{ nome:'Azulejo/Cerâmica' },
   alvenaria:{ nome:'Alvenaria' },
   infinita:{ nome:'Infinita' }
 };
-var fforma = store.get('poolapp.forma', 'ret');
+let fforma = store.get('poolapp.forma', 'ret');
 if(fforma && typeof fforma === 'object') fforma = fforma.shape || 'ret'; /* migra dado de versão anterior */
 if(typeof fforma !== 'string' || !FT_FORMAS[fforma]) fforma = 'ret';
-var ftipo = store.get('poolapp.ptipo', 'vinil');
+let ftipo = store.get('poolapp.ptipo', 'vinil');
 if(typeof ftipo !== 'string' || !FT_TIPOS[ftipo]) ftipo = 'vinil';
-/* ===== volume pela FORMA selecionada (B): ret/qua C×L×P · red π×(C/2)²×P · ova π×(C/2)×(L/2)×P ===== */
-function calcVolShape(c,l,p){
-  if(fforma === 'red') return Math.round(Math.PI * (c/2) * (c/2) * p * 1000);
-  if(fforma === 'ova') return Math.round(Math.PI * (c/2) * (l/2) * p * 1000);
-  return Math.round(c * l * p * 1000);
-}
-const FORMULA_TXT = {
-  ret:{ note:'Piscina retangular: comprimento × largura × profundidade média (m) × 1.000 = litros', lf:'Total: C × L × P × 1.000' },
-  qua:{ note:'Piscina quadrada: comprimento × largura × profundidade média (m) × 1.000 = litros', lf:'Total: C × L × P × 1.000' },
-  red:{ note:'Piscina redonda: π × raio² × profundidade (m) × 1.000 = litros — use C como diâmetro', lf:'Total: π × (C ÷ 2)² × P × 1.000' },
-  ova:{ note:'Piscina oval: π × (comprimento ÷ 2) × (largura ÷ 2) × profundidade média (m) × 1.000 = litros', lf:'Total: π × C/2 × L/2 × P × 1.000' }
-};
-function renderShapeUI(){
-  const cfg = FORMULA_TXT[fforma] || FORMULA_TXT.ret;
-  const fn = document.getElementById('formulaNote');
-  const fl = document.getElementById('lfLabel');
-  const rowLarg = document.getElementById('rowLarg');
-  const labComp = document.getElementById('labComp');
-  if(fn) fn.textContent = cfg.note;
-  if(fl) fl.textContent = cfg.lf;
-  if(rowLarg) rowLarg.hidden = (fforma === 'red');   /* Redonda: esconde L, C vira diâmetro */
-  if(labComp && labComp.firstChild) labComp.firstChild.nodeValue = (fforma === 'red') ? 'Diâmetro (m)' : 'Comprimento (m)';
-}
-function lfRecalc(){
-  const c = num('compInput'), l = num('largInput'), p = num('profInput');
-  const t = calcVolShape(c,l,p);
-  const lf = document.getElementById('lfTotal');
-  if(lf) lf.textContent = t > 0 ? fmt(t)+' L' : '—';
-  const dd = document.getElementById('dimsDisplay');
-  if(dd){
-    if(fforma === 'red') dd.textContent = (c>0 && p>0) ? 'D: '+fmtNum(c)+'m P: '+fmtNum(p)+'m' : 'D: — P: —';
-    else dd.textContent = (c>0 && l>0 && p>0) ? dimsText(c,l,p) : 'C: — L: — P: —';
-  }
-}
 function renderFormaRow(){
   document.querySelectorAll('#formaRow .uchip').forEach(b=>b.classList.toggle('on', b.dataset.f===fforma));
 }
 function renderTipoRow(){
   document.querySelectorAll('#tipoRow .uchip').forEach(b=>b.classList.toggle('on', b.dataset.t===ftipo));
 }
-function renderInfinitaAviso(){
-  const av = document.getElementById('infinitaAviso');
-  if(av) av.hidden = (ftipo !== 'infinita');   /* B: borda infinita avisa para somar o reservatório manualmente */
-}
 $('#formaRow').addEventListener('click', e=>{
   const b = e.target.closest('.uchip'); if(!b) return;
   fforma = b.dataset.f;
   store.set('poolapp.forma', fforma);
-  renderFormaRow(); renderShapeUI(); lfRecalc(); buzz(6);
-  toast('Forma da piscina: '+FT_FORMAS[fforma].nome+' — '+FORMULA_TXT[fforma].lf,'ok');
+  renderFormaRow(); buzz(6);
+  toast('Forma da piscina: '+FT_FORMAS[fforma].nome,'ok');
 });
 $('#tipoRow').addEventListener('click', e=>{
   const b = e.target.closest('.uchip'); if(!b) return;
   ftipo = b.dataset.t;
   store.set('poolapp.ptipo', ftipo);
-  renderTipoRow(); renderInfinitaAviso(); bordaMarcar(); buzz(6);
+  renderTipoRow(); buzz(6);
   toast('Tipo de piscina: '+FT_TIPOS[ftipo].nome,'ok');
 });
-renderFormaRow(); renderTipoRow(); renderInfinitaAviso(); renderShapeUI(); lfRecalc();
+renderFormaRow(); renderTipoRow();
 
 /* ================= válvula do filtro ================= */
 const VALVE = [
@@ -1656,12 +1611,12 @@ function doseFor(p,v){
   }
   if(p.id==='cloro'){
     if(v<1)  return {tone:'t-act', h:`<b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))}${TAG_CLORO}<small>Mata bactérias e algas de uma vez. 28 g por 1.000 L — aplique ao entardecer com filtro em RECIRCULAR por 15 min, depois FILTRAR.</small>`};
-    if(v>3.5)return {tone:'t-warn', h:'<b>Cloro alto:</b> não trate nada agora — filtre no sol por 6 h e re-teste amanhã.'};
+    if(v>3)  return {tone:'t-warn', h:'<b>Cloro alto — ACIMA da faixa 1–3 ppm:</b> não trate nada agora — aguarde 6 h, filtre e re-teste. Nenhuma dosagem com cloro alto.'};
     return {tone:'t-ok', h:'Cloro na faixa de 1–3 ppm — água protegida contra algas e bactérias.'};
   }
   if(p.id==='turbidez'){
     if(v>30) return {tone:'t-warn', h:`<b>Sulfato de alumínio:</b> ${fmtG(Math.round(20*m3))} (20 g por m³)${TAG_SULF}<small>Recircular 1 h, repouso 12 h e aspire em DRENAR — não ligue o filtro nesse período. Depois filtre 8 h e retro-lave.</small>`};
-    if(v>0)  return {tone:'t-act', h:`<span class="choque">⚠️ Adicione agora — Cloro de CHOQUE: ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)</span><b style="display:block;margin-top:9px">Clarificante coagulante:</b> ${fmtMl(8*m3)}${TAG_CLAR}<small>Cloro de choque + clarificante e filtre 12 h — o clarificante trabalha no filtro, não decanta. Algicida de choque é opcional, só preventivo (${fmtMl(6*m3)} — 6 mL por m³). <b>NÃO use sulfato ainda!</b> Só se passar de 30%.</small>`};
+    if(v>0)  return {tone:'t-act', h:`<span class="choque">⚠️ Adicione agora — Algicida de CHOQUE: ${fmtMl(6*m3)} (6 mL por m³)</span><b style="display:block;margin-top:9px">Clarificante:</b> ${fmtMl(8*m3)}${TAG_CLAR}<small>Aplique o choque + o clarificante e filtre 12 h. <b>NÃO use sulfato ainda!</b> Só se passar de 30%.</small>`};
     return {tone:'t-ok', h:'Água cristalina — transparência dentro do ideal. Só manter a rotina.'};
   }
   if(p.id==='alcalinidade'){
@@ -1808,7 +1763,16 @@ function etapa1(){
   let ok=true;
   if(ph<7){ ok=false; L.push(`<b>Barrilha leve (sobe pH):</b> ${fmtG(10*Math.ceil((7-ph)*10)*m3)} até pH 7,2${TAG_BARR}`); }
   else if(ph>7.4){ ok=false; L.push(`<b>Ácido muriático (desce pH):</b> ${fmtMl(12*Math.ceil((ph-7.4)*10)*m3)} — metade agora, re-teste em 2 h${TAG_MUR}`); }
-  if(at<100){ ok=false; L.push(`<b>Bicarbonato de sódio (sobe AT):</b> ${fmtG(Math.ceil(1.8*(100-at)*m3))} → alvo 100 ppm${TAG_BIC}`); }
+  /* item 1: NUNCA exibir Ácido e Bicarbonato juntos — com pH acima de 7,4 a etapa
+     mostra SÓ ácido; o bicarbonato fica escondido até o pH ser corrigido e re-testado. */
+  if(at<100){
+    ok=false;
+    if(ph>7.4){
+      L.push(`🔒 <b>Bicarbonato de sódio escondido por enquanto</b> — com o pH acima de 7,4 nunca mostramos ácido e bicarbonato juntos. Corrija o pH, filtre 2 h, <b>re-teste</b> e a dose do bicarbonato aparece aqui.`);
+    } else {
+      L.push(`<b>Bicarbonato de sódio (sobe AT):</b> ${fmtG(Math.ceil(1.8*(100-at)*m3))} → alvo 100 ppm${TAG_BIC}`);
+    }
+  }
   else if(at>120){ ok=false; L.push(`<b>AT em ${at} ppm:</b> baixe aos poucos com ácido muriático, re-teste a cada dose${TAG_MUR}`); }
   return {ok, L};
 }
@@ -1840,27 +1804,12 @@ function drenoEstado(){
   return { ativo: pct > 0, pct, pCian, pDur, cian, dur, cianNA, durNA };
 }
 function renderTreat(){
-  const ts0 = document.getElementById('ts0');
-  const chipT = document.getElementById('tsChip');
-  /* G: volume 0/vazio bloqueia o plano — mostra “Preencha as medidas primeiro” */
-  if(!volumeValido()){
-    if(ts0) ts0.hidden = true;
-    if(chipT) chipT.textContent = '3 etapas, nesta ordem';
-    [1,2,3].forEach(i=>{
-      const card = document.getElementById('ts'+i);
-      const badge = document.getElementById('tsb'+i);
-      const body = document.getElementById('tsbody'+i);
-      if(card) card.className = 'tstep lock';
-      if(badge){ badge.className = 'ts-badge rb'; badge.textContent = 'Bloqueada'; }
-      if(body) body.innerHTML = '<div class="dose err">⚠️ <b>Preencha as medidas primeiro</b> — o volume da água é obrigatório para calcular as doses.</div>';
-    });
-    try{ renderLibRegra(); }catch(e2){}
-    return;
-  }
-  /* ===== Etapa 0 · DRENO (cianúrico > 100 ou dureza > 400): trava as Etapas 1, 2 e 3
-     no próprio card — aviso só no modal não basta (item 3). Destrava com o novo teste. */
+  /* item 3: Etapa 0 · DRENO (cianúrico > 100 ou dureza > 400) trava as Etapas 1, 2 e 3
+     no próprio card — aviso só no modal não basta. Destrava com o novo teste. */
   const dr = drenoEstado();
+  const chipT = document.getElementById('tsChip');
   if(chipT) chipT.textContent = dr.ativo ? 'Etapa 0 antes de tudo' : '3 etapas, nesta ordem';
+  const ts0 = document.getElementById('ts0');
   if(ts0) ts0.hidden = !dr.ativo;
   if(dr.ativo){
     const vol = getVolume();
@@ -1874,10 +1823,11 @@ function renderTreat(){
     ts0.className = 'tstep lock';
     $('#tsb0').className = 'ts-badge rb';
     $('#tsb0').textContent = 'Fazer primeiro';
-    $('#tsbody0').innerHTML = `
+    $('#tsbody0').innerHTML = vol > 0 ? `
       <div class="dose err">🚰 <b>Drene ${dr.pct}% da água — ${fmt(litros)} L dos seus ${fmt(vol)} L — UMA VEZ SÓ</b> e depois complete com água nova.<small>Regra do MAIOR, não soma: ${partes.join(' · ')}. Esse dreno leva o cianúrico para ~90 ppm e a dureza para ~400 ppm.${semMedir.length ? ' Fora da conta: ' + semMedir.join(' e ') + ' — re-teste para o app contar.' : ''}</small></div>
-      <div class="dose"><b>Passo a passo:</b> ① desligue a bomba e gire a manopla para <b>DRENO</b> · ② abra só o registro do dreno e esgote ${fmt(litros)} L — nunca deixe a bomba puxar ar · ③ com a bomba desligada, manopla de volta para <b>FILTRAR</b> e feche o registro · ④ complete com água nova até o nível normal e circule 2 h · ⑤ <b>re-teste cianúrico e dureza</b> e salve os novos valores na aba Parâmetros.</div>
-      <div class="dose">🔒 <b>Etapas 1, 2 e 3 ficam TRAVADAS até o novo teste</b> — não adianta dosar por cima de água que vai ser trocada.</div>`;
+      <div class="dose"><b>Passo a passo:</b> ① desligue a bomba e gire a manopla para <b>DRENO</b> · ② abra só o registro do dreno e esgote ${fmt(litros)} L — nunca deixe a bomba puxar ar · ③ com a bomba desligada, manopla de volta para <b>FILTRAR</b> e feche o registro · ④ complete com água nova até o nível normal e circule 2 h · ⑤ <b>re-teste cianúrico e dureza</b> e salve os novos valores na aba Parâm.</div>
+      <div class="dose">🔒 <b>Etapas 1, 2 e 3 ficam TRAVADAS até o novo teste</b> — não adianta dosar por cima de água que vai ser trocada.</div>` : `
+      <div class="dose err">🚰 <b>Drene ${dr.pct}% da água — UMA VEZ SÓ</b> e depois complete com água nova.<small>Preencha as medidas na aba Config para o app calcular os litros exatos do dreno.</small></div>`;
     [1,2,3].forEach(i=>{
       const card = document.getElementById('ts'+i);
       const badge = document.getElementById('tsb'+i);
@@ -1886,11 +1836,12 @@ function renderTreat(){
       if(badge){ badge.className = 'ts-badge rb'; badge.textContent = 'Travada'; }
       if(body) body.innerHTML = '<div class="dose err">🔒 <b>Travada até o novo teste.</b> Faça o dreno da Etapa 0, complete com água nova, circule 2 h e re-teste — os novos valores destravam aqui mesmo.</div>';
     });
-    try{ renderLibRegra(); }catch(e2){}
     return;
   }
   const e1 = etapa1(), c = params.cloro;
-  const ok2 = c>=1 && c<=3.5, cAlto = c>3.5, cBaixo = c<1;
+  /* item 2: a faixa do cloro é 1–3 ppm — 3,5 ppm está ACIMA da faixa, NUNCA dentro.
+     Cloro acima de 3,0: SEMPRE aguardar 6 h e re-testar — nunca dose em kg. */
+  const ok2 = c>=1 && c<=3, cAlto = c>3, cBaixo = c<1;
   $('#ts1').className = 'tstep ' + (e1.ok?'ok':'todo');
   $('#tsb1').className = 'ts-badge ' + (e1.ok?'okb':'tob');
   $('#tsb1').textContent = e1.ok ? 'OK' : 'Ajustar';
@@ -1903,8 +1854,8 @@ function renderTreat(){
   $('#tsbody2').innerHTML = ok2
     ? `<div class="dose ok">Cloro em ${fmtVal(PARAMS[1],c)} ppm — dentro da faixa 1–3 ppm.</div>`
     : cAlto
-      ? `<div class="dose">Cloro em ${fmtVal(PARAMS[1],c)} ppm: <b>aguarde</b> — filtre no sol por 6 h e re-teste antes do sulfato.</div>`
-      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez. Aplique ao entardecer, filtro em RECIRCULAR por 15 min, depois FILTRAR. Vinil/Fibra: dilua em balde com água da piscina e espalhe pelas laterais. Azulejo/Cerâmica e Alvenaria: aplique direto ao longo das laterais.</small></div>`;
+      ? `<div class="dose err">Cloro em ${fmtVal(PARAMS[1],c)} ppm — <b>ACIMA da faixa 1–3 ppm</b>. <b>Aguarde 6 h, filtre e re-teste.</b> Com cloro acima de 3 ppm não existe dosagem: nenhum produto agora.</div>`
+      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez. Aplique ao entardecer, filtro em RECIRCULAR por 15 min, depois FILTRAR. Vinil/fibra: dilua em balde com água da piscina e espalhe pelas laterais. Azulejo: aplique direto ao longo das laterais.</small></div>`;
   const g = Math.round(20*getVolume()/1000);
   const decantando = treat && (Date.now()-treat.ts) < 24*3600e3;
   const elapsed = treat ? Date.now()-treat.ts : 0;
@@ -1991,19 +1942,18 @@ $('#shBody').addEventListener('click', e=>{
    Cards oficiais da aba Tratamento — componente isolado (não mexe no Tratamento orientado) */
 const BORDA = {
   vinil:   { nome:'Vinil',                          agua:470, red:30,  apl:'umedecer, borrifar, aguardar 2 a 3 minutos, escovar com escova curva macia, enxaguar.' },
-  ceramica:{ nome:'Azulejo/Cerâmica', agua:400, red:100, apl:'umedecer, borrifar, aguardar 3 a 5 minutos, escovar com escova de nylon, enxaguar.' },
+  ceramica:{ nome:'Cerâmica / Azulejo / Pastilhas', agua:400, red:100, apl:'umedecer, borrifar, aguardar 3 a 5 minutos, escovar com escova de nylon, enxaguar.' },
   fibra:   { nome:'Fibra',                          agua:450, red:50,  apl:'umedecer, borrifar, aguardar 2 a 3 minutos, escovar com escova macia, enxaguar.' }
 };
-const BORDA_POR_TIPO = { vinil:'vinil', fibra:'fibra', azulejo:'ceramica', alvenaria:'ceramica', infinita:'ceramica' };
+const BORDA_POR_TIPO = { vinil:'vinil', fibra:'fibra', alvenaria:'ceramica', infinita:'ceramica' };
 let bordaSel = 'vinil';
 function bordaRender(){
   const chips = $('#bordaChips'), box = $('#bordaDose');
   if(!chips || !box) return;
   chips.querySelectorAll('.pchip').forEach(c=>c.classList.toggle('on', c.dataset.b===bordaSel));
   const b = BORDA[bordaSel] || BORDA.vinil;
-  const mesma = (bordaSel === 'ceramica') ? '<small>· mesma dosagem vale para Alvenaria e Infinita</small>' : '';
   box.innerHTML = `<p class="mtit">Dosagem para borrifador de 500 ml</p>
-    <div class="dose ok"><b>${b.nome}</b>${mesma}: ${b.agua} ml de água limpa + ${b.red} ml de redutor de pH líquido</div>
+    <div class="dose ok"><b>${b.nome}:</b> ${b.agua} ml de água limpa + ${b.red} ml de redutor de pH líquido</div>
     <div class="dose"><b>Aplicação:</b> ${b.apl}</div>
     <div class="dose"><b>Regra geral para todos:</b> preparar apenas para uso imediato, utilizar luvas e óculos, não aplicar sob sol forte, não deixar secar na borda.</div>`;
 }
@@ -2031,19 +1981,14 @@ document.addEventListener('click', e=>{
 /* regra de liberação oficial — amarra Parâmetros (turbidez) + Limpeza de borda + Tratamento */
 function renderLibRegra(){
   const box = $('#libRegra'); if(!box) return;
-  if(!volumeValido()){
-    box.innerHTML = `<div class="dose err" style="margin:0">⚠️ <b>Preencha as medidas primeiro</b> — sem o volume da água não há dosagem nem plano de tratamento.</div>`;
-    return;
-  }
-  const vol = getVolume(), m3 = vol/1000;
+  const m3 = getVolume()/1000;
   if(params.turbidez <= 20){
-    box.innerHTML = `<div class="dose ok" style="margin:0"><b>🟢 Água CRISTALINA — executa apenas a Limpeza de borda</b>, nesta ordem: medir, corrigir o pH se necessário, borrifar, escovar, enxaguar e filtrar 2 h. Cloro de choque e clarificante coagulante só entram quando a água estiver turva.</div>`;
+    box.innerHTML = `<div class="dose ok" style="margin:0"><b>🟢 Água CRISTALINA — executa apenas a Limpeza de borda</b>, nesta ordem: medir, corrigir o pH se necessário, borrifar, escovar, enxaguar e filtrar 2 h. Algicida de choque e clarificante só entram quando a água estiver turva.</div>`;
   } else {
     const w = store.get('poolapp.weather', null);
     const hBase = w ? (w.temp>=30 ? 8 : w.temp>=28 ? 6 : 4) : 0;
     const hExtra = hBase ? Math.round(hBase*1.25) : 0;
-    const filtroTxt = hExtra ? ' (+'+Math.round(hBase*0.25)+' h = '+hExtra+' h hoje)' : '';
-    box.innerHTML = `<div class="dose" style="margin:0"><b>🟡 Água TURVA — o principal é Cloro de choque + Clarificante coagulante.</b> Após a limpeza de borda: cloro de choque <b>${fmtG(Math.round(vol*0.028))}</b> (28 g por 1.000 L) · clarificante coagulante conforme o rótulo (${fmtMl(8*m3)} de referência) — o clarificante trabalha NO FILTRO: única regra de filtração é <b>+25% de tempo</b>${filtroTxt}. O algicida de choque é opcional, só preventivo de algas: <b>+25% de dosagem adicional</b> sobre a metragem = <b>${fmtMl(9.375*m3)}</b> (7,5 + 25% = 9,375 mL por m³).<small>Decantação e aspiração para o dreno só com floculante/sulfato de alumínio (Etapa 3) — clarificante coagulante é para FILTRAR. Exemplo — Resultado: água turva com gordura na borda. Ação: limpeza de borda com a dosagem do seu revestimento; em seguida, cloro de choque + clarificante coagulante para coagular a oleosidade em suspensão; filtrar com +25% do tempo do clima${filtroTxt}.</small></div>`;
+    box.innerHTML = `<div class="dose" style="margin:0"><b>🟡 Água TURVA — liberado na loja: Algicida de choque + Clarificante coagulante.</b> Após a limpeza de borda: algicida de choque com <b>25% de dosagem adicional</b> sobre a metragem (${fmtMl(7.5*m3)} — 7,5 mL por m³) · clarificante coagulante conforme o rótulo (${fmtMl(8*m3)} de referência) · filtração +25%${hExtra ? ' ('+hExtra+' h hoje)' : ''} · decantação e aspiração para o dreno no dia seguinte.<small>Exemplo — Resultado: água turva com gordura na borda. Ação: limpeza de borda com a dosagem do seu revestimento; em seguida, algicida de choque + clarificante coagulante para coagular a oleosidade em suspensão; filtrar 6 h.</small></div>`;
   }
 }
 /* doses do guia de água colorida / manchas — sempre no volume atual da piscina */
@@ -2052,10 +1997,10 @@ function renderAguaColorida(){
   const set = (id, txt)=>{ const el = document.getElementById(id); if(el) el.textContent = txt; };
   set('acIntro',  'Método em 3 passos para água esverdeada, amarelada ou sépia — dosado para os seus '+fmt(vol)+' L.');
   set('ac2Intro', 'Para poucas manchas localizadas (pontos no fundo), o tratamento é dirigido direto na mancha — dosado para os seus '+fmt(vol)+' L:');
-  set('acLeve',   fmtMl(15*vol/1000));   /* 15 mL por 1.000 L */
-  set('acGrave',  fmtMl(50*vol/1000));   /* 50 mL por 1.000 L */
-  set('acConc',   fmtG(14*vol/1000));    /* 14 g por 1.000 L */
-  set('acComum',  fmtG(28*vol/1000));    /* 28 g por 1.000 L */
+  set('acLeve',   fmtMl(15*vol/1000));   /* 675 mL  @ 45.000 L */
+  set('acGrave',  fmtMl(50*vol/1000));   /* 2,25 L  @ 45.000 L */
+  set('acConc',   fmtG(14*vol/1000));    /* 630 g   @ 45.000 L */
+  set('acComum',  fmtG(28*vol/1000));    /* 1,3 kg  @ 45.000 L */
   set('acPonto',  fmtMl(100));
   set('acEspalh', fmtMl(50*vol/1000));
 }
@@ -2558,7 +2503,7 @@ function openPaywall(){
 $('#btnManual').addEventListener('click', ()=>{
   openSheet('Manual do PoolApp', `
     <p class="sh-intro">Tudo funciona offline — só o clima e o pagamento precisam de internet.</p>
-    <div class="vs-step"><span class="n">1</span><span><b>Volume da água</b> — use − e + (passo de 1.000 L) ou digite o valor. A litragem rápida calcula pela forma escolhida (retangular/quadrada: C × L × P; redonda: π × raio², com C como diâmetro; oval: π × C/2 × L/2) × 1.000 e o botão “Aplicar volume acima” leva o resultado para o volume. Tem hidromassagem? Marque em “Minha hidro tem?” que o volume dela é somado nas doses. Borda infinita: some o volume do reservatório manualmente.</span></div>
+    <div class="vs-step"><span class="n">1</span><span><b>Volume da água</b> — use − e + (passo de 1.000 L) ou digite o valor. A litragem rápida calcula comp × larg × prof × 1.000 e o botão “Aplicar volume acima” leva o resultado para o volume. Tem hidromassagem? Marque em “Minha hidro tem?” que o volume dela é somado nas doses.</span></div>
     <div class="vs-step"><span class="n">2</span><span><b>Válvula do filtro</b> — arraste a manopla ou toque num número; cada posição traz dicas e o passo a passo correto.</span></div>
     <div class="vs-step"><span class="n">3</span><span><b>Registros</b> — gire a manopla: cinza é fechado, verde é aberto. São 4: DRENO, SKIMMER, ASPIRAÇÃO e HIDROMASSAGEM. Combinação perigosa? O card vibra e pisca em vermelho.</span></div>
     <div class="vs-step"><span class="n">4</span><span><b>Parâmetros</b> — pH e cloro têm slider direto no card; toque no card para medir os outros. Metais (ferro e cobre), Dureza Cálcica e Cianúrico têm a opção “Não sei”. As doses são calculadas para o seu volume.</span></div>
