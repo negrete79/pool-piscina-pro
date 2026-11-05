@@ -6,6 +6,11 @@
 <!-- Área administrativa — não indexar -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0F5C5C">
+<!-- PWA do PAINEL — instalação separada do site principal (não usa os ícones/manifest do site) -->
+<link rel="manifest" href="/manifest-admin.json">
+<link rel="apple-touch-icon" href="/icon-admin-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Painel Pool">
 <title>PoolApp · Admin</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1232,6 +1237,21 @@ $('#btnWa').addEventListener('click', ()=>{
   }
 })();
 setInterval(()=>{ if($('#viewPainel').hidden === false && !sessaoValida()){ tokenClear(); mostrarLogin('Sessão de 2 h expirada — entre novamente.'); } }, 60000);
+</script>
+<script>
+/* PWA do painel — registro SEPARADO do site principal.
+   Escopo próprio /admin.html: este service worker controla SÓ o painel,
+   nunca o site (que usa o sw.js com escopo /). Try/catch em tudo:
+   se o PWA falhar, o painel segue funcionando normal. */
+try{
+  if('serviceWorker' in navigator){
+    addEventListener('load', function(){
+      navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin.html' })
+        .then(function(){ console.log('[Painel] PWA ativo (escopo /admin.html)'); })
+        .catch(function(e){ console.log('[Painel] PWA indisponível — painel segue normal: ' + (e && e.message)); });
+    });
+  }
+}catch(e){ /* silencioso — o painel nunca depende do SW */ }
 </script>
 </body>
 </html>
