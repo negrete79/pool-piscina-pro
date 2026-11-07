@@ -1615,8 +1615,8 @@ function doseFor(p,v){
     return {tone:'t-ok', h:'Cloro na faixa de 1–3 ppm — água protegida contra algas e bactérias.'};
   }
   if(p.id==='turbidez'){
-    if(v>30) return {tone:'t-warn', h:`<b>Sulfato de alumínio:</b> ${fmtG(Math.round(20*m3))} (20 g por m³)${TAG_SULF}<small>Recircular 1 h, repouso 12 h e aspire em DRENAR — não ligue o filtro nesse período. Depois filtre 8 h e retro-lave.</small>`};
-    if(v>0)  return {tone:'t-act', h:`<span class="choque">⚠️ Adicione agora — Algicida de CHOQUE: ${fmtMl(6*m3)} (6 mL por m³)</span><b style="display:block;margin-top:9px">Clarificante:</b> ${fmtMl(8*m3)}${TAG_CLAR}<small>Aplique o choque + o clarificante e filtre 12 h. <b>NÃO use sulfato ainda!</b> Só se passar de 30%.</small>`};
+    if(v>30){ const doseS = v>=90?40:v>=70?30:20; return {tone:'t-warn', h:`<b>Sulfato de alumínio:</b> ${fmtG(Math.round(doseS*m3))} (${doseS} g por m³)${TAG_SULF}<small>Recircular 1 h, repouso 12 h e aspire em DRENAR — não ligue o filtro nesse período. Depois filtre 8 h e retro-lave.</small>`}; }
+    if(v>0){ const doseAlg = v>=25?8:6; const doseClar = v>=25?12:8; return {tone:'t-act', h:`<span class="choque">⚠️ Adicione agora — Algicida de CHOQUE: ${fmtMl(doseAlg*m3)} (${doseAlg} mL por m³)</span><b style="display:block;margin-top:9px">Clarificante:</b> ${fmtMl(doseClar*m3)}${TAG_CLAR}<small>Aplique o choque + o clarificante e filtre 12 h. <b>NÃO use sulfato ainda!</b> Só se passar de 30%.</small>`}; }
     return {tone:'t-ok', h:'Água cristalina — transparência dentro do ideal. Só manter a rotina.'};
   }
   if(p.id==='alcalinidade'){
@@ -1628,7 +1628,7 @@ function doseFor(p,v){
   }
   if(p.id==='dureza'){
     if(v<200) return {tone:'t-act', h:`<b>Elevador de dureza (cloreto de cálcio):</b> ${fmtG(1.5*(200-v)*m3)}<small>Água “fome” ataca o revestimento e a estrutura.</small>`};
-    if(v>400) return {tone:'t-act', h:'<b>Dureza alta:</b> dilua 20–30% da água e complete com água nova (mais macia).'};
+    if(v>400) return {tone:'t-act', h:'<b>Dureza alta:</b> dilua 20–30% da água e complete com água nova.'};
     return {tone:'t-ok', h:'Dureza equilibrada — protege vinil, fibra e metais.'};
   }
   if(p.id==='cianurico'){
@@ -1858,7 +1858,8 @@ function renderTreat(){
     ? `<div class="dose ok">Cloro em ${fmtVal(PARAMS[1],c)} ppm — dentro da faixa 1–3 ppm.</div>`
     : cAlto
       ? `<div class="dose err">Cloro em ${fmtVal(PARAMS[1],c)} ppm — <b>ACIMA da faixa 1–3 ppm</b>. <b>Aguarde 6 h, filtre e re-teste.</b> Com cloro acima de 3 ppm não existe dosagem: nenhum produto agora.</div>`
-      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez. Aplique ao entardecer, filtro em RECIRCULAR por 15 min, depois FILTRAR. Vinil/fibra: dilua em balde com água da piscina e espalhe pelas laterais. Azulejo: aplique direto ao longo das laterais.</small></div>`;
+      : `<div class="dose"><b>Supercloração:</b> ${fmtG(Math.round(getVolume()*0.028))} (28 g por 1.000 L)${TAG_CLORO}<small>Mata bactérias e algas de uma vez. Aplique ao entardecer.
+Vinil / fibra / azulejo / pastilha: sempre dilua em um balde com água da piscina. Depois espalhe bem devagar pelas laterais, com o filtro em RECIRCULAR por 2h.dia seguinte deixe em FILTRAR.</small></div>`;
   const g = Math.round(20*getVolume()/1000);
   const decantando = treat && (Date.now()-treat.ts) < 24*3600e3;
   const elapsed = treat ? Date.now()-treat.ts : 0;
@@ -1883,7 +1884,7 @@ function renderTreat(){
       <button class="btn" id="btnConfirm">Confirmar que apliquei — ${fmtG(g)}</button>`;
     if(sul.tipo === 'aviso_turbidez'){
       cls3='todo'; b3t='Liberada'; b3c='tob';
-      body3 = `<div class="dose warn-pisca">✅ <b>Água muito turva detectada — Sulfato liberado!</b> Para eficiência máxima, mantenha alcalinidade em 100 ppm. Turbidez alta exige decantação.</div>` + doseHtml;
+      body3 = `<div class="dose warn-pisca">✅ <b>Água muito turva detectada — Sulfato liberado!</b>Atenção Para eficiência máxima, mantenha alcalinidade em 100 ppm. Turbidez alta exige decantação.</div>` + doseHtml;
     } else if(sul.tipo === 'aviso_100'){
       cls3='todo'; b3t='Liberada'; b3c='tob';
       body3 = `<div class="dose warn-pisca">✅ Liberado. Para melhor eficiência, alcalinidade ideal é 100 ppm.</div>` + doseHtml;
@@ -1916,9 +1917,9 @@ function renderAllDoses(){ renderParams(); renderTreat(); renderAguaColorida(); 
 function diagList(){
   const vol = getVolume();
   return [
-   {t:'Ainda verde (algas)', r:[`Supercloração (na loja: cloro granulado ou cloro choque — químico hipoclorito de cálcio): ${fmtG(Math.round(vol*0.028))} (28 g por 1.000 L) + algicida de choque (matador de algas — químico quaternário de amônio): ${fmtMl(20*vol/1000)}.`,'Escove paredes e fundo antes de aplicar.','Filtro em FILTRAR por 8 h; retro-lave se a pressão subir.']},
+   {t:'Ainda verde (algas)', r:[`Supercloração: cloro granulado ou cloro choque — químico hipoclorito de cálcio): ${fmtG(Math.round(vol*0.028))} (28 g por 1.000 L) + algicida de choque (matador de algas — químico quaternário de amônio): ${fmtMl(20*vol/1000)}.`,'Escove paredes e fundo antes de aplicar.','Filtro em FILTRAR por 8 h; retro-lave se a pressão subir.']},
    {t:'Turva branca', r:['É alumínio em suspensão: filtre 4–6 h direto.',`Não assentou? Clarificante (químico: sulfato de alumínio diluído ou polímero — junta a sujeira fina pro filtro): ${fmtMl(8*vol/1000)}.`,'Retro-lave 2x ao dia até o visor limpar.']},
-   {t:'Amarelada / sépia (metais)', r:['Ferro/cobre/manganês precipitou: NÃO aplique cloro agora.',`Diminuidor de metais (na loja: sequestrante de metais ou antiferrugem — químico EDTA/HEDP): ${fmtMl(15*vol/1000)} (15 mL/1.000 L), filtro ligado.`,'Filtre 6 h e retro-lave.']},
+   {t:'Amarelada / sépia (metais)', r:['Ferro/cobre/manganês precipitou: NÃO aplique cloro agora.',`Diminuidor de metais sequestrante de metais ou antiferrugem — químico EDTA/HEDP): ${fmtMl(15*vol/1000)} (15 mL/1.000 L), filtro ligado.`,'Filtre 6 h e retro-lave.']},
    {t:'Esverdeada clara', r:[`Início de algas: choque de cloro granulado: ${fmtG(Math.round(15*vol/1000))} (15 g/m³).`,'Escove a linha d’água e os cantos.','Filtre 8 h e re-teste o cloro em 24 h.']},
    {t:'Fundo sujo / manchado', r:['Sedimento assentou certo! Aspire em modo ASPIRAR (dreno fechado, aspiração aberta).','Movimento lento e reto, sem levantar a nuvem.']},
    {t:'Cristalina — deu certo!', r:['Aspire o fundo em modo ASPIRAR para tirar o sedimento.','Volte os registros: DRENO fechado, SKIMMER e ASPIRAÇÃO abertos.','Manopla em FILTRAR e filtre o tempo indicado pelo clima.']}
@@ -1991,8 +1992,10 @@ function renderLibRegra(){
     const w = store.get('poolapp.weather', null);
     const hBase = w ? (w.temp>=30 ? 8 : w.temp>=28 ? 6 : 4) : 0;
     const hExtra = hBase ? Math.round(hBase*1.25) : 0;
-    box.innerHTML = `<div class="dose" style="margin:0"><b>🟡 Água TURVA — liberado na loja: Algicida de choque + Clarificante coagulante.</b> Após a limpeza de borda: algicida de choque com <b>25% de dosagem adicional</b> sobre a metragem (${fmtMl(7.5*m3)} — 7,5 mL por m³) · clarificante coagulante conforme o rótulo (${fmtMl(8*m3)} de referência) · filtração +25%${hExtra ? ' ('+hExtra+' h hoje)' : ''} · decantação e aspiração para o dreno no dia seguinte.<small>Exemplo — Resultado: água turva com gordura na borda. Ação: limpeza de borda com a dosagem do seu revestimento; em seguida, algicida de choque + clarificante coagulante para coagular a oleosidade em suspensão; filtrar 6 h.</small></div>`;
-  }
+    const turb = params.turbidez;
+    const doseAlg = turb>=90?18:turb>=70?15:turb>=45?12:turb>=25?8:6;
+    const doseClar = turb>=90?20:turb>=70?18:turb>=45?15:turb>=25?12:8;
+    box.innerHTML = `<div class="dose" style="margin:0"><b>🟡 Água TURVA: Algicida de choque + Clarificante coagulante.</b> Após a limpeza de borda e com pH entre 7.2 e 7.6: algicida de choque com <b>25% de dosagem adicional já incluso (${fmtMl(doseAlg*m3)} - ${doseAlg} mL por m³)</b> · clarificante coagulante conforme o rótulo (${fmtMl(doseClar*m3)} - ${doseClar} mL por m³) de referência) Dilua sempre em balde com água da piscina, espalhe pelas laterais, RECIRCULAR por 2h com timer pra desligar sozinho. No dia seguinte, aspire para o DRENO e depois deixe em FILTRAR${hExtra ? ' ('+hExtra+' h hoje)' : ''}.<small>Exemplo — Resultado: água turva com gordura na borda. Ação: limpeza de borda com a dosagem do seu revestimento; em seguida, algicida de choque para matar a alga e clarificante para coagular a oleosidade em suspensão.</small></div>`;}
 }
 /* doses do guia de água colorida / manchas — sempre no volume atual da piscina */
 function renderAguaColorida(){
@@ -2088,7 +2091,7 @@ function codeInfo(c, noite){
   if(c===1)  return [(noite?'🌙':'🌤️'),'Sol predominante'];
   if(c===2)  return [(noite?'🌙':'⛅'),'Parcialmente nublado'];
   if(c===3)  return ['☁️','Nublado'];
-  if(c<=48)  return ['🌫️','Neblina'];
+  if(c<=48)  return ['☁️️','Neblina'];
   if(c<=57)  return ['🌦️','Garoa'];
   if(c<=67)  return ['🌧️','Chuva'];
   if(c<=77)  return ['🌨️','Neve'];
