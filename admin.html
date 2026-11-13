@@ -2,915 +2,1334 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
-<meta name="description" content="NEGRET'S — Painel Admin de licenças: ativos, pagamentos, pendências e códigos de ativação.">
-<title>NEGRET'S · Painel Admin</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cpath d='M36 4 68 36 36 68 4 36Z' fill='%23080808' stroke='%23d4af37' stroke-width='3'/%3E%3Ctext x='36' y='48' font-family='Georgia,serif' font-size='32' font-weight='bold' fill='%23d4af37' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Área administrativa — não indexar -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0F5C5C">
+<!-- PWA do PAINEL — instalação separada do site principal (não usa os ícones/manifest do site) -->
+<link rel="manifest" href="/manifest-admin.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Painel Pool">
+<title>PoolApp · Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#080808; --card:#121212; --line:#1e1e1e;
-  --gold:#d4af37; --gold-d:#a8842c;
-  --ink:#ece7dc; --mut:#8f897a;
-  --serif:'Cinzel',Georgia,serif;
-  --sans:'Jost','Avenir Next','Segoe UI',sans-serif;
-  --ok:#8fd48f; --warn:#f0b95a; --bad:#e07070; --mutc:#9a948a;
+body{font-family:'Inter',sans-serif}
+[hidden]{display:none!important}
+.field{position:relative}
+.field input{width:100%;height:52px;border-radius:12px;border:1px solid #d1d5db;background:#f9fafb;padding:0 44px 0 42px;font-size:14.5px;font-weight:500;color:#111827;outline:none;transition:.2s}
+.field input:focus{background:#fff;border-color:#0F5C5C;box-shadow:0 0 0 3px rgba(15,92,92,.12)}
+.icon-left{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:#6b7280;pointer-events:none}
+.icon-left svg{width:20px;height:20px}
+.eyeBtn{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:8px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:#6b7280}
+.eyeBtn:hover{background:#f3f4f6;color:#111827}
+.eyeBtn svg{width:18px;height:18px}
+.btn{width:100%;height:52px;border-radius:12px;background:#0F5C5C;color:#fff;font-weight:700;font-size:15px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:#0A3D3D}.btn:disabled{opacity:.6;cursor:default}
+.spin{width:16px;height:16px;border-radius:99px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite;flex:none}
+.spin.dark{border-color:#c8dddd;border-top-color:#0F5C5C}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toastbox{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{padding:11px 18px;border-radius:12px;color:#fff;font-weight:600;font-size:13px;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.22);animation:tIn .25s ease-out;text-align:center}
+.toast.err{background:#b91c1c}.toast.ok{background:#15803d}.toast.warn{background:#b45309}.toast.info{background:#0F5C5C}
+.toast.out{opacity:0;transition:.3s}
+@keyframes tIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1}}
+.badge{display:inline-block;padding:4px 11px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-ok{background:#dcfce7;color:#15803d}.b-pend{background:#fef9c3;color:#a16207}
+.b-can{background:#fee2e2;color:#b91c1c}.b-test{background:#dbeafe;color:#1d4ed8}
+.b-src{background:#e0f2fe;color:#0369a1}.b-cod{background:#ede9fe;color:#6d28d9}
+.dot-on{width:10px;height:10px;border-radius:99px;background:#22c55e;display:inline-block;box-shadow:0 0 0 3px rgba(34,197,94,.16);animation:pp 2.2s ease-in-out infinite}
+@keyframes pp{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,.16)}50%{box-shadow:0 0 0 7px rgba(34,197,94,.06)}}
+.act{padding:7px 10px;border-radius:10px;font-size:11.5px;font-weight:600;border:1px solid #d1d5db;color:#374151;background:#fff;transition:all .15s;white-space:nowrap;cursor:pointer}
+.act:hover{background:#f9fafb;border-color:#9ca3af}
+.act:disabled{opacity:.4;cursor:default}
+.act.pri{background:#0F5C5C;border-color:#0F5C5C;color:#fff}.act.pri:hover{background:#0A3D3D}
+.act.del{border-color:#fca5a5;color:#dc2626}.act.del:hover{background:#fef2f2}
+.modal{position:fixed;inset:0;z-index:90;background:rgba(17,24,39,.5);display:grid;place-items:center;padding:18px}
+.mcard{width:100%;max-width:430px;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:22px 20px;box-shadow:0 24px 70px rgba(0,0,0,.3);animation:mIn .22s ease-out;max-height:88vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1}}
+.mcard input[type=text],.mcard input[type=email],.mcard input[type=password]{width:100%;height:46px;border-radius:12px;border:1px solid #d1d5db;background:#f9fafb;padding:0 12px;font-size:14px;font-weight:500;color:#111827;outline:none;transition:.2s}
+.mcard input:focus{background:#fff;border-color:#0F5C5C;box-shadow:0 0 0 3px rgba(15,92,92,.12)}
+.mcard label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin:12px 0 5px}
+.mcard .mfield{position:relative}
+.mcard .mfield input{padding-left:40px}
+.mcard .mfield .eyeBtn{width:34px;height:34px}
+.logline{font-size:11.5px;padding:5px 0;border-bottom:1px dashed #e5e7eb;color:#4b5563}
+.stcard{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:13px 15px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.stcard b{display:block;font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.tbl{width:100%;text-align:left;font-size:13px;border-collapse:collapse}
+table.tbl th{background:#f9fafb;color:#6b7280;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:11px 12px;white-space:nowrap}
+table.tbl td{padding:11px 12px;border-top:1px solid #f3f4f6;vertical-align:top}
+table.tbl tbody tr:hover{background:#f9fafb}
+/* mobile: tabela vira cards — todas as ações (inclusive 🗑️ excluir) sempre visíveis */
+@media (max-width:640px){
+  .tblwrap{overflow:visible}
+  table.tbl{min-width:0!important}
+  table.tbl thead{display:none}
+  table.tbl, table.tbl tbody{display:block}
+  table.tbl tbody tr{display:block;border-top:1px solid #e5e7eb;padding:12px 40px 12px 14px;position:relative}
+  table.tbl tbody tr:hover{background:#fff}
+  table.tbl td{display:flex;align-items:center;gap:10px;border:0;padding:3px 0;font-size:13px;flex-wrap:wrap}
+  table.tbl td[data-l]::before{content:attr(data-l);flex:none;width:72px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b7280}
+  table.tbl td[data-nolabel]::before{display:none}
+  table.tbl td.ckcell{position:absolute;top:12px;right:12px}
+  table.tbl td.acts{display:flex;flex-wrap:wrap;gap:6px;padding-top:9px;margin-top:7px;border-top:1px dashed #f3f4f6}
+  table.tbl td.acts::before{display:none}
+  #filtros{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #filtros::-webkit-scrollbar{display:none}
+  #filtros .fil{flex:none}
 }
-body.light{
-  --bg:#f3efe4; --card:#ffffff; --line:#e2dcc9;
-  --ink:#1c1a14; --mut:#7a7466;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
-::selection{background:rgba(212,175,55,.35)}
-button,input,select{font-family:var(--sans);font-size:15px;color:var(--ink)}
-button{cursor:pointer}
-.wrap{max-width:560px;margin:0 auto;padding:0 16px}
-.ic{width:20px;height:20px;flex:0 0 auto}
-/* ===== LOGIN ===== */
-#vLogin{display:none;min-height:100vh;align-items:center;justify-content:center;padding:28px 16px}
-#vLogin.on{display:flex}
-.lg-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 22px 20px}
-.lg-head{display:flex;align-items:center;gap:14px;margin-bottom:22px}
-.lg-logo{width:56px;height:56px;border-radius:15px;background:linear-gradient(150deg,#e8c95c,var(--gold) 55%,var(--gold-d));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(212,175,55,.28);flex:0 0 auto}
-.lg-logo svg{width:28px;height:28px}
-.lg-t{font-size:21px;font-weight:700;letter-spacing:.01em;line-height:1.15}
-.lg-s{font-size:14px;color:var(--mut);margin-top:2px}
-.lg-err{display:none;background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.45);color:var(--bad);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:12px}
-.lg-err.on{display:block}
-.fld{position:relative;margin-bottom:14px}
-.fld .fic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mut);width:19px;height:19px}
-.fld input{width:100%;height:54px;background:var(--bg);border:1px solid #2a2820;border-radius:15px;padding:0 48px 0 44px;font-size:16px;outline:none;transition:border-color .2s}
-body.light .fld input{border-color:#d8d2bd}
-.fld input:focus{border-color:var(--gold)}
-.fld.err input{border-color:#e07070!important;box-shadow:0 0 0 2px rgba(224,112,112,.18)}
-.fld.err input:focus{border-color:#e07070}
-.fld .peye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
-.fld .peye:active{color:var(--gold)}
-.lembrar{display:flex;align-items:center;gap:10px;font-size:14.5px;margin:2px 0 16px;user-select:none;cursor:pointer}
-.lembrar input{width:19px;height:19px;accent-color:var(--gold)}
-.btn-g{width:100%;height:54px;border:0;border-radius:15px;background:linear-gradient(160deg,#e8c95c,var(--gold) 60%,var(--gold-d));color:#080808;font-weight:700;font-size:17px;letter-spacing:.01em;box-shadow:0 8px 24px rgba(212,175,55,.3)}
-.btn-g:active{transform:scale(.98)}
-.lg-div{height:1px;background:var(--line);margin:20px 0 0}
-.lg-forgot{display:block;width:100%;background:none;border:0;color:var(--gold);font-weight:600;font-size:15px;text-align:center;padding:18px 0 6px}
-.foot{max-width:560px;margin:18px auto 0;padding:0 16px 26px;text-align:center;font-size:12.5px;color:var(--mut)}
-.foot b{color:var(--gold);font-weight:600}
-/* ===== DASH ===== */
-#vDash{display:none;padding-bottom:40px}
-#vDash.on{display:block}
-.dh{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0}
-.dh::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.45),transparent)}
-.dh-row{display:flex;align-items:center;gap:9px}
-.dh-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,#e8c95c,var(--gold) 55%,var(--gold-d));display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.dh-logo svg{width:21px;height:21px}
-.dh-who{min-width:0;flex:1 1 auto;margin-right:auto}
-.dh-nome{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dh-nome button{background:none;border:0;color:var(--mut);padding:2px}
-.dh-mail{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dh-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:none;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:0 0 auto}
-.dh-btn:active{background:rgba(212,175,55,.1)}
-.dh-sair{height:40px;padding:0 13px;border-radius:12px;border:1px solid rgba(224,112,112,.55);background:none;color:var(--bad);font-weight:600;font-size:14.5px;flex:0 0 auto}
-.dh-sair:active{background:rgba(224,112,112,.12)}
-/* stats */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:16px 0 0}
-.stat{background:linear-gradient(160deg,var(--card),var(--bg));border:1px solid var(--line);border-radius:16px;padding:15px 16px}
-.stat.full{grid-column:1/-1}
-.stat .lb{font-size:10.5px;letter-spacing:.18em;color:var(--mut);font-weight:500}
-.stat .vl{font-family:var(--serif);font-weight:700;font-size:34px;margin-top:6px;line-height:1;color:var(--gold)}
-.stat .vl.sm{font-size:26px}
-.stat.ok .vl{color:var(--ok)}
-.stat.pd .vl{color:var(--warn)}
-.stat.bd .vl{color:var(--bad)}
-.stat .sm2{font-size:11.5px;color:var(--mut);margin-top:5px}
-/* controles */
-.ctl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:16px 0 0}
-.search{position:relative}
-.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mut)}
-.search input{width:100%;height:48px;background:var(--bg);border:1px solid #2a2820;border-radius:14px;padding:0 14px 0 42px;font-size:15px;outline:none}
-body.light .search input{border-color:#d8d2bd}
-.search input:focus{border-color:var(--gold)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
-.chip{background:none;border:1px solid var(--line);color:var(--mut);border-radius:11px;padding:8px 13px;font-size:13.5px;font-weight:500}
-.chip .n{display:inline-flex;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:rgba(212,175,55,.16);color:var(--gold);font-size:10.5px;align-items:center;justify-content:center;margin-left:5px;font-weight:600}
-.chip.on{background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.5);color:var(--gold)}
-.acts2{display:flex;gap:10px;margin-top:13px}
-.acts2 .btn-o{flex:1;height:46px;border-radius:13px;border:1px solid rgba(212,175,55,.5);background:none;color:var(--gold);font-weight:600;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px}
-.acts2 .btn-o:active{background:rgba(212,175,55,.1)}
-/* registros */
-.rec{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px 15px;margin-top:12px}
-.rc-row{display:flex;align-items:baseline;gap:10px;padding:4px 0}
-.rc-l{font-size:10px;letter-spacing:.16em;color:var(--mut);flex:0 0 78px;font-weight:500}
-.rc-v{font-size:14.5px;min-width:0;overflow-wrap:anywhere}
-.rc-v b{font-weight:600}
-.rc-top{display:flex;align-items:center}
-.rc-top .rc-v{flex:1}
-.rc-sel{width:20px;height:20px;accent-color:var(--gold);flex:0 0 auto;margin-left:8px}
-.badge{display:inline-block;padding:3.5px 12px;border-radius:99px;font-size:12.5px;font-weight:600;letter-spacing:.02em}
-.b-ativo{background:rgba(143,212,143,.14);color:var(--ok)}
-.b-trial{background:rgba(212,175,55,.15);color:var(--gold)}
-.b-pend{background:rgba(240,185,90,.15);color:var(--warn)}
-.b-exp{background:rgba(224,112,112,.15);color:var(--bad)}
-.b-desist{background:rgba(154,148,138,.15);color:var(--mutc)}
-.b-canc{background:rgba(201,106,106,.18);color:#c96a6a}
-.taglocal{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.08em;background:rgba(212,175,55,.16);color:var(--gold);margin-left:7px;vertical-align:1px}
-.rc-acts{display:flex;gap:9px;margin-top:11px;flex-wrap:wrap}
-.rc-acts .b1{flex:1;min-width:118px;height:40px;border-radius:11px;border:1px solid rgba(212,175,55,.5);background:none;color:var(--gold);font-weight:600;font-size:13px}
-.rc-acts .b2{flex:1;min-width:96px;height:40px;border-radius:11px;border:1px solid rgba(224,112,112,.45);background:none;color:var(--bad);font-weight:600;font-size:13px}
-.rc-acts .b2.rev{border-color:rgba(143,212,143,.5);color:var(--ok)}
-.rc-code{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px}
-.rc-code .pl4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
-.rc-code .pl4 button{height:40px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink);font-weight:600;font-size:13px}
-.rc-code .pl4 button:active{border-color:var(--gold);color:var(--gold)}
-.codebox{background:var(--bg);border:1px solid rgba(212,175,55,.55);border-radius:12px;padding:11px 13px;text-align:center;font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.14em;color:var(--gold)}
-.rc-code .mini{display:flex;gap:8px;margin-top:9px}
-.rc-code .mini button{flex:1;height:38px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink);font-size:12.5px;font-weight:600}
-/* v3.6.5 — gestão de licenças: planos, segurança e modais */
-.pl4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
-.pl4 button{height:42px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink);font-weight:600;font-size:13px}
-.pl4 button.on{border-color:var(--gold);color:var(--gold);background:rgba(212,175,55,.12)}
-.pl4 button:active{border-color:var(--gold);color:var(--gold)}
-.err2{display:none;background:rgba(224,112,112,.12);border:1px solid rgba(224,112,112,.5);color:var(--bad);border-radius:11px;padding:9px 12px;font-size:13px;margin-top:10px}
-.err2.on{display:block}
-.fld-err{border-color:var(--bad)!important}
-.sh-dev{background:var(--bg);border:1px solid rgba(212,175,55,.5);border-radius:12px;padding:9px 12px;text-align:center;font-family:var(--serif);font-weight:700;letter-spacing:.1em;color:var(--gold);font-size:16px;margin:9px 0}
-.empty{border:1px dashed var(--line);border-radius:15px;padding:26px 16px;text-align:center;color:var(--mut);font-size:13.5px;margin-top:14px}
-/* barra bulk */
-.bulk{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;gap:10px;align-items:center;background:var(--card);border-top:1px solid rgba(212,175,55,.4);padding:11px 14px calc(11px + env(safe-area-inset-bottom,0px))}
-.bulk.on{display:flex}
-.bulk span{font-size:13.5px;color:var(--mut);margin-right:auto}
-.bulk button{height:40px;padding:0 14px;border-radius:11px;font-weight:600;font-size:13px;background:none}
-.bulk .b1{border:1px solid rgba(224,112,112,.5);color:var(--bad)}
-.bulk .b2{border:1px solid var(--line);color:var(--ink)}
-/* v3.7 — ativação e pagamento */
-.ap-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}
-.ap-t{font-family:var(--serif);color:var(--gold);letter-spacing:.12em;font-size:13px;margin-bottom:2px}
-.ativ-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line)}
-.ativ-row:last-child{border-bottom:none}
-.ativ-f{text-align:right;color:var(--mut);font-size:11.5px}
-.ativ-f b{color:var(--gold);font-size:12px}
-/* sheet */
-.mask{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:200;display:none;align-items:flex-end;justify-content:center}
-.mask.on{display:flex}
-.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom,0px));animation:up .22s}
-@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-.m-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.m-head h3{font-family:var(--serif);color:var(--gold);font-size:17px;letter-spacing:.1em}
-.m-x{background:none;border:1px solid var(--line);color:var(--mut);width:34px;height:34px;border-radius:10px;font-size:19px}
-.sh-lbl{display:block;font-size:10px;letter-spacing:.16em;color:var(--mut);margin:13px 0 5px;font-weight:500}
-.sh-in{width:100%;height:48px;background:var(--bg);border:1px solid #2a2820;border-radius:13px;padding:0 13px;font-size:15px;outline:none}
-body.light .sh-in{border-color:#d8d2bd}
-.sh-in:focus{border-color:var(--gold)}
-.sh-note{font-size:12.5px;color:var(--mut);margin-top:6px}
-.sh-kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
-.sh-kv b{font-weight:600;overflow-wrap:anywhere;text-align:right}
-/* toasts */
-#toasts{position:fixed;left:0;right:0;bottom:24px;z-index:400;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
-.toast{background:#1a1712;border:1px solid rgba(212,175,55,.55);color:#f0e6c8;padding:11px 18px;border-radius:99px;font-size:13.5px;max-width:88vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:tin .2s}
-body.light .toast{background:#2a2620}
-@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:640px){.acts{display:flex;flex-wrap:wrap;gap:5px}}
+/* header no celular: nome do admin precisa caber — aperta botões e ícone */
+@media (max-width:640px){.hdicon{width:36px!important;height:36px!important;font-size:17px!important}}
+@media (max-width:460px){.hidel{display:none}#btnTema,#btnWa,#btnCfg,#btnInstalar,#btnSair{padding-left:9px;padding-right:9px}}
+/* ================= MODO ESCURO (pa_theme no localStorage) ================= */
+html.dark body{background:#0e1618;color:#d7e0e0}
+html.dark .bg-white{background-color:#132023!important}
+html.dark .bg-\[\#f3f5f5\]{background-color:#0e1618!important}
+html.dark .bg-\[\#f9fafb\]{background-color:#0f1a1d!important}
+html.dark .bg-gray-50{background-color:#0f1a1d!important}
+html.dark .hover\:bg-gray-50:hover{background-color:#1a2b2f!important}
+html.dark .hover\:bg-\[\#eef6f6\]:hover{background-color:#16302f!important}
+html.dark .hover\:bg-red-50:hover{background-color:#2a1414!important}
+html.dark .focus\:bg-white:focus{background-color:#132023!important}
+html.dark .text-gray-900{color:#e8f0ef!important}
+html.dark .text-gray-800{color:#d7e0e0!important}
+html.dark .text-gray-700{color:#c2cfce!important}
+html.dark .text-gray-600{color:#9db3b2!important}
+html.dark .text-gray-500{color:#82999b!important}
+html.dark .text-gray-400{color:#648082!important}
+html.dark .text-gray-300{color:#52696b!important}
+html.dark .text-red-600{color:#ff8f8f!important}
+html.dark .text-green-700{color:#5fd4a8!important}
+html.dark .text-yellow-700{color:#f0b95e!important}
+html.dark .text-\[\#0F5C5C\]{color:#7fd0c8!important}
+html.dark .border-gray-200{border-color:#233639!important}
+html.dark .border-gray-300{border-color:#2b4144!important}
+html.dark .border-gray-100{border-color:#1c2f32!important}
+html.dark .border-red-200{border-color:#4a2226!important}
+html.dark .border-\[\#0F5C5C\]{border-color:#2e6b64!important}
+html.dark .bg-red-50{background-color:#241315!important}
+html.dark .bg-red-50\/40{background-color:#1a1214!important}
+html.dark .bg-red-100{background-color:#3a1d20!important}
+html.dark header{background:rgba(14,22,24,.85)!important}
+html.dark .field input,html.dark .mcard input[type=text],html.dark .mcard input[type=email],html.dark .mcard input[type=password],html.dark #busca{background:#0f1a1d;border-color:#2b4144;color:#e8f0ef}
+html.dark .field input:focus,html.dark .mcard input:focus,html.dark #busca:focus{background:#132023;border-color:#2e6b64;box-shadow:0 0 0 3px rgba(127,208,200,.12)}
+html.dark .icon-left{color:#82999b}
+html.dark .eyeBtn{color:#82999b}
+html.dark .eyeBtn:hover{background:#1a2b2f;color:#e8f0ef}
+html.dark .spin.dark{border-color:#2b4144;border-top-color:#7fd0c8}
+html.dark .b-ok{background:#123527;color:#5fd4a8}
+html.dark .b-pend{background:#33270e;color:#f0b95e}
+html.dark .b-can{background:#351416;color:#ff8f8f}
+html.dark .b-test{background:#14263a;color:#7db4f0}
+html.dark .b-src{background:#14263a;color:#7db4f0}
+html.dark .b-cod{background:#26203f;color:#b9a5f5}
+html.dark .act{background:#132023;border-color:#2b4144;color:#c2cfce}
+html.dark .act:hover{background:#1a2b2f;border-color:#3a5558}
+html.dark .act.pri{background:#0F5C5C;border-color:#0F5C5C;color:#fff}
+html.dark .act.del{border-color:#5a2a2e;color:#ff8f8f}
+html.dark .act.del:hover{background:#241315}
+html.dark .modal{background:rgba(0,0,0,.62)}
+html.dark .mcard{background:#132023;border-color:#233639;color:#e8f0ef}
+html.dark .mcard label{color:#82999b}
+html.dark .logline{border-bottom-color:#1c2f32;color:#9db3b2}
+html.dark .stcard{background:#132023;border-color:#233639;box-shadow:none}
+html.dark .stcard b{color:#e8f0ef}
+html.dark table.tbl th{background:#0f1a1d;color:#82999b}
+html.dark table.tbl td{border-top-color:#1c2f32}
+html.dark table.tbl tbody tr{border-top-color:#1c2f32}
+html.dark table.tbl tbody tr:hover{background:#162729}
 </style>
+<script>
+/* aplica o tema salvo ANTES de pintar a página (evita flash claro) */
+(function(){ try{
+  var t = localStorage.getItem('pa_theme');
+  if(!t) t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  if(t === 'dark') document.documentElement.classList.add('dark');
+}catch(e){} })();
+</script>
 </head>
-<body>
+<body class="bg-[#f3f5f5] text-gray-900">
 
-<!-- ===== LOGIN ===== -->
-<div id="vLogin">
-  <div style="width:100%">
-    <div class="wrap"><div class="lg-card">
-      <div class="lg-head">
-        <div class="lg-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-        <div><div class="lg-t">NEGRET'S · Painel Admin</div><div class="lg-s">Acesso restrito ao administrador</div></div>
-      </div>
-      <div class="lg-err" id="lgErr"></div>
-      <div class="fld">
-        <svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6.5 9 6.5 9-6.5"/></svg>
-        <input id="aEmail" type="email" inputmode="email" autocomplete="username" placeholder="E-mail do administrador">
-      </div>
-      <div class="fld">
-        <svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="11" width="17" height="10" rx="2.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <input id="aPass" type="password" autocomplete="current-password" placeholder="Senha">
-        <button class="peye" id="peye" type="button" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-      <label class="lembrar"><input type="checkbox" id="aLemb" checked> Lembrar de mim</label>
-      <button class="btn-g" id="btnEntrar" type="button">Entrar</button>
-      <div class="lg-div"></div>
-      <button class="lg-forgot" id="btnForgot" type="button">Esqueceu a senha?</button>
-    </div></div>
-    <p class="foot">NEGRET'S Universal · Área restrita · Criado por <b>Elias Costa NEGRE'T'S</b></p>
-  </div>
+<div class="toastbox" id="toasts"></div>
+
+<!-- ================= TELA DE LOGIN ================= -->
+<div id="viewLogin" hidden class="min-h-screen grid place-items-center p-4">
+<div class="w-full max-w-[380px]">
+<div class="bg-white rounded-[20px] border border-gray-200 p-7 shadow-sm">
+<div class="mb-6 flex items-center gap-2.5">
+<span class="w-10 h-10 rounded-xl grid place-items-center text-[20px] flex-none" style="background:linear-gradient(145deg,#0F5C5C,#0A3D3D)">🔧</span>
+<div>
+<h1 class="text-[18px] font-bold text-gray-900 tracking-tight leading-tight">PoolApp · Painel Admin</h1>
+<p class="text-[13px] text-gray-500 mt-0.5">Acesso restrito ao administrador</p>
+</div>
 </div>
 
-<!-- ===== DASHBOARD ===== -->
-<div id="vDash">
-  <div class="dh"><div class="wrap dh-row">
-    <div class="dh-logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#080808" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-    <div class="dh-who">
-      <div class="dh-nome">Olá, <span id="dhNome">Elias</span><button id="dhEdit" type="button" title="Editar nome" aria-label="Editar nome"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></div>
-      <div class="dh-mail" id="dhMail"></div>
-    </div>
-    <button class="dh-btn" id="btnTema" type="button" title="Tema claro/escuro" aria-label="Alternar tema"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg></button>
-    <button class="dh-btn" id="btnDev" type="button" title="Aparelho local" aria-label="Aparelho local"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></button>
-    <button class="dh-btn" id="btnCfg" type="button" title="Configurações" aria-label="Configurações"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.08a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg></button>
-    <button class="dh-sair" id="btnSair" type="button">Sair</button>
-  </div></div>
-
-  <div class="wrap">
-    <div class="stats">
-      <div class="stat full"><div class="lb">ATIVOS AGORA</div><div class="vl" id="stAtivos">0</div><div class="sm2" id="stAtivosSm"></div></div>
-      <div class="stat"><div class="lb">FATURADO · 30 DIAS</div><div class="vl sm" id="stFat">R$ 0,00</div><div class="sm2">ativações pagas no canal</div></div>
-      <div class="stat ok"><div class="lb">ATIVAÇÕES PAGAS</div><div class="vl" id="stPagas">0</div><div class="sm2">total no histórico</div></div>
-      <div class="stat pd"><div class="lb">PENDENTES</div><div class="vl" id="stPend">0</div><div class="sm2">pagou e aguarda ativação</div></div>
-      <div class="stat bd"><div class="lb">EXPIRADOS &gt; 30 D</div><div class="vl" id="stExp">0</div><div class="sm2">parados há mais de 30 dias</div></div>
-    </div>
-
-    <!-- v3.7 — ATIVAÇÃO E PAGAMENTO -->
-    <div class="ap-card">
-      <div class="ap-t">ATIVAÇÃO E PAGAMENTO</div>
-      <label class="sh-lbl">URL DA API DE ATIVAÇÃO (PIX)</label>
-      <div style="display:flex;gap:8px">
-        <input class="sh-in" id="apUrl" placeholder="https://assist-ncia-cell-2.vercel.app" inputmode="url" style="flex:1">
-        <button class="btn-o" id="btnApUrl" type="button" style="white-space:nowrap">SALVAR</button>
-      </div>
-      <p class="sh-note">O app do cliente usa SEMPRE o que estiver aqui (salva no painel, no aparelho local e publica no Firebase → negrets/config/lic — os aparelhos pegam sozinhos). Padrão de fábrica: https://assist-ncia-cell-2.vercel.app</p>
-      <label class="sh-lbl">GERAR CÓDIGO MANUAL (VALE SÓ PARA O APARELHO INFORMADO)</label>
-      <div style="display:flex;gap:8px">
-        <input class="sh-in" id="gcDev" placeholder="ID do aparelho (ex.: NG-DJRY)" autocomplete="off" style="flex:1;text-transform:uppercase">
-        <input class="sh-in" id="gcDias" type="number" min="1" max="730" value="30" title="Dias de validade" style="width:88px">
-        <button class="btn-o" id="btnGenCode" type="button" style="white-space:nowrap">GERAR</button>
-      </div>
-      <div id="gcOut"></div>
-      <label class="sh-lbl">ÚLTIMAS ATIVAÇÕES</label>
-      <div id="apAtiv"></div>
-      <div class="acts2" style="margin-top:12px">
-        <button class="btn-o" id="btnNaMao" type="button">ATIVAR APARELHO NA MÃO</button>
-      </div>
-    </div>
-
-    <div class="ctl">
-      <div class="search"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="qBusca" placeholder="Buscar por e-mail, nome ou ID…" autocomplete="off"></div>
-      <div class="chips" id="chips"></div>
-      <div class="acts2">
-        <button class="btn-o" id="btnLicAdd" type="button"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> ADICIONAR LICENÇA</button>
-        <button class="btn-o" id="btnAtualizar" type="button"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg> Atualizar</button>
-        <button class="btn-o" id="btnCsv" type="button"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13m0 0 4.5-4.5M12 16l-4.5-4.5M4 21h16"/></svg> Exportar CSV</button>
-      </div>
-    </div>
-
-    <div id="recList"></div>
-    <p class="foot">NEGRET'S Universal · Área restrita · Criado por <b>Elias Costa NEGRE'T'S</b></p>
-  </div>
+<form id="loginForm" novalidate>
+<div class="field mb-3">
+<span class="icon-left">
+<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5.5A2.5 2.5 0 015.5 3h9A2.5 2.5 0 0117 5.5v9A2.5 2.5 0 0114.5 17h-9A2.5 2.5 0 013 14.5v-9z"/><path d="M3.5 5.5l6.5 4.5 6.5-4.5"/></svg>
+</span>
+<input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username" value="admin@poolapp.com">
 </div>
+
+<div class="field mb-4">
+<span class="icon-left">
+<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="14" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg>
+</span>
+<input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
+<button type="button" class="eyeBtn" id="pwEye" tabindex="-1" aria-label="Mostrar senha">
+<svg id="eyeOn" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 10s2.5-5 7.5-5 7.5 5 7.5 5-2.5 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.2"/></svg>
+<svg id="eyeOff" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none"><path d="M3 3l14 14"/><path d="M10.6 10.6A2 2 0 019 10a2 2 0 01.6-1.4"/><path d="M10 5c5 0 7.5 5 7.5 5a11.5 11.5 0 01-2.2 2.8M10 15c-5 0-7.5-5-7.5-5A11.5 11.5 0 015.7 7.2"/></svg>
+</button>
+</div>
+
+<label class="flex items-center gap-2 text-[13px] text-gray-600 mb-5 select-none"><input type="checkbox" id="lembrar" checked class="w-4 h-4 accent-[#0F5C5C] rounded"> Lembrar de mim</label>
+
+<button type="submit" class="btn" id="btnLogin"><span id="btnLoginTxt">Entrar</span></button>
+<p id="lockMsg" class="hidden mt-3 text-[12px] font-semibold text-red-600 text-center"></p>
+<p id="msg" class="hidden mt-3 text-[12px] font-semibold text-red-600 text-center"></p>
+</form>
+
+<div class="mt-6 pt-5 border-t border-gray-100 text-center">
+<a href="/admin/forgot.html" class="text-[12px] font-semibold text-[#0F5C5C] hover:underline">Esqueceu a senha?</a>
+</div>
+</div>
+<p class="text-center text-[11px] text-gray-400 mt-4">PoolApp Universal · Área restrita · Criado por <span class="font-bold text-[#0F5C5C]">Elias Costa NEGRET'S</span></p>
+</div>
+</div>
+
+<!-- ================= PAINEL ================= -->
+<div id="viewPainel" hidden>
+<header class="sticky top-0 z-40 border-b border-gray-200" style="background:rgba(243,245,245,.85);backdrop-filter:blur(12px)">
+<div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 md:gap-3">
+<span class="w-10 h-10 rounded-xl grid place-items-center text-[19px] flex-none hdicon" style="background:linear-gradient(145deg,#0F5C5C,#0A3D3D)">🔧</span>
+<div class="min-w-0 flex-1">
+<p class="text-[14.5px] font-bold leading-tight truncate">Olá, <span id="admNome" class="md:hidden">Admin</span><span id="admNomeFull" class="hidden md:inline">Admin</span>
+<button id="btnEditNome" class="text-[11px] align-middle opacity-60 hover:opacity-100" title="Editar nome">✏️</button></p>
+<p class="text-[11px] font-medium text-gray-500 truncate" id="admEmail">admin@poolapp.com</p>
+</div>
+<button id="btnTema" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50" title="Alternar modo claro/escuro">🌙<span class="hidel"> Tema</span></button>
+<button id="btnWa" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">📱<span class="hidel"> WhatsApp</span></button>
+<button id="btnCfg" class="h-10 px-3.5 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-gray-50">⚙️<span class="hidel"> Configurações</span></button>
+<button id="btnInstalar" hidden class="h-10 px-3.5 rounded-xl bg-white border border-[#0F5C5C] text-[12.5px] font-semibold text-[#0F5C5C] hover:bg-[#eef6f6]" title="Instalar o painel como app na tela inicial">⬇<span class="hidel"> Instalar App</span></button>
+<button id="btnSair" class="h-10 px-3.5 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">Sair</button>
+</div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-5 pb-14">
+<!-- métricas -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+<div class="stcard col-span-2 lg:col-span-1"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Ativos agora</span><b id="kAtivos" class="text-green-700">—</b></div>
+<div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Faturado · 30 dias</span><b id="kFat" class="text-[#0F5C5C]">—</b></div>
+<div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Ativações pagas</span><b id="kAtiv" class="text-green-700">—</b></div>
+<div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Pendentes</span><b id="kPend" class="text-yellow-700">—</b></div>
+<div class="stcard"><span class="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">Expirados &gt; 30 d</span><b id="kExp" class="text-red-600">—</b></div>
+</div>
+
+<!-- controles -->
+<div class="bg-white border border-gray-200 rounded-[20px] shadow-sm p-3.5 mb-4 flex flex-wrap items-center gap-2.5">
+<input type="search" id="busca" placeholder="🔎 Buscar por e-mail, nome ou ID…" class="flex-1 min-w-[200px] h-11 rounded-xl border border-gray-300 bg-[#f9fafb] px-3.5 text-[14px] font-medium outline-none focus:bg-white focus:border-[#0F5C5C]">
+<div class="flex rounded-xl border border-gray-200 overflow-hidden text-[12px] font-semibold bg-white" id="filtros">
+<button data-f="todos" class="fil px-3.5 h-11 bg-[#0F5C5C] text-white">Todos</button>
+<button data-f="ativos" class="fil px-3.5 h-11 border-x border-gray-200 text-gray-600">🟢 Ativos <span id="atvCnt" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold align-middle">0</span></button>
+<button data-f="pendentes" class="fil px-3.5 h-11 border-r border-gray-200 text-gray-600">Pendentes</button>
+<button data-f="desistentes" class="fil px-3.5 h-11 text-gray-600">Desistentes</button>
+<button data-f="lixeira" class="fil px-3.5 h-11 text-gray-600">Lixeira <span id="lixCnt" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold align-middle">0</span></button>
+</div>
+<button id="btnAtualizar" class="h-11 px-4 rounded-xl bg-white border border-[#0F5C5C] text-[#0F5C5C] text-[12.5px] font-semibold hover:bg-[#eef6f6] flex items-center gap-2"><span id="updSpin" class="spin dark hidden"></span><span id="updTxt">↻ Atualizar</span></button>
+<button id="btnCsv" class="h-11 px-4 rounded-xl bg-white border border-gray-200 text-[12.5px] font-semibold text-gray-600 hover:bg-gray-50">⬇ Exportar CSV</button>
+<button id="btnLixClear" hidden class="h-11 px-4 rounded-xl bg-white border border-red-200 text-[12.5px] font-semibold text-red-600 hover:bg-red-50">🗑️ Esvaziar lixeira</button>
+</div>
+
+<!-- nota da aba Ativos -->
+<p id="atvNota" hidden class="text-[11.5px] text-gray-500 mb-3 px-1 leading-snug">🟢 Mostra quem está com a <b>licença válida agora</b>: ativação por <b>Pix</b> (pagamento aprovado — 30 dias fixos) ou por <b>código</b> gerado no painel com a duração escolhida (30 dias, 60 dias, 6 meses, 1 ano ou vitalício). Quem expira primeiro aparece em cima.</p>
 
 <!-- barra de seleção -->
-<div class="bulk" id="bulkBar">
-  <span id="bulkN">0 selecionado(s)</span>
-  <button class="b1" id="bulkCanc" type="button">CANCELAR</button>
-  <button class="b2" id="bulkRemove" type="button">REMOVER</button>
-  <button class="b2" id="bulkClear" type="button">LIMPAR</button>
+<div id="selBar" hidden class="bg-red-50 border border-red-200 rounded-[20px] px-4 py-2.5 mb-4 flex flex-wrap items-center gap-3 text-[13px] font-semibold text-red-600">
+<span id="selTxt">0 selecionados</span>
+<button id="btnDelSel" class="ml-auto act del">🗑️ Excluir selecionados</button>
+<button id="btnSelClear" class="act">Limpar</button>
 </div>
 
-<!-- sheet: config -->
-<div class="mask" id="shCfg"><div class="sheet">
-  <div class="m-head"><h3>CONFIGURAÇÕES DO PAINEL</h3><button class="m-x" data-close="shCfg" type="button">×</button></div>
-  <label class="sh-lbl">NOME DO PROPRIETÁRIO (MOSTRADO NO OLÁ)</label>
-  <input class="sh-in" id="nNome" placeholder="Elias">
-  <label class="sh-lbl">E-MAIL DE ACESSO AO PAINEL</label>
-  <input class="sh-in" id="nEmail" inputmode="email" placeholder="onegretth@gmail.com">
-  <label class="sh-lbl">NOVA SENHA DO PAINEL (VAZIO = MANTER)</label>
-  <input class="sh-in" id="nPass" type="password" autocomplete="new-password" placeholder="••••">
-  <label class="sh-lbl">CANAL PRIVADO DA NUVEM (LICENÇAS)</label>
-  <input class="sh-in" id="nTop" readonly>
-  <p class="sh-note">Os aparelhos com o app publicam os eventos de licença (trial, pagou, pendente, desistiu, ativo) neste canal privado ntfy.sh e o painel junta tudo aqui.</p>
-  <label class="sh-lbl">FIREBASE — ATIVAÇÃO À DISTÂNCIA (EX.: https://SEU-PROJETO.firebaseio.com)</label>
-  <input class="sh-in" id="nFb" placeholder="https://seu-projeto-default-rtdb.firebaseio.com" inputmode="url">
-  <label class="sh-lbl">URL DA API DE ATIVAÇÃO — PIX AUTOMÁTICO (EX.: https://NEGRETS.VERCEL.APP)</label>
-  <input class="sh-in" id="nApi" placeholder="https://negrets.vercel.app" inputmode="url">
-  <p class="sh-note">v3.6.5 — com o Firebase configurado, os botões ADICIONAR / EDITAR / EXCLUIR mandam comando direto para o aparelho do cliente (liberar ou bloquear na hora). Com a URL da API configurada, o app do cliente gera o QR do banco (Mercado Pago) e ativa sozinho quando o PIX cai. No Vercel, configure as variáveis <b>MP_TOKEN</b>, <b>FIREBASE_URL</b> e <b>SITE_URL</b>.</p>
-  <button class="btn-g" id="btnCfgSave" type="button" style="margin-top:16px">SALVAR</button>
-  <button class="btn-o" id="btnRegWipe" type="button" style="width:100%;height:46px;margin-top:10px;border-radius:13px;border:1px solid rgba(224,112,112,.5);background:none;color:var(--bad);font-weight:600;font-size:14.5px">LIMPAR REGISTRO RECEBIDO DA NUVEM</button>
-</div></div>
+<!-- tabela -->
+<div class="bg-white border border-gray-200 rounded-[20px] shadow-sm overflow-hidden">
+<div class="tblwrap">
+<table class="tbl min-w-[880px]">
+<thead>
+<tr>
+<th class="w-9"><input type="checkbox" id="ckAll" class="w-4 h-4 accent-[#0F5C5C] rounded"></th>
+<th>Data</th>
+<th>Nome</th>
+<th>E-mail</th>
+<th>Valor</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody id="tbody"><tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">Carregando pagamentos…</td></tr></tbody>
+</table>
+</div>
+<div class="flex items-center justify-between gap-3 px-4 py-3 border-t border-gray-200 text-[12.5px] font-semibold text-gray-600">
+<span id="pagInfo">—</span>
+<div class="flex gap-2">
+<button id="pgPrev" class="act">← Anterior</button>
+<button id="pgNext" class="act">Próxima →</button>
+</div>
+</div>
+</div>
 
-<!-- sheet: aparelho local -->
-<div class="mask" id="shDev"><div class="sheet">
-  <div class="m-head"><h3>APARELHO DESTA INSTALAÇÃO</h3><button class="m-x" data-close="shDev" type="button">×</button></div>
-  <div id="devBody"></div>
-</div></div>
+<!-- log -->
+<div class="bg-white border border-gray-200 rounded-[20px] shadow-sm p-4 mt-4">
+<div class="flex items-center justify-between mb-1.5">
+<h3 class="text-[13px] font-bold text-gray-900">📜 Log de atividades do admin</h3>
+<button id="btnLogClear" class="text-[11.5px] font-semibold text-gray-400 hover:text-red-600">limpar</button>
+</div>
+<div id="logBox"><p class="logline">Nenhuma atividade registrada ainda.</p></div>
+</div>
 
-<!-- v3.6.5 — senha de segurança para adicionar/editar/excluir licenças -->
-<div class="mask" id="shSenha"><div class="sheet">
-  <div class="m-head"><h3 id="ssTitle">CONFIRMAR AÇÃO</h3><button class="m-x" data-close="shSenha" type="button">×</button></div>
-  <p class="sh-note">Ação sensível — confirme com a <b>senha do painel</b> (padrão 1234) para continuar.</p>
-  <input class="sh-in" id="ssPass" type="password" autocomplete="off" placeholder="Senha do painel">
-  <div class="err2" id="ssErr"></div>
-  <button class="btn-g" id="btnSsOk" type="button" style="margin-top:14px">CONFIRMAR</button>
-</div></div>
+<p class="text-center text-[11px] font-medium text-gray-400 mt-5">PoolApp Universal · Pagamentos Pix processados pelo Mercado Pago · sessão expira em 2 h</p>
+<p class="text-center text-[12px] font-semibold text-gray-500 mt-1.5">🛠️ Criado por <span class="font-bold text-[#0F5C5C]">Elias Costa NEGRET'S</span></p>
+</main>
+</div>
 
-<!-- v3.6.5 — ADICIONAR LICENÇA -->
-<div class="mask" id="shLicAdd"><div class="sheet">
-  <div class="m-head"><h3>ADICIONAR LICENÇA</h3><button class="m-x" data-close="shLicAdd" type="button">×</button></div>
-  <label class="sh-lbl">ID DO APARELHO (O CLIENTE VÊ NO APP: MAIS → ASSINATURA)</label>
-  <input class="sh-in" id="alDev" placeholder="Ex.: NG-A1B2" autocomplete="off" style="text-transform:uppercase">
-  <label class="sh-lbl">NOME DA LOJA / CLIENTE</label>
-  <input class="sh-in" id="alNome" placeholder="Ex.: Assistência do João">
-  <div style="display:flex;gap:10px">
-    <div style="flex:1"><label class="sh-lbl">E-MAIL / CONTATO</label><input class="sh-in" id="alMail" inputmode="email" placeholder="cliente@email.com"></div>
-    <div style="flex:1"><label class="sh-lbl">WHATSAPP</label><input class="sh-in" id="alTel" inputmode="tel" placeholder="31999999999"></div>
-  </div>
-  <label class="sh-lbl">PLANO A LIBERAR</label>
-  <div class="pl4" id="alPlans">
-    <button data-p="d30" type="button">30 DIAS</button>
-    <button data-p="d60" type="button">60 DIAS</button>
-    <button data-p="a1" type="button">1 ANO</button>
-    <button data-p="vit" type="button">VITALÍCIO</button>
-  </div>
-  <p class="sh-note">Ao salvar: grava no Firebase, publica no canal e manda o comando <b>liberar</b> — o app do cliente ativa sozinho quando abrir.</p>
-  <button class="btn-g" id="btnLicAddSave" type="button" style="margin-top:14px">ADICIONAR E LIBERAR</button>
-</div></div>
-
-<!-- v3.6.5 — EDITAR LICENÇA -->
-<div class="mask" id="shLicEdit"><div class="sheet">
-  <div class="m-head"><h3>EDITAR LICENÇA</h3><button class="m-x" data-close="shLicEdit" type="button">×</button></div>
-  <div class="sh-dev" id="elDev">—</div>
-  <p class="sh-note" style="text-align:center" id="elNome"></p>
-  <label class="sh-lbl">NOVO PLANO (CONTA DA DATA DE HOJE)</label>
-  <div class="pl4" id="elPlans">
-    <button data-p="d30" type="button">30 DIAS</button>
-    <button data-p="d60" type="button">60 DIAS</button>
-    <button data-p="a1" type="button">1 ANO</button>
-    <button data-p="vit" type="button">VITALÍCIO</button>
-  </div>
-  <button class="btn-g" id="btnLicEditSave" type="button" style="margin-top:14px">SALVAR E MANDAR COMANDO</button>
-</div></div>
-
-<!-- v3.6.5 — EXCLUIR LICENÇA -->
-<div class="mask" id="shLicDel"><div class="sheet">
-  <div class="m-head"><h3>EXCLUIR LICENÇA</h3><button class="m-x" data-close="shLicDel" type="button">×</button></div>
-  <div class="sh-dev" id="dlDev">—</div>
-  <p class="sh-note" style="text-align:center">O aparelho do cliente vai ser <b style="color:var(--bad)">bloqueado à distância</b> (comando via Firebase) e o registro sai da lista. Não dá para desfazer.</p>
-  <label class="sh-lbl">DIGITE <b>EXCLUIR</b> PARA CONFIRMAR</label>
-  <input class="sh-in" id="dlTxt" autocomplete="off" placeholder="EXCLUIR">
-  <button class="btn-g" id="btnLicDelGo" type="button" style="margin-top:14px;background:#3a1515;border-color:rgba(224,112,112,.6);color:#ffb3b3">EXCLUIR DE VEZ</button>
-</div></div>
-
-<!-- v3.7 — ativar aparelho na mão -->
-<div class="mask" id="shNaMao"><div class="sheet">
-  <div class="m-head"><h3>ATIVAR APARELHO NA MÃO</h3><button class="m-x" data-close="shNaMao" type="button">×</button></div>
-  <p class="sh-note">Use quando estiver com o <b>celular do cliente</b> na mão: abra este painel no MESMO endereço do app (ex.: seuapp.vercel.app/admin.html), entre e toque no botão abaixo — ele ativa o app NEGRET'S instalado neste mesmo navegador/aparelho.</p>
-  <div id="nmBody"></div>
-  <button class="btn-g" id="btnNaMaoGo" type="button" style="margin-top:14px">ATIVAR ESTE APARELHO (+30 DIAS)</button>
-</div></div>
-
-<div id="toasts"></div>
+<!-- modal genérico -->
+<div class="modal" id="modal" hidden><div class="mcard" id="modalCard"></div></div>
 
 <script>
-/* ================= NEGRET'S · Painel Admin (arquivo separado) =================
-   - Login por e-mail + senha do proprietário (padrão: onegretth@gmail.com / 1234)
-   - Lê o app NEGRET'S no mesmo endereço (localStorage negrets_v6) e o canal da nuvem
-   - Agrega todos os aparelhos que publicam eventos de licença (trial/pagou/pendente/desistiu/ativo) */
-
-/* Opcionais: preencha ANTES de publicar para acessar de QUALQUER aparelho (ex.: seu PC),
-   mesmo sem o app instalado neste navegador. Vazio = usa e-mail/senha do app local. */
-const PAINEL_EMAIL='';   // ex.: 'onegretth@gmail.com'
-const PAINEL_SENHA='';   // ex.: 'minhaSenhaForte'
-
-const KEY='negrets_v6', REGK='negrets_licreg', NTFY='https://ntfy.sh/';
-const LIC_TOP='negrets-lic-7k4mqz';   /* deve ser IGUAL ao do index.html */
-const TRIAL_DIAS=30;
-const PLANS={d30:{d:30,n:'30 dias',l:'A'},d60:{d:60,n:'60 dias',l:'B'},a1:{d:365,n:'1 ano',l:'C'},vit:{d:0,n:'Vitalício',l:'D'}};
-
-let DB=null,reg=null,filtro='todos',sel=new Set(),pollTimer=null;
-
-const $=id=>document.getElementById(id);
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-const money=v=>'R$ '+(+v||0).toFixed(2).replace('.',',');
-const pad=n=>String(n).padStart(2,'0');
-function fmtDT(t){if(!t)return '—';const d=new Date(+t);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2)+' '+pad(d.getHours())+':'+pad(d.getMinutes());}
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;$('toasts').appendChild(t);setTimeout(()=>t.remove(),3400);}
-function openSh(id){$(id).classList.add('on');}
-function closeSh(id){$(id).classList.remove('on');}
-document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeSh(b.dataset.close)));
-document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on');}));
-
-function loadDB(){try{DB=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){DB=null;}}
-function loadReg(){try{reg=JSON.parse(localStorage.getItem(REGK)||'null')||null;}catch(e){reg=null;}
-  if(!reg||typeof reg!=='object')reg={devs:{},hist:[]};
-  if(!reg.devs)reg.devs={};if(!Array.isArray(reg.hist))reg.hist=[];
-  if(!reg.apiCfg||typeof reg.apiCfg!=='object')reg.apiCfg={fb:'',api:''};}
-function saveReg(){try{localStorage.setItem(REGK,JSON.stringify(reg));}catch(e){}}
-
-/* ---------- estado local do app (espelho do licState do index) ---------- */
-function localRec(){
-  if(!DB||!DB.config||!DB.config.lic)return null;
-  const L=DB.config.lic,n=Date.now();
-  return{dev:L.dev,loja:(DB.config.loja&&DB.config.loja.nome)||'',tel:(DB.config.loja&&DB.config.loja.zap)||'',email:L.oemail||'',ev:'local',t:Date.now(),plan:L.plan||'',exp:+L.exp||0,t0:+L.t0||0,pend:+L.pend||0,grace:+L.grace||0,st:'',val:+L.preco||20,local:true,hist:(L.hist||[]).slice()};
+'use strict';
+const API_BASE = 'https://pool-piscina-pro.vercel.app';
+/* ================= util ================= */
+const $ = s => document.querySelector(s);
+function toast(msg, kind){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || 'info');
+  t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); setTimeout(()=>t.remove(), 320); }, 2800);
 }
-function stOf(d){
-  if(!d)return{k:'exp',lb:'—'};
-  if(d.canceled)return{k:'canc',lb:'Cancelado'};
-  const n=Date.now();
-  if(d.plan==='vit'||(+d.exp&&+d.exp>n))return{k:'ativo',lb:d.plan==='vit'?'Ativo · vitalício':'Ativo · '+Math.ceil((+d.exp-n)/864e5)+'d'};
-  if(d.st==='pend'||(+d.grace&&+d.grace>n)||(+d.pend&&n-+d.pend<48*3600e3))return{k:'pend',lb:'Pendente'};
-  const te=(+d.t0||0)+TRIAL_DIAS*864e5;
-  if(+d.t0&&n<te)return{k:'trial',lb:'Trial · '+Math.ceil((te-n)/864e5)+'d'};
-  if(d.ev==='desist'&&(n-+d.t<48*3600e3))return{k:'desist',lb:'Desistiu'};
-  return{k:'exp',lb:'Expirado'+((+d.t0&&n>te)?' · '+Math.floor((n-te)/864e5)+'d':'')};
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtData(iso){
+  const d = new Date(iso); if(isNaN(d.getTime())) return '—';
+  const dd = ('0'+d.getDate()).slice(-2), mm = ('0'+(d.getMonth()+1)).slice(-2), aa = String(d.getFullYear()).slice(-2);
+  return dd + '/' + mm + '/' + aa + ' ' + ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
 }
-/* v3.7 — código manual vínculado ao aparelho: ID + vencimento + chave secreta (igual ao index.html) */
-const COD_SALT='9649D36E8224036D78321FE6DA98C2F2';
-const COD_EPOCA=Date.UTC(2026,0,1);
-async function licSigCalc(dev,expMin){
-  if(!(window.crypto&&crypto.subtle))throw new Error('sem crypto');
-  const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(COD_SALT),{name:'HMAC',hash:'SHA-256'},false,['sign']);
-  const h=new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode('NG1|'+String(dev||'').toUpperCase()+'|'+String(expMin))));
-  let s='';for(let i=0;i<5;i++)s+=h[i].toString(16).padStart(2,'0');
-  return s.toUpperCase();
+function fmtValor(v){ return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+async function api(path, opts){
+  return await fetch(API_BASE + path, opts);
 }
-async function genCodeDev(dev,dias){
-  const exp=Date.now()+Math.max(1,+dias||30)*864e5;
-  const expMin=Math.floor((exp-COD_EPOCA)/60000);
-  const sig=await licSigCalc(dev,expMin);
-  const raw=expMin.toString(36).toUpperCase().padStart(5,'0')+sig;
-  return raw.slice(0,5)+'-'+raw.slice(5,10)+'-'+raw.slice(10,15);
+function openModal(html){ $('#modalCard').innerHTML = html; $('#modal').hidden = false; }
+function closeModal(){ $('#modal').hidden = true; }
+$('#modal').addEventListener('click', e=>{ if(e.target.id === 'modal') closeModal(); });
+
+/* ================= log do admin ================= */
+function getLog(){ try{ return JSON.parse(localStorage.getItem('pa_admin_log') || '[]'); }catch(e){ return []; } }
+function addLog(txt){
+  const l = getLog();
+  l.unshift('[' + fmtData(new Date().toISOString()) + '] ' + txt);
+  try{ localStorage.setItem('pa_admin_log', JSON.stringify(l.slice(0, 60))); }catch(e){}
+  renderLog();
+}
+function renderLog(){
+  const l = getLog(), box = $('#logBox');
+  if(box) box.innerHTML = l.length ? l.map(x=>`<p class="logline">${esc(x)}</p>`).join('') : '<p class="logline">Nenhuma atividade registrada ainda.</p>';
+}
+$('#btnLogClear').addEventListener('click', ()=>{ try{ localStorage.removeItem('pa_admin_log'); }catch(e){} renderLog(); });
+
+/* ================= exclusões persistentes (CORREÇÃO do bug "volta tudo") =================
+   O /tmp do Vercel é efêmero e o MP não apaga pagamento aprovado — por isso a exclusão
+   agora é garantida AQUI: os ids excluídos ficam no localStorage e são filtrados
+   a cada carregamento. A Lixeira permite restaurar. */
+const DEL_KEY = 'pa_del_ids', OVR_KEY = 'pa_overrides';
+function getDel(){
+  try{ const a = JSON.parse(localStorage.getItem(DEL_KEY) || '[]'); return new Set(a.map(String)); }
+  catch(e){ return new Set(); }
+}
+function saveDel(){ try{ localStorage.setItem(DEL_KEY, JSON.stringify([...DEL])); }catch(e){} }
+function getDelInfo(){ /* id -> {data, quando} para exibir na Lixeira */
+  try{ return JSON.parse(localStorage.getItem(DEL_KEY + '_info') || '{}'); }catch(e){ return {}; }
+}
+function saveDelInfo(info){ try{ localStorage.setItem(DEL_KEY + '_info', JSON.stringify(info)); }catch(e){} }
+let DEL = getDel(), DELINFO = getDelInfo();
+/* excluídos DEFINITIVAMENTE: saem da Lixeira e nunca mais aparecem no painel */
+const FOREVER_KEY = 'pa_del_forever';
+function getForever(){
+  try{ const a = JSON.parse(localStorage.getItem(FOREVER_KEY) || '[]'); return new Set(a.map(String)); }
+  catch(e){ return new Set(); }
+}
+function saveForever(){ try{ localStorage.setItem(FOREVER_KEY, JSON.stringify([...FOREVER])); }catch(e){} }
+let FOREVER = getForever();
+function getOvr(){
+  try{ return JSON.parse(localStorage.getItem(OVR_KEY) || '{}'); }catch(e){ return {}; }
+}
+function saveOvr(o){ try{ localStorage.setItem(OVR_KEY, JSON.stringify(o)); }catch(e){} }
+
+/* ================= ativações por CÓDIGO (registro do painel) =================
+   O servidor não guarda quem ativou — ele só valida. O painel mantém o próprio
+   registro (pa_codigos: código → { email, nome, quando, dias }):
+   - Pagamento Pix aprovado  → ativo por 30 dias a partir da data do pagamento;
+   - Código gerado no painel → ativo pela duração escolhida (30 dias, 60 dias,
+     6 meses, 1 ano ou vitalício — o código carrega o plano embutido e o
+     /api/check-status devolve o expira certo quando o cliente digita no app).
+   Códigos gerados antes deste recurso são recuperados do log do admin (30 dias). */
+const COD_KEY = 'pa_codigos';
+function getCodigos(){ try{ return JSON.parse(localStorage.getItem(COD_KEY) || '{}'); }catch(e){ return {}; } }
+function saveCodigos(){ try{ localStorage.setItem(COD_KEY, JSON.stringify(CODS)); }catch(e){} }
+let CODS = getCodigos();
+function seedCodigosDoLog(){
+  let add = 0;
+  getLog().forEach(l=>{
+    const c = l.match(/[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}/);
+    const e = l.match(/para\s+([^\s,]+)/);
+    if(!c || !e) return;
+    const code = c[0].toUpperCase(), email = e[1].toLowerCase();
+    if(CODS[code] || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    const d = l.match(/^\[(\d{2})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2})\]/);
+    const quando = d ? new Date(2000 + Number(d[3]), Number(d[2]) - 1, Number(d[1]), Number(d[4]), Number(d[5])).getTime() : Date.now();
+    CODS[code] = { email, nome: '', code, quando, dias: 30 };
+    add++;
+  });
+  if(add) saveCodigos();
 }
 
-/* ---------- nuvem: junta os eventos publicados pelos aparelhos ---------- */
-async function pollCloud(){
-  if(!navigator.onLine)return 0;
+/* ================= sessão JWT (2 h) ================= */
+function tokenGet(){
+  try{ return localStorage.getItem('pa_token') || sessionStorage.getItem('pa_token') || ''; }catch(e){ return ''; }
+}
+function tokenStore(tok, lembrar){
   try{
-    const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
-    const r=await fetch(NTFY+LIC_TOP+'/json?poll=1&since=12h',{signal:ctl.signal});
-    clearTimeout(tm);
-    if(!r.ok)return 0;
-    const txt=await r.text();let n=0;
-    txt.split('\n').forEach(line=>{
-      if(!line.trim())return;
-      let m;try{m=JSON.parse(line);}catch(e){return;}
-      if(!m||m.event!=='message'||!m.message)return;
-      let p;try{p=JSON.parse(m.message);}catch(e){return;}
-      if(!p||!p.dev||!p.ev)return;
-      const d=reg.devs[p.dev]||{};
-      reg.devs[p.dev]={dev:p.dev,loja:p.loja||d.loja||'',tel:p.tel||d.tel||'',email:p.email||d.email||'',ev:p.ev,t:+p.t||Date.now(),plan:p.plan||d.plan||'',exp:+p.exp||d.exp||0,t0:+p.t0||d.t0||0,pend:+p.pend||0,grace:+p.grace||0,st:p.st||d.st||'',val:+p.val||d.val||0,canceled:d.canceled,deleted:d.deleted||(p.del&&(p.ev==='canc'))};
-      reg.hist.push({t:+p.t||Date.now(),dev:p.dev,loja:p.loja||'',ev:p.ev,val:+p.val||0,forma:p.forma||'',quem:p.quem||''});
-      n++;
-    });
-    if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
-    if(n)saveReg();
-    return n;
-  }catch(e){return 0;}
-}
-
-/* ---------- montagem dos registros (local + nuvem) ---------- */
-function records(){
-  const map={};
-  Object.keys(reg.devs).forEach(k=>{const d=Object.assign({},reg.devs[k]);map[k]=d;});
-  const lr=localRec();
-  if(lr){const old=map[lr.dev]||{};map[lr.dev]=Object.assign({},old,lr,{canceled:old.canceled,deleted:old.deleted});}
-  return Object.keys(map).map(k=>map[k]).filter(d=>!d.deleted);
-}
-let curRecs=[];
-function applyFiltros(){
-  const q=norm($('qBusca').value).trim();
-  let rs=records();
-  const withK=rs.map(d=>({d,k:stOf(d)}));
-  if(filtro!=='todos')return withK.filter(x=>x.k.k===filtro||(filtro==='pend'&&x.k.k==='desist'&&false));
-  return withK;
-}
-function render(){
-  /* stats */
-  const rs=records().map(d=>({d,k:stOf(d)}));
-  const n=Date.now();
-  const ativos=rs.filter(x=>x.k.k==='ativo').length;
-  const pends=rs.filter(x=>x.k.k==='pend').length;
-  const exps=rs.filter(x=>{if(x.k.k!=='exp')return false;const base=+x.d.exp||((+x.d.t0||0)+TRIAL_DIAS*864e5);return base&&n-base>30*864e5;}).length;
-  const fat=reg.hist.filter(h=>h.ev==='ativ'&&n-+h.t<=30*864e5).reduce((a,h)=>a+(+h.val||0),0);
-  const pagas=reg.hist.filter(h=>h.ev==='ativ').length;
-  $('stAtivos').textContent=ativos;
-  $('stAtivosSm').textContent=rs.length+' aparelho(s) registrado(s)';
-  $('stFat').textContent=money(fat);
-  $('stPagas').textContent=pagas;
-  $('stPend').textContent=pends;
-  $('stExp').textContent=exps;
-  /* chips */
-  const cnt={todos:rs.length,ativo:ativos,trial:rs.filter(x=>x.k.k==='trial').length,pend:pends,exp:exps,desist:rs.filter(x=>x.k.k==='desist').length,canc:rs.filter(x=>x.k.k==='canc').length};
-  const names={todos:'Todos',ativo:'Ativos',trial:'Trial',pend:'Pendentes',exp:'Expirados',desist:'Desistiu',canc:'Cancelados'};
-  $('chips').innerHTML=Object.keys(names).map(k=>'<button class="chip'+(filtro===k?' on':'')+'" data-f="'+k+'" type="button">'+names[k]+'<span class="n">'+cnt[k]+'</span></button>').join('');
-  document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{filtro=c.dataset.f;render();}));
-  /* lista */
-  const q=norm($('qBusca').value).trim();
-  let list=rs.filter(x=>filtro==='todos'||x.k.k===filtro);
-  if(q)list=list.filter(x=>norm(x.d.loja+' '+x.d.email+' '+x.d.tel+' '+x.d.dev).includes(q));
-  list.sort((a,b)=>(+b.d.t||0)-(+a.d.t||0));
-  curRecs=list.map(x=>x.d);
-  $('recList').innerHTML=list.length?list.map((x,i)=>{
-    const d=x.d;
-    return `<div class="rec">
-      <div class="rc-row rc-top"><span class="rc-l">DATA</span><span class="rc-v"><b>${fmtDT(d.t)}</b>${d.local?'<span class="taglocal">LOCAL</span>':''}</span><input type="checkbox" class="rc-sel" data-dev="${esc(d.dev)}" ${sel.has(d.dev)?'checked':''} aria-label="Selecionar"></div>
-      <div class="rc-row"><span class="rc-l">NOME</span><span class="rc-v"><b>${esc(d.loja||'—')}</b></span></div>
-      <div class="rc-row"><span class="rc-l">CONTATO</span><span class="rc-v">${esc([d.email,d.tel].filter(Boolean).join(' · ')||'—')}</span></div>
-      <div class="rc-row"><span class="rc-l">APARELHO</span><span class="rc-v"><b>${esc(d.dev)}</b></span></div>
-      <div class="rc-row"><span class="rc-l">VALOR</span><span class="rc-v">${d.val?money(d.val):'—'}${d.plan?' · '+esc(PLANS[d.plan]?PLANS[d.plan].n:d.plan):''}</span></div>
-      <div class="rc-row"><span class="rc-l">STATUS</span><span class="rc-v"><span class="badge b-${x.k.k}">${esc(x.k.lb)}</span></span></div>
-      <div class="rc-acts">
-        <button class="b1" data-code="${esc(d.dev)}" type="button">GERAR CÓDIGO</button>
-        <button class="b1" data-edit="${esc(d.dev)}" type="button">✏ EDITAR</button>
-        <button class="b2" data-del="${esc(d.dev)}" type="button">🗑 EXCLUIR</button>
-        ${d.canceled?'<button class="b2 rev" data-rev="'+esc(d.dev)+'" type="button">REATIVAR</button>':'<button class="b2" data-canc="'+esc(d.dev)+'" type="button">CANCELAR</button>'}
-      </div>
-      <div class="rc-code" id="rcx-${esc(d.dev)}" style="display:none"></div>
-    </div>`;
-  }).join(''):'<div class="empty">Nenhum aparelho por aqui ainda.<br>Abra o app NEGRET\u2019S nos aparelhos dos clientes — os eventos aparecem automaticamente.</div>';
-  document.querySelectorAll('.rc-sel').forEach(c=>c.addEventListener('change',()=>{if(c.checked)sel.add(c.dataset.dev);else sel.delete(c.dataset.dev);bulkSync();}));
-  document.querySelectorAll('[data-code]').forEach(b=>b.addEventListener('click',()=>codeBox(b.dataset.code)));
-  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>pedirSenha('editar',b.dataset.edit)));
-  document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>pedirSenha('excluir',b.dataset.del)));
-  document.querySelectorAll('[data-canc]').forEach(b=>b.addEventListener('click',()=>{const d=reg.devs[b.dataset.canc]||{};d.canceled=true;if(reg.devs[b.dataset.canc])reg.devs[b.dataset.canc]=d;else{const lr=localRec();if(lr&&lr.dev===b.dataset.canc){/* local: guarda flag no reg */reg.devs[b.dataset.canc]=Object.assign({dev:b.dataset.canc},lr,{canceled:true});}}saveReg();render();toast('Registro cancelado.');}));
-  document.querySelectorAll('[data-rev]').forEach(b=>b.addEventListener('click',()=>{if(reg.devs[b.dataset.rev]){reg.devs[b.dataset.rev].canceled=false;}saveReg();render();toast('Registro reativado.');}));
-  renderAtiv();
-  bulkSync();
-}
-function bulkSync(){
-  const on=sel.size>0;
-  $('bulkBar').classList.toggle('on',on);
-  if(on)$('bulkN').textContent=sel.size+' selecionado(s)';
-}
-function codeBox(dev){
-  const d=curRecs.find(x=>x.dev===dev);const box=$('rcx-'+dev);if(!box)return;
-  if(box.style.display!=='none'){box.style.display='none';return;}
-  box.style.display='';
-  /* v3.7 — código vínculado ao aparelho: escolhe os dias, o código já nasce amarrado ao ID */
-  box.innerHTML='<div class="pl4"><button data-d="30" type="button">30 DIAS</button><button data-d="60" type="button">60 DIAS</button><button data-d="365" type="button">1 ANO</button></div><div id="cbIn-'+esc(dev)+'"></div>';
-  box.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',async()=>{
-    const dias=+b.dataset.d;
-    if(!(window.crypto&&crypto.subtle)){toast('Abra o painel pelo site (https) para gerar códigos.');return;}
-    const c=await genCodeDev(dev,dias);
-    const exp=Date.now()+dias*864e5;
-    $('cbIn-'+dev).innerHTML='<div class="codebox">'+c+'</div><p class="sh-note" style="margin-top:6px">'+dias+' dias (até '+fmtDT(exp)+') — vale SÓ para o aparelho <b>'+esc(dev)+'</b>. O cliente digita no app: MAIS → ASSINATURA DO APP → ATIVAR COM CÓDIGO MANUAL.</p><div class="mini"><button data-cp="'+c+'" type="button">COPIAR</button><button data-wa="'+c+'" data-loja="'+esc(d?d.loja||'':'')+'" type="button">ENVIAR NO WHATSAPP</button></div>';
-    $('cbIn-'+dev).querySelector('[data-cp]').addEventListener('click',async e=>{
-      try{await navigator.clipboard.writeText(c);toast('Código copiado.');}catch(e2){toast('Código: '+c);}
-    });
-    $('cbIn-'+dev).querySelector('[data-wa]').addEventListener('click',e=>{
-      const el=e.currentTarget;
-      const msg='Código de ativação do app NEGRET\u2019S ('+dias+' dias, até '+fmtDT(exp)+')\nVale SÓ para o aparelho '+dev+' — não funciona em outro.\nNo app: MAIS → ASSINATURA DO APP → ATIVAR COM CÓDIGO MANUAL.\nCódigo: '+el.dataset.wa;
-      const tel=String((d&&d.tel)||'').replace(/\D/g,'');
-      window.open('https://wa.me/'+(tel?'55'+tel.replace(/^55/,''):'')+'?text='+encodeURIComponent(msg),'_blank');
-    });
-  }));
-}
-
-/* ---------- CSV ---------- */
-function exportCsv(){
-  const rows=[['DATA','NOME','CONTATO','APARELHO','VALOR','STATUS']];
-  curRecs.forEach(d=>{const k=stOf(d);rows.push([fmtDT(d.t),(d.loja||''),((d.email||'')+(d.tel?' '+(d.tel||''):'')),(d.dev||''),d.val?money(d.val):'',k.lb]);});
-  const csv='\uFEFF'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-  a.download='negrets-painel-licencas.csv';a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-  toast('CSV exportado ('+(curRecs.length)+' registro(s)).');
-}
-
-/* ---------- aparelho local ---------- */
-function renderDev(){
-  const L=DB&&DB.config&&DB.config.lic;
-  if(!L){$('devBody').innerHTML='<p class="sh-note">O app NEGRET\u2019S não está aberto neste navegador — nada para mostrar.</p>';return;}
-  const lr=localRec(),k=stOf(lr);
-  const st=lr;
-  const te=(+L.t0||0)+TRIAL_DIAS*864e5;
-  const trialRest=Date.now()<te?Math.ceil((te-Date.now())/864e5):0;
-  $('devBody').innerHTML=
-    '<div class="sh-kv"><span>APARELHO</span><b>'+esc(L.dev)+'</b></div>'+
-    '<div class="sh-kv"><span>STATUS</span><b><span class="badge b-'+k.k+'">'+esc(k.lb)+'</span></b></div>'+
-    '<div class="sh-kv"><span>LOJA</span><b>'+esc((DB.config.loja&&DB.config.loja.nome)||'—')+'</b></div>'+
-    '<div class="sh-kv"><span>PLANO</span><b>'+(L.plan?(PLANS[L.plan]?PLANS[L.plan].n:L.plan):'trial')+'</b></div>'+
-    (L.exp?'<div class="sh-kv"><span>VALIDADE</span><b>'+fmtDT(L.exp)+'</b></div>':'<div class="sh-kv"><span>TRIAL</span><b>'+trialRest+' dia(s) restante(s)</b></div>')+
-    '<div class="sh-kv"><span>ÚLTIMOS EVENTOS</span><b>'+(L.hist||[]).slice(-3).map(h=>esc(h.e)).join('<br>')+'</b></div>'+
-    '<p class="sh-note">Para ativar ESTE aparelho: abra o app NEGRET\u2019S \u2192 MAIS \u2192 ASSINATURA DO APP \u2192 pague o PIX (ativa sozinho na hora) ou use ATIVAR COM C\u00d3DIGO MANUAL com um c\u00f3digo gerado aqui (vale s\u00f3 para este ID).</p>';
-}
-
-/* ---------- config ---------- */
-function openCfg(){
-  const L=DB&&DB.config&&DB.config.lic;
-  $('nNome').value=L?(L.onome||'Elias'):'';
-  $('nEmail').value=L?(L.oemail||'onegretth@gmail.com'):(PAINEL_EMAIL||'');
-  $('nPass').value='';
-  $('nTop').value=LIC_TOP;
-  /* v3.6.5 — Firebase e API: prioridade no app local, depois no próprio painel */
-  const fb=(L&&L.fb)||reg.apiCfg.fb||'';const api=(L&&L.api)||reg.apiCfg.api||'';
-  $('nFb').value=fb;$('nApi').value=api||'https://assist-ncia-cell-2.vercel.app';
-  $('btnCfgSave').style.display='';
-  openSh('shCfg');
-}
-function saveCfg(){
-  /* v3.6.5 — Firebase/API valem mesmo sem o app aberto neste navegador (ficam no registro do painel) */
-  const fb=$('nFb').value.trim().replace(/\/+$/,''),api=$('nApi').value.trim().replace(/\/+$/,'');
-  reg.apiCfg={fb,api};saveReg();
-  /* v3.7 — publica a URL da API/Firebase na nuvem: TODOS os aparelhos passam a usar sem reinstalar */
-  (async()=>{
-    if(!fb)return;
-    try{
-      const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),8000);
-      const r=await fetch(fb+'/negrets/config/lic.json',{method:'PATCH',body:JSON.stringify({api:api,fb:fb,t:Date.now()}),signal:ctl.signal});
-      clearTimeout(tm);
-      if(r.ok)toast('Config salva — URL publicada na nuvem: os aparelhos do cliente atualizam sozinhos.');
-    }catch(e){}
-  })();
-  if(!DB||!DB.config.lic){closeSh('shCfg');toast('Configuração da nuvem salva no painel.');return;}
-  const L=DB.config.lic;
-  L.onome=$('nNome').value.trim()||'Elias';
-  L.oemail=$('nEmail').value.trim().toLowerCase()||'onegretth@gmail.com';
-  const np=$('nPass').value.trim();
-  if(np)L.op=np;
-  L.fb=fb;L.api=api;
-  try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}
-  fillHead();
-  closeSh('shCfg');
-  toast(np?'Configuração salva — a NOVA SENHA do painel já vale agora.':'Configuração salva.');
-}
-
-/* ---------- cabeçalho ---------- */
-function fillHead(){
-  const L=DB&&DB.config&&DB.config.lic;
-  $('dhNome').textContent=L?(L.onome||'Elias'):'Proprietário';
-  $('dhMail').textContent=L?(L.oemail||(PAINEL_EMAIL||'')):(PAINEL_EMAIL||'');
-}
-
-/* ---------- login ---------- */
-function lgErr(m){const e=$('lgErr');if(!m){e.classList.remove('on');return;}e.textContent=m;e.classList.add('on');}
-function lgN(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'').toLowerCase();}
-function fldErr(el,on){if(el&&el.parentElement)el.parentElement.classList.toggle('err',!!on);}
-/* v3.6.4: login tolerante \u2014 ignora espa\u00e7os, mai\u00fasculas/min\u00fasculas e acentos; senha padr\u00e3o 1234 */
-function entrar(){
-  lgErr('');
-  fldErr($('aEmail'),false);fldErr($('aPass'),false);
-  const u=$('aEmail').value||'';
-  const s=$('aPass').value||'';
-  const oemail=PAINEL_EMAIL||(DB&&DB.config&&DB.config.lic&&DB.config.lic.oemail)||'onegretth@gmail.com';
-  const op=(DB&&DB.config&&DB.config.lic&&DB.config.lic.op)||'';
-  const wantP=PAINEL_SENHA||op||'1234';
-  if(!u||lgN(u)!==lgN(oemail)){lgErr('E-mail incorreto \u2014 o e-mail autorizado neste painel \u00e9: '+oemail+'.');fldErr($('aEmail'),true);return;}
-  if(!s||lgN(s)!==lgN(wantP)){lgErr('Senha incorreta \u2014 a senha padr\u00e3o \u00e9 1234'+(op&&op!=='1234'?', mas este aparelho usa uma senha pr\u00f3pria (a \u00faltima salva nas Configura\u00e7\u00f5es do painel)':'')+'.');fldErr($('aPass'),true);return;}
-  if($('aLemb').checked)localStorage.setItem('negretsAdmEmail',u);else localStorage.removeItem('negretsAdmEmail');
-  sessionStorage.setItem('negretsAdmOk','1');
-  goDash();
-}
-function goDash(){
-  $('vLogin').classList.remove('on');
-  $('vDash').classList.add('on');
-  fillHead();
-  render();
-  pollCloud().then(n=>{if(n)render();});
-  clearInterval(pollTimer);
-  pollTimer=setInterval(()=>{if($('vDash').classList.contains('on'))pollCloud().then(n=>{if(n)render();});},60000);
-}
-function sair(){
-  sessionStorage.removeItem('negretsAdmOk');
-  clearInterval(pollTimer);
-  $('vDash').classList.remove('on');
-  $('vLogin').classList.add('on');
-  $('aPass').value='';
-  lgErr('');
-}
-
-/* ================= v3.6.5 — GESTÃO DE LICENÇAS: ADICIONAR / EDITAR / EXCLUIR com segurança ================= */
-const PAINEL_FB='';   /* opcional: fixe a URL do Firebase aqui para o painel funcionar sozinho em outro aparelho */
-let pendAcao=null,licPlanSel='d30',licEditDev='';
-function fbEff(){
-  if(DB&&DB.config&&DB.config.lic&&DB.config.lic.fb)return String(DB.config.lic.fb).trim().replace(/\/+$/,'');
-  if(reg.apiCfg&&reg.apiCfg.fb)return String(reg.apiCfg.fb).trim().replace(/\/+$/,'');
-  return String(PAINEL_FB||'').trim().replace(/\/+$/,'');
-}
-async function fbSendCmd(dev,obj){
-  const fb=fbEff();if(!fb)return false;
-  try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
-    const r=await fetch(fb+'/negrets/commands/'+encodeURIComponent(dev)+'.json',{method:'PUT',body:JSON.stringify(obj),signal:ctl.signal});
-    clearTimeout(tm);return r.ok;}catch(e){return false;}
-}
-async function fbPatchDev(dev,obj){
-  const fb=fbEff();if(!fb)return false;
-  try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
-    const r=await fetch(fb+'/negrets/devices/'+encodeURIComponent(dev)+'.json',{method:'PATCH',body:JSON.stringify(obj),signal:ctl.signal});
-    clearTimeout(tm);return r.ok;}catch(e){return false;}
-}
-function ntfyPub(ev,dev,extra){
-  try{
-    const d=reg.devs[dev]||{};
-    const s={t:Date.now(),dev,loja:d.loja||'',tel:d.tel||'',email:d.email||'',ev,plan:d.plan||'',val:+d.val||20,exp:+d.exp||0,t0:+d.t0||0};
-    if(extra)Object.assign(s,extra);
-    fetch(NTFY+LIC_TOP,{method:'POST',body:JSON.stringify(s)}).catch(()=>{});
+    if(lembrar) localStorage.setItem('pa_token', tok);
+    else sessionStorage.setItem('pa_token', tok);
   }catch(e){}
 }
-/* segurança: pede a senha do painel antes de qualquer ação sensível */
-function pedirSenha(tipo,dev){
-  pendAcao={tipo,dev};
-  const tit={adicionar:'ADICIONAR LICENÇA',editar:'EDITAR LICENÇA',excluir:'EXCLUIR LICENÇA'}[tipo]||tipo;
-  $('ssTitle').textContent='CONFIRMAR — '+tit;
-  $('ssPass').value='';$('ssErr').classList.remove('on');$('ssPass').classList.remove('fld-err');
-  openSh('shSenha');setTimeout(()=>$('ssPass').focus(),80);
+function tokenClear(){ try{ localStorage.removeItem('pa_token'); sessionStorage.removeItem('pa_token'); }catch(e){} }
+function tokenPayload(tok){
+  try{
+    const p = JSON.parse(decodeURIComponent(escape(atob(tok.split('.')[0].replace(/-/g,'+').replace(/_/g,'/')))));
+    return p;
+  }catch(e){ return null; }
 }
-function ssOk(){
-  const want=(DB&&DB.config&&DB.config.lic&&DB.config.lic.op)||PAINEL_SENHA||'1234';
-  const s=$('ssPass').value||'';
-  if(lgN(s)!==lgN(want)){$('ssErr').textContent='Senha incorreta — digite a senha do painel para continuar.';$('ssErr').classList.add('on');$('ssPass').classList.add('fld-err');return;}
-  closeSh('shSenha');
-  const a=pendAcao;pendAcao=null;if(!a)return;
-  if(a.tipo==='adicionar')openLicAdd();
-  else if(a.tipo==='editar')openLicEdit(a.dev);
-  else if(a.tipo==='excluir')openLicDel(a.dev);
+function sessaoValida(){
+  const tok = tokenGet();
+  if(!tok) return null;
+  const p = tokenPayload(tok);
+  if(!p || !p.exp || p.exp < Date.now()){ tokenClear(); return null; }
+  return p;
 }
-function selPlan(p){licPlanSel=p;document.querySelectorAll('#alPlans button,#elPlans button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));}
-function openLicAdd(){
-  $('alDev').value='';$('alNome').value='';$('alMail').value='';$('alTel').value='';
-  selPlan('d30');openSh('shLicAdd');setTimeout(()=>$('alDev').focus(),80);
-}
-function licAddSave(){
-  const dev=($('alDev').value||'').trim().toUpperCase();
-  if(!dev){toast('Informe o ID do aparelho (o cliente vê no app: MAIS → ASSINATURA DO APP).');$('alDev').classList.add('fld-err');return;}
-  $('alDev').classList.remove('fld-err');
-  const P=PLANS[licPlanSel];if(!P){toast('Escolha um plano.');return;}
-  const exp=P.d?Date.now()+P.d*864e5:0;
-  const loja=($('alNome').value||'').trim(),mail=($('alMail').value||'').trim(),tel=($('alTel').value||'').trim();
-  reg.devs[dev]=Object.assign({},reg.devs[dev]||{},{dev,loja,email:mail,tel,ev:'ativ',plan:licPlanSel,exp,t:Date.now(),val:20,manual:true,canceled:false,deleted:false});
-  reg.hist.push({t:Date.now(),dev,loja,ev:'adm-add',val:20});
-  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
-  saveReg();sel.delete(dev);render();closeSh('shLicAdd');
-  (async()=>{
-    await fbPatchDev(dev,{dev,plan:licPlanSel,exp,ev:'pago',val:20,t:Date.now()});
-    const ok=await fbSendCmd(dev,{acao:'liberar',plan:licPlanSel,exp,lido:false,t:Date.now()});
-    ntfyPub('ativ',dev,{forma:'PAINEL',quem:'proprietário (painel)'});
-    if(ok)toast('Licença ADICIONADA — o app do cliente ativa sozinho ao abrir.');
-    else toast(fbEff()?'Salvo no Firebase (comando sem confirmação — aparelho offline?).':'Salvo na lista. Configure o FIREBASE nas CONFIGURAÇÕES para ativar à distância.');
-  })();
-}
-function openLicEdit(dev){
-  const d=curRecs.find(x=>x.dev===dev)||reg.devs[dev]||{};
-  licEditDev=dev;
-  $('elDev').textContent=dev;
-  $('elNome').textContent=d.loja||('Licença do aparelho '+dev);
-  selPlan(d.plan&&PLANS[d.plan]?d.plan:'d30');
-  openSh('shLicEdit');
-}
-function licEditSave(){
-  const dev=licEditDev,P=PLANS[licPlanSel];
-  if(!dev||!P)return;
-  const exp=P.d?Date.now()+P.d*864e5:0;
-  const loja=(reg.devs[dev]&&reg.devs[dev].loja)||'';
-  if(reg.devs[dev]){reg.devs[dev].plan=licPlanSel;reg.devs[dev].exp=exp;reg.devs[dev].ev='ativ';reg.devs[dev].t=Date.now();reg.devs[dev].canceled=false;reg.devs[dev].deleted=false;}
-  else{
-    const lr=localRec();
-    if(lr&&lr.dev===dev&&DB&&DB.config.lic){const L=DB.config.lic;L.plan=licPlanSel;L.exp=exp;L.grace=0;L.pend=0;L.hist=L.hist||[];L.hist.push({t:Date.now(),e:'Licença editada pelo painel admin — '+P.n,tp:'pagou'});try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}}
-  }
-  reg.hist.push({t:Date.now(),dev,loja,ev:'adm-edit',val:20});
-  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
-  saveReg();render();closeSh('shLicEdit');
-  (async()=>{
-    await fbPatchDev(dev,{plan:licPlanSel,exp,ev:'pago',val:20,t:Date.now()});
-    const ok=await fbSendCmd(dev,{acao:'liberar',plan:licPlanSel,exp,lido:false,t:Date.now()});
-    ntfyPub('ativ',dev,{forma:'PAINEL',quem:'proprietário (painel)'});
-    toast(ok?'Licença EDITADA — o app do cliente atualiza sozinho.':(fbEff()?'Salvo no Firebase (confirmação pendente).':'Salvo na lista. Configure o FIREBASE para aplicar no aparelho.'));
-  })();
-}
-function openLicDel(dev){licEditDev=dev;$('dlTxt').value='';$('dlDev').textContent=dev;openSh('shLicDel');}
-function licDelGo(){
-  if(($('dlTxt').value||'').trim().toUpperCase()!=='EXCLUIR'){toast('Digite EXCLUIR para confirmar.');$('dlTxt').classList.add('fld-err');return;}
-  $('dlTxt').classList.remove('fld-err');
-  const dev=licEditDev,d=reg.devs[dev];
-  if(d&&!d.local){delete reg.devs[dev];}
-  else if(d){d.deleted=true;}
-  else{
-    const lr=localRec();
-    if(lr&&lr.dev===dev)reg.devs[dev]=Object.assign({dev},lr,{deleted:true});
-  }
-  reg.hist.push({t:Date.now(),dev,loja:(d&&d.loja)||'',ev:'adm-del',val:0});
-  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
-  saveReg();sel.delete(dev);render();closeSh('shLicDel');
-  (async()=>{
-    if(fbEff()){
-      await fbPatchDev(dev,{ev:'canc',plan:'',exp:0,t:Date.now()});
-      const ok=await fbSendCmd(dev,{acao:'bloquear',lido:false,t:Date.now()});
-      ntfyPub('canc',dev,{del:1});
-      toast(ok?'Licença EXCLUÍDA — o app do cliente bloqueia sozinho ao abrir.':'Excluído da lista; comando não confirmado (aparelho offline?).');
-    }else toast('Excluído da lista local. Configure o FIREBASE para revogar no aparelho do cliente.');
-  })();
+function authHeaders(json){
+  const h = { 'Authorization': 'Bearer ' + tokenGet() };
+  if(json) h['Content-Type'] = 'application/json';
+  return h;
 }
 
-/* ================= v3.7 — ATIVAÇÃO E PAGAMENTO: URL da API · código manual · últimas ativações · ativar na mão ================= */
-function saveApUrl(){
-  const api=($('apUrl').value||'').trim().replace(/\/+$/,'');
-  reg.apiCfg=Object.assign({},reg.apiCfg||{},{});if(api)reg.apiCfg.api=api;saveReg();
-  if($('nApi'))$('nApi').value=api||reg.apiCfg.api||'';
-  if(DB&&DB.config&&DB.config.lic){const L=DB.config.lic;if(api)L.api=api;try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}}
-  (async()=>{
-    const f=fbEff();if(!f){toast(api?'URL salva no painel. Configure o FIREBASE nas CONFIGURAÇÕES para propagar aos outros aparelhos.':'URL limpa.');return;}
-    try{
-      const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),8000);
-      const r=await fetch(f+'/negrets/config/lic.json',{method:'PATCH',body:JSON.stringify({api:api,t:Date.now()}),signal:ctl.signal});
-      clearTimeout(tm);
-      toast(r.ok?'URL da API salva E publicada na nuvem — os aparelhos do cliente atualizam sozinhos.':'URL salva no painel; o Firebase não confirmou o envio.');
-    }catch(e){toast('URL salva no painel; sem contato com o Firebase para publicar.');}
-  })();
+/* ================= login ================= */
+const pwEye = $('#pwEye'), inpSenha = $('#loginSenha');
+pwEye.addEventListener('click', ()=>{
+  const show = inpSenha.type === 'password';
+  inpSenha.type = show ? 'text' : 'password';
+  $('#eyeOn').style.display = show ? 'none' : 'block';
+  $('#eyeOff').style.display = show ? 'block' : 'none';
+});
+$('#loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email = $('#loginEmail').value.trim(), senha = inpSenha.value;
+  const msg = $('#msg'), lock = $('#lockMsg');
+  msg.classList.add('hidden'); lock.classList.add('hidden');
+  if(!email || !senha){ msg.textContent = 'Preencha e-mail e senha'; msg.classList.remove('hidden'); return; }
+  const btn = $('#btnLogin');
+  btn.disabled = true;
+  $('#btnLoginTxt').innerHTML = '<span class="spin"></span>Entrando...';
+  try{
+    const r = await api('/api/admin-login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, senha})
+    });
+    const j = await r.json();
+    if(!r.ok || !j.ok){
+      if(j.bloqueado){
+        lock.textContent = '⛔ ' + (j.error || 'Painel bloqueado. Aguarde alguns minutos.');
+        lock.classList.remove('hidden');
+      } else {
+        msg.textContent = j.error || 'E-mail ou senha incorretos';
+        msg.classList.remove('hidden');
+      }
+      return;
+    }
+    tokenStore(j.token, $('#lembrar').checked);
+    try{ localStorage.setItem('pa_admin_nome', j.nome || 'Admin'); }catch(e){}
+    toast('Bem-vindo, ' + (j.nome || 'Admin') + '!', 'ok');
+    abrirPainel(j.nome, j.email);
+  }catch(err){
+    msg.textContent = 'Erro de conexão com API';
+    msg.classList.remove('hidden');
+  }finally{
+    btn.disabled = false;
+    $('#btnLoginTxt').textContent = 'Entrar';
+  }
+});
+
+/* ================= painel ================= */
+const PER_PAGE = 20;
+let LISTA = [], RAW = [], PAGINA = 1, FILTRO = 'todos', CODIGOS = {}, SELECAO = {};
+/* nome do admin: completo no desktop, primeiro nome no celular (cabe no header) */
+let ADM_NOME = 'Admin';
+function primeiroNome(n){ const t = String(n || '').trim(); return t ? t.split(/\s+/)[0] : 'Admin'; }
+function setNome(n){
+  ADM_NOME = String(n || '').trim() || 'Admin';
+  const a = $('#admNome'), b = $('#admNomeFull');
+  if(a) a.textContent = primeiroNome(ADM_NOME);
+  if(b) b.textContent = ADM_NOME;
 }
-async function btnGenCodeGo(){
-  const dev=($('gcDev').value||'').trim().toUpperCase();
-  if(!dev){toast('Digite o ID do aparelho (o cliente vê no app: MAIS → ASSINATURA DO APP).');return;}
-  const dias=Math.max(1,+($('gcDias').value||30)||30);
-  if(!(window.crypto&&crypto.subtle)){toast('Abra o painel pelo site (https) para gerar códigos.');return;}
-  let c;try{c=await genCodeDev(dev,dias);}catch(e){toast('Não deu para gerar o código aqui — abra o painel pelo site (https).');return;}
-  const exp=Date.now()+dias*864e5;
-  $('gcOut').innerHTML='<div class="codebox" style="margin-top:10px">'+c+'</div><p class="sh-note" style="margin-top:6px">Vale até <b>'+fmtDT(exp)+'</b> ('+dias+' dias) — SÓ para o aparelho <b>'+esc(dev)+'</b>. Cliente digita no app: MAIS → ASSINATURA DO APP → ATIVAR COM CÓDIGO MANUAL.</p><div class="mini"><button data-cp="'+c+'" type="button">COPIAR</button><button data-wa="'+c+'" type="button">ENVIAR NO WHATSAPP</button></div>';
-  $('gcOut').querySelector('[data-cp]').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(c);toast('Código copiado.');}catch(e){toast('Código: '+c);}});
-  $('gcOut').querySelector('[data-wa]').addEventListener('click',()=>{
-    const msg='Código de ativação do app NEGRET\u2019S ('+dias+' dias, até '+fmtDT(exp)+')\nVale SÓ para o aparelho '+dev+' — não funciona em outro.\nNo app: MAIS → ASSINATURA DO APP → ATIVAR COM CÓDIGO MANUAL.\nCódigo: '+c;
-    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+function abrirPainel(nome, email){
+  const p = sessaoValida();
+  if(!p){ mostrarLogin('Sessão expirada — entre novamente.'); return; }
+  const saved = (()=>{ try{ return localStorage.getItem('pa_admin_nome'); }catch(e){ return null; } })();
+  setNome(nome || saved || p.n || 'Admin');
+  $('#admEmail').textContent = email || p.e || '';
+  $('#viewLogin').hidden = true;
+  $('#viewPainel').hidden = false;
+  renderLog();
+  carregar();
+  carregarWA();
+}
+function mostrarLogin(msg){
+  $('#viewPainel').hidden = true;
+  $('#viewLogin').hidden = false;
+  if(msg) toast(msg, 'warn');
+}
+$('#btnSair').addEventListener('click', ()=>{ tokenClear(); mostrarLogin(); toast('Sessão encerrada', 'info'); });
+
+/* ================= carregamento (aplica exclusões/overrides locais) ================= */
+function aplicarLocal(){
+  const ovr = getOvr();
+  LISTA = RAW
+    .map(p=>{
+      const o = ovr[String(p.id)];
+      return o ? { ...p, nome: o.nome || p.nome, email: o.email || p.email } : p;
+    })
+    .filter(p=>!DEL.has(String(p.id)) && !FOREVER.has(String(p.id)));
+}
+async function carregar(){
+  if(!sessaoValida()){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
+  const btn = $('#btnAtualizar');
+  btn.disabled = true; $('#updSpin').classList.remove('hidden'); $('#updTxt').textContent = 'Atualizando…';
+  try{
+    const r = await api('/api/listar-pagamentos', { headers: authHeaders() });
+    const j = await r.json();
+    if(r.status === 401){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
+    if(!r.ok){ toast(j.error || 'Falha na consulta', 'err'); return; }
+    RAW = j.pagamentos || [];
+    PAGINA = 1;
+    aplicarLocal();
+    render();
+  }catch(e){
+    toast('Sem conexão com a API: ' + e.message, 'err');
+  }finally{
+    btn.disabled = false; $('#updSpin').classList.add('hidden'); $('#updTxt').textContent = '↻ Atualizar';
+  }
+}
+
+/* ================= render ================= */
+function statusBadge(p){
+  if(p.status === 'approved') return '<span class="badge b-ok">Pago</span>';
+  if(p.status === 'pending' || p.status === 'in_process') return '<span class="badge b-pend">Pendente</span>';
+  if(p.status === 'cancelled' || p.status === 'rejected') return '<span class="badge b-can">Cancelado</span>';
+  return '<span class="badge b-test">' + esc(Number(p.valor) < 1 ? 'Teste' : (p.status || 'Outro')) + '</span>';
+}
+function buscarEm(q, p){
+  if(!q) return true;
+  return ((p.email||'') + ' ' + (p.nome||'') + ' ' + (p.id||'')).toLowerCase().indexOf(q) !== -1;
+}
+function filtrar(){
+  const q = ($('#busca').value || '').trim().toLowerCase();
+  if(FILTRO === 'ativos') return ativosLista().filter(p=>buscarEm(q, p));
+  if(FILTRO === 'lixeira') return RAW.filter(p=>DEL.has(String(p.id)) && !FOREVER.has(String(p.id)) && buscarEm(q, p));
+  return LISTA.filter(p=>{
+    if(FILTRO === 'pendentes' && !(p.status === 'pending' || p.status === 'in_process')) return false;
+    if(FILTRO === 'desistentes' && !(p.status === 'cancelled' || p.status === 'rejected')) return false;
+    return buscarEm(q, p);
   });
 }
-function renderAtiv(){
-  const el=$('apAtiv');if(!el)return;
-  const rows=reg.hist.filter(h=>h.ev==='ativ'||h.ev==='adm-add'||h.ev==='adm-edit').slice(-9).reverse();
-  el.innerHTML=rows.length?rows.map(h=>{
-    const forma=h.forma||(h.ev==='adm-add'||h.ev==='adm-edit'?'PAINEL':'—');
-    const quem=h.quem||(h.ev==='adm-add'||h.ev==='adm-edit'?'proprietário (painel)':'aparelho do cliente');
-    return '<div class="ativ-row"><span><b>'+esc(h.dev||'—')+'</b>'+(h.loja?' · '+esc(h.loja):'')+'<br><small style="color:var(--mut)">'+fmtDT(h.t)+'</small></span><span class="ativ-f"><b>'+esc(forma)+'</b><br>'+esc(quem)+'</span></div>';
-  }).join(''):'<p class="sh-note">Nenhuma ativação ainda — entra aqui quando um aparelho pagar o PIX, usar código manual ou você ativar pelo painel.</p>';
+/* ================= usuários com licença ATIVA (Pix + código) ================= */
+function ativosLista(){
+  const agora = Date.now(), VITAL = 3650 * 864e5;   /* vitalício ≈ 10 anos (o painel mostra “não expira”) */
+  const mapa = {};
+  const nomeDe = em => { const f = LISTA.find(x => String(x.email || '').toLowerCase() === em); return (f && f.nome) || ''; };
+  const add = (email, nome, origem, ativado, extra)=>{
+    email = String(email || '').trim().toLowerCase();
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    if(!ativado) return;
+    const dias = (extra.dias === 0 || extra.dias === '0') ? 0 : (Number(extra.dias) || 30);
+    const expira = dias === 0 ? ativado + VITAL : ativado + dias * 864e5;
+    if(dias !== 0 && expira <= agora) return;                 /* expirado não entra */
+    const cur = mapa[email];
+    if(cur && expira <= cur.expira) return;                   /* fica a validade mais distante */
+    mapa[email] = {
+      id: extra.id, idcod: extra.idcod || '', data: new Date(ativado).toISOString(),
+      nome: nome || (cur && cur.nome) || (origem === 'Código' ? nomeDe(email) : '') || '',
+      email, valor: extra.valor, origem, ativado, expira, dias,
+      status: origem === 'Pix' ? 'ativo via pix' : 'ativo via codigo'
+    };
+  };
+  LISTA.forEach(p=>{
+    if(p.status === 'approved' && Number(p.valor) >= 1)
+      add(p.email, p.nome, 'Pix', new Date(p.data).getTime() || 0, { id: String(p.id), valor: p.valor, dias: 30 });   /* Pix: 30 dias fixos */
+  });
+  Object.keys(CODS).forEach(k=>{
+    const c = CODS[k];
+    const dias = (c.dias === 0 || c.dias === '0') ? 0 : (Number(c.dias) || 30);
+    add(c.email, c.nome || nomeDe(String(c.email || '').toLowerCase()), 'Código', Number(c.quando) || 0, { id: 'cod:' + k, idcod: k, valor: null, dias });
+  });
+  return Object.values(mapa).sort((a,b)=>a.expira - b.expira);   /* quem expira primeiro em cima */
 }
-function renderNaMao(){
-  const L=DB&&DB.config&&DB.config.lic;
-  if(!L){$('nmBody').innerHTML='<p class="sh-note">O app NEGRET\u2019S não foi aberto neste navegador ainda — abra o app primeiro (mesmo endereço), depois volte aqui e toque em ativar.</p>';$('btnNaMaoGo').style.display='none';return;}
-  const k=stOf(localRec());
-  $('nmBody').innerHTML='<div class="sh-kv"><span>APARELHO</span><b>'+esc(L.dev)+'</b></div><div class="sh-kv"><span>STATUS ATUAL</span><b><span class="badge b-'+k.k+'">'+esc(k.lb)+'</span></b></div>'+(DB.config.loja&&DB.config.loja.nome?'<div class="sh-kv"><span>LOJA</span><b>'+esc(DB.config.loja.nome)+'</b></div>':'');
-  $('btnNaMaoGo').style.display='';
+/* dica de licença nas linhas normais (pagamento aprovado = licença de 30 dias) */
+function licInfo(p){
+  if(p.status !== 'approved' || Number(p.valor) < 1) return '';
+  const ts = new Date(p.data).getTime();
+  if(!ts) return '';
+  const expira = ts + 30 * 864e5, ativo = expira > Date.now();
+  return '<span class="block text-[10.5px] font-bold mt-1 ' + (ativo ? 'text-green-700' : 'text-red-600') + '">'
+    + (ativo ? '🟢 licença ativa até ' : '🔴 licença expirou em ') + fmtData(new Date(expira).toISOString()) + '</span>';
 }
-function naMaoGo(){
-  const L=DB&&DB.config&&DB.config.lic;if(!L)return;
-  L.plan='d30';L.exp=Date.now()+30*864e5;L.grace=0;L.pend=0;L.hist=L.hist||[];
-  L.hist.push({t:Date.now(),e:'Ativado NA MÃO pelo proprietário — vale até '+fmtDT(L.exp),tp:'pagou'});
-  try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}
-  reg.devs[L.dev]=Object.assign({},reg.devs[L.dev]||{},{dev:L.dev,loja:(DB.config.loja&&DB.config.loja.nome)||'',ev:'ativ',plan:'d30',exp:L.exp,t:Date.now(),val:+L.preco||20,canceled:false,deleted:false});
-  reg.hist.push({t:Date.now(),dev:L.dev,loja:(DB.config.loja&&DB.config.loja.nome)||'',ev:'ativ',val:+L.preco||20,forma:'NA MÃO',quem:'proprietário (no aparelho do cliente)'});
-  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
-  saveReg();render();closeSh('shNaMao');
-  (async()=>{
-    const ok=await fbSendCmd(L.dev,{acao:'liberar',plan:'d30',exp:L.exp,lido:false,t:Date.now(),forma:'NA MÃO',quem:'proprietário na mão'});
-    ntfyPub('ativ',L.dev,{forma:'NA MÃO',quem:'proprietário (no aparelho do cliente)'});
-    toast(ok?'Ativado na mão + comando publicado — recarregue o app do cliente.':'Ativado neste navegador — recarregue o app do cliente.');
-  })();
+function kpis(){
+  const agora = Date.now(), d30 = 30*864e5;
+  let fat = 0, ativ = 0, pend = 0, exp = 0;
+  LISTA.forEach(p=>{
+    const ts = new Date(p.data).getTime() || 0;
+    if(p.status === 'approved'){
+      ativ++;
+      if(agora - ts < d30) fat += Number(p.valor) || 0; else exp++;
+    }
+    if(p.status === 'pending' || p.status === 'in_process') pend++;
+  });
+  $('#kFat').textContent = 'R$ ' + fat.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  $('#kAtiv').textContent = String(ativ);
+  $('#kPend').textContent = String(pend);
+  $('#kExp').textContent = String(exp);
+  const atv = ativosLista();
+  $('#kAtivos').textContent = String(atv.length);
+  const ac = $('#atvCnt');
+  ac.textContent = String(atv.length);
+  ac.classList.toggle('hidden', atv.length === 0);
+  const n = DEL.size, el = $('#lixCnt');
+  el.textContent = String(n);
+  el.classList.toggle('hidden', n === 0);
+}
+function pintarFiltros(){
+  document.querySelectorAll('.fil').forEach(x=>{
+    const on = x.dataset.f === FILTRO;
+    x.classList.toggle('bg-[#0F5C5C]', on);
+    x.classList.toggle('text-white', on);
+    x.classList.toggle('text-gray-600', !on);
+  });
+}
+function render(){
+  kpis();
+  pintarFiltros();
+  const nSel = Object.keys(SELECAO).filter(k=>SELECAO[k]).length;
+  $('#selBar').hidden = FILTRO === 'lixeira' || FILTRO === 'ativos' || nSel === 0;
+  $('#selTxt').textContent = nSel + ' selecionado' + (nSel === 1 ? '' : 's');
+  $('#btnLixClear').hidden = !(FILTRO === 'lixeira' && DEL.size > 0);
+  $('#atvNota').hidden = FILTRO !== 'ativos';
+  const lista = filtrar();
+  const totalPag = Math.max(1, Math.ceil(lista.length / PER_PAGE));
+  if(PAGINA > totalPag) PAGINA = totalPag;
+  const page = lista.slice((PAGINA-1)*PER_PAGE, PAGINA*PER_PAGE);
+  const tb = $('#tbody');
+  if(FILTRO === 'ativos'){
+    tb.innerHTML = page.length ? page.map(u=>{
+      const vital = Number(u.dias) === 0;
+      const dias = vital ? 0 : Math.max(1, Math.ceil((u.expira - Date.now()) / 864e5));
+      const st = vital
+        ? '<span class="badge b-ok">Vitalício</span>'
+        : (dias <= 5
+          ? '<span class="badge b-pend">expira em ' + (dias === 1 ? '1 dia' : dias + ' dias') + '</span>'
+          : '<span class="badge b-ok">Ativo · ' + dias + ' dias</span>');
+      const orig = u.origem === 'Pix' ? '<span class="badge b-src">⚡ via Pix</span>' : '<span class="badge b-cod">🔑 via Código</span>';
+      const acoes = u.origem === 'Pix'
+        ? '<button class="act" data-act="ver-pag">🔎 Ver na lista</button>'
+        : '<button class="act" data-act="reenv-cod">📱 Reenviar</button>'
+        + '<button class="act" data-act="cop-cod">🔑 Copiar</button>'
+        + '<button class="act del" data-act="rem-cod" title="Remover da lista de ativos">🗑️</button>';
+      return `<tr data-key="${esc(u.email)}" data-email="${esc(u.email)}" data-nome="${esc(u.nome || '')}" data-cod="${esc(u.idcod)}" data-dias="${vital ? 0 : (Number(u.dias) || 30)}">
+        <td class="p-3" data-nolabel><span class="dot-on" title="Licença ativa"></span></td>
+        <td class="p-3 whitespace-nowrap font-semibold" data-l="Ativado">${fmtData(u.data)}</td>
+        <td class="p-3 font-semibold" data-l="Nome">${u.nome ? esc(u.nome) : '<span class="text-gray-400">—</span>'}</td>
+        <td class="p-3" data-l="E-mail">${esc(u.email)}</td>
+        <td class="p-3 font-bold whitespace-nowrap" data-l="Valor">${u.valor != null ? fmtValor(u.valor) : '—'}</td>
+        <td class="p-3" data-l="Status">${st}<span class="block mt-1">${orig}</span><span class="block text-[10.5px] text-gray-500 mt-1">${vital ? 'não expira — ativação vitalícia' : 'válido até ' + fmtData(new Date(u.expira).toISOString())}</span></td>
+        <td class="p-3 acts whitespace-nowrap" data-l="Ações">${acoes}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">Nenhum usuário com licença ativa agora — ativações por Pix aprovado ou por código aparecem aqui.</td></tr>';
+  } else if(FILTRO === 'lixeira'){
+    tb.innerHTML = page.length ? page.map(p=>{
+      const id = String(p.id), info = DELINFO[id] || {};
+      return `<tr class="bg-red-50/40" data-id="${id}">
+        <td class="p-3 text-gray-300" data-nolabel>—</td>
+        <td class="p-3 whitespace-nowrap font-semibold text-gray-500" data-l="Data">${fmtData(p.data)}</td>
+        <td class="p-3 font-semibold text-gray-500" data-l="Nome">${p.nome ? esc(p.nome) : '—'}</td>
+        <td class="p-3 text-gray-500" data-l="E-mail">${p.email ? esc(p.email) : '—'}</td>
+        <td class="p-3 font-bold whitespace-nowrap text-gray-500" data-l="Valor">${fmtValor(p.valor)}</td>
+        <td class="p-3" data-l="Status">${statusBadge(p)}</td>
+        <td class="p-3 acts whitespace-nowrap" data-l="Ações">
+          <button class="act" data-act="restaurar">↩ Restaurar</button>
+          <button class="act del" data-act="excluir-def" title="Sai da Lixeira e some do painel para sempre">🗑️ Excluir definitivo</button>
+          ${info.quando ? `<span class="block text-[10.5px] text-gray-400 mt-1">oculto em ${esc(info.quando)}</span>` : ''}
+        </td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">A Lixeira está vazia.</td></tr>';
+  } else if(!LISTA.length){
+    tb.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">Nenhum pagamento encontrado nos últimos 90 dias.</td></tr>';
+  } else if(!page.length){
+    tb.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-medium">Nada com esse filtro/busca.</td></tr>';
+  } else {
+    tb.innerHTML = page.map(p=>{
+      const id = String(p.id);
+      const cod = CODIGOS[id] || '';
+      return `<tr data-id="${id}">
+        <td class="p-3 ckcell" data-nolabel><input type="checkbox" class="ck w-4 h-4 accent-[#0F5C5C] rounded" data-id="${id}" ${SELECAO[id]?'checked':''}></td>
+        <td class="p-3 whitespace-nowrap font-semibold" data-l="Data">${fmtData(p.data)}</td>
+        <td class="p-3 font-semibold" data-l="Nome">${p.nome ? esc(p.nome) : '<span class="text-red-600 font-bold">— editar</span>'}</td>
+        <td class="p-3" data-l="E-mail">${p.email ? esc(p.email) : '<span class="text-red-600 font-bold">— editar</span>'}</td>
+        <td class="p-3 font-bold whitespace-nowrap" data-l="Valor">${fmtValor(p.valor)}</td>
+        <td class="p-3" data-l="Status">${statusBadge(p)}${licInfo(p)}</td>
+        <td class="p-3 acts whitespace-nowrap" data-l="Ações">
+          <button class="act pri" data-act="ativar">🔑 Ativar código</button>
+          <button class="act" data-act="reenviar">Reenviar código</button>
+          <button class="act" data-act="copiar">Copiar código</button>
+          <button class="act" data-act="editar">Editar</button>
+          <button class="act del" data-act="excluir" title="Excluir da lista (fica na Lixeira)">🗑️</button>
+          ${cod ? `<span class="block text-[10.5px] font-bold text-green-700 mt-1">Código: ${esc(cod)}</span>` : ''}
+        </td></tr>`;
+    }).join('');
+  }
+  $('#pagInfo').textContent = FILTRO === 'ativos'
+    ? lista.length + ' usuário' + (lista.length === 1 ? '' : 's') + ' ativo' + (lista.length === 1 ? '' : 's') + ' · página ' + PAGINA + ' de ' + totalPag
+    : lista.length + ' pagamento' + (lista.length === 1 ? '' : 's') + ' · página ' + PAGINA + ' de ' + totalPag;
 }
 
-/* ---------- eventos ---------- */
-$('btnEntrar').addEventListener('click',entrar);
-$('aPass').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
-$('aEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('aPass').focus();});
-$('peye').addEventListener('click',()=>{const p=$('aPass');const show=p.type==='password';p.type=show?'text':'password';$('peye').style.color=show?'var(--gold)':'';p.focus();});
-$('aEmail').addEventListener('input',()=>fldErr($('aEmail'),false));
-$('aPass').addEventListener('input',()=>fldErr($('aPass'),false));
-$('btnForgot').addEventListener('click',()=>{
-  const zap=String((DB&&DB.config&&DB.config.loja&&DB.config.loja.zap)||(DB&&DB.config&&DB.config.lic&&DB.config.lic.ozap)||'').replace(/\D/g,'');
-  const msg='Olá! Esqueci a senha do PAINEL ADMIN do app NEGRET\u2019S. Pode me ajudar a redefinir?';
-  window.open('https://wa.me/'+(zap?'55'+zap.replace(/^55/,''):'')+'?text='+encodeURIComponent(msg),'_blank');
-  toast('Abrindo o WhatsApp para recuperar o acesso…');
+/* ================= controles ================= */
+$('#busca').addEventListener('input', ()=>{ PAGINA = 1; render(); });
+document.querySelectorAll('.fil').forEach(b=>b.addEventListener('click', ()=>{
+  FILTRO = b.dataset.f; PAGINA = 1; render();
+}));
+$('#pgPrev').addEventListener('click', ()=>{ if(PAGINA > 1){ PAGINA--; render(); } });
+$('#pgNext').addEventListener('click', ()=>{ if(PAGINA < Math.max(1, Math.ceil(filtrar().length / PER_PAGE))){ PAGINA++; render(); } });
+$('#ckAll').addEventListener('change', ()=>{
+  if(FILTRO === 'lixeira' || FILTRO === 'ativos') return;
+  const on = $('#ckAll').checked;
+  filtrar().slice((PAGINA-1)*PER_PAGE, PAGINA*PER_PAGE).forEach(p=>{ SELECAO[String(p.id)] = on; });
+  render();
 });
-$('btnSair').addEventListener('click',sair);
-$('btnTema').addEventListener('click',()=>{const on=document.body.classList.toggle('light');localStorage.setItem('negretsAdmTema',on?'1':'');});
-$('btnDev').addEventListener('click',()=>{renderDev();openSh('shDev');});
-$('btnCfg').addEventListener('click',openCfg);
-$('dhEdit').addEventListener('click',openCfg);
-$('btnCfgSave').addEventListener('click',saveCfg);
-$('btnRegWipe').addEventListener('click',()=>{reg={devs:{},hist:[],apiCfg:reg.apiCfg||{fb:'',api:''}};saveReg();closeSh('shCfg');render();toast('Registro da nuvem limpo (os próximos eventos voltam a acumular).');});
-/* v3.6.5 — gestão de licenças com segurança */
-$('btnLicAdd').addEventListener('click',()=>pedirSenha('adicionar'));
-$('btnSsOk').addEventListener('click',ssOk);
-$('ssPass').addEventListener('keydown',e=>{if(e.key==='Enter')ssOk();});
-$('ssPass').addEventListener('input',()=>{$('ssErr').classList.remove('on');$('ssPass').classList.remove('fld-err');});
-$('btnLicAddSave').addEventListener('click',licAddSave);
-$('btnLicEditSave').addEventListener('click',licEditSave);
-$('btnLicDelGo').addEventListener('click',licDelGo);
-document.querySelectorAll('#alPlans button,#elPlans button').forEach(b=>b.addEventListener('click',()=>selPlan(b.dataset.p)));
-$('btnAtualizar').addEventListener('click',async()=>{const n=await pollCloud();render();toast(n?('Atualizado — '+n+' evento(s) novo(s).'):'Sem novos eventos.');});
-$('btnCsv').addEventListener('click',exportCsv);
-$('qBusca').addEventListener('input',render);
-$('bulkCanc').addEventListener('click',()=>{sel.forEach(d=>{if(reg.devs[d])reg.devs[d].canceled=true;else{const lr=localRec();if(lr&&lr.dev===d)reg.devs[d]=Object.assign({dev:d},lr,{canceled:true});}});saveReg();sel.clear();render();toast('Selecionados cancelados.');});
-$('bulkRemove').addEventListener('click',()=>{let n=0;sel.forEach(d=>{if(reg.devs[d]&&!reg.devs[d].local){delete reg.devs[d];n++;}});saveReg();sel.clear();render();toast(n+' registro(s) removido(s) da lista.');});
-$('bulkClear').addEventListener('click',()=>{sel.clear();render();});
-/* v3.7 — ATIVAÇÃO E PAGAMENTO */
-$('btnApUrl').addEventListener('click',saveApUrl);
-$('btnGenCode').addEventListener('click',btnGenCodeGo);
-$('btnNaMao').addEventListener('click',()=>{renderNaMao();openSh('shNaMao');});
-$('btnNaMaoGo').addEventListener('click',naMaoGo);
+$('#btnSelClear').addEventListener('click', ()=>{ SELECAO = {}; render(); });
+$('#btnAtualizar').addEventListener('click', carregar);
+$('#btnCsv').addEventListener('click', ()=>{
+  const lista = filtrar();
+  if(!lista.length) return toast('Nada para exportar com esse filtro', 'warn');
+  const linhas = [['Data','Nome','E-mail','Valor','Status','Validade','ID']].concat(lista.map(p=>[
+    fmtData(p.data), (p.nome||''), (p.email||''), String(Number(p.valor||0).toFixed(2)).replace('.',','), p.status||'', (p.expira ? fmtData(new Date(p.expira).toISOString()) : ''), String(p.id)
+  ]));
+  const csv = '\uFEFF' + linhas.map(l=>l.map(c=>'"' + String(c).replace(/"/g,'""') + '"').join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = 'poolapp-pagamentos.csv';
+  a.click();
+  addLog('CSV exportado (' + lista.length + ' linhas).');
+  toast('CSV exportado', 'ok');
+});
 
-/* ---------- init ---------- */
-loadDB();
-loadReg();
-$('apUrl').value=(reg.apiCfg&&reg.apiCfg.api)||'https://assist-ncia-cell-2.vercel.app';
-renderAtiv();
-if(localStorage.getItem('negretsAdmTema')==='1')document.body.classList.add('light');
-const lem=localStorage.getItem('negretsAdmEmail');
-if(lem)$('aEmail').value=lem;
-else if(DB&&DB.config&&DB.config.lic&&DB.config.lic.oemail)$('aEmail').value=DB.config.lic.oemail;
-if(sessionStorage.getItem('negretsAdmOk')==='1'&&((DB&&DB.config&&DB.config.lic)||PAINEL_SENHA))goDash();
-else $('vLogin').classList.add('on');
+/* ================= ações da tabela ================= */
+function linhaPorId(id){
+  for(const p of LISTA) if(String(p.id) === String(id)) return p;
+  for(const p of RAW) if(String(p.id) === String(id)) return p;
+  return null;
+}
+$('#tbody').addEventListener('click', async e=>{
+  const ck = e.target.closest('.ck');
+  if(ck){ SELECAO[ck.dataset.id] = ck.checked; render(); return; }
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const tr = b.closest('tr');
+  /* linhas da aba Ativos (Pix + código) têm tratamento próprio */
+  if(tr.dataset.key){
+    const d = tr.dataset, act = b.dataset.act;
+    if(act === 'ver-pag'){ FILTRO = 'todos'; $('#busca').value = d.email || ''; PAGINA = 1; render(); }
+    if(act === 'reenv-cod') reenviarCodigoDireto(d.email, d.nome, d.cod, Number(d.dias));
+    if(act === 'cop-cod') copiarTexto(d.cod);
+    if(act === 'rem-cod') removerCodigoModal(d.cod, d.email);
+    return;
+  }
+  const id = tr.dataset.id;
+  const p = linhaPorId(id); if(!p) return;
+  const act = b.dataset.act;
+  if(act === 'ativar') ativarModal(p);
+  if(act === 'reenviar') reenviar(p, b);
+  if(act === 'copiar') copiarCodigo(p);
+  if(act === 'editar') editarModal(p);
+  if(act === 'excluir') excluirModal(p);
+  if(act === 'restaurar') restaurar(id);
+  if(act === 'excluir-def') excluirDefModal(id);
+});
+$('#btnDelSel').addEventListener('click', async ()=>{
+  if(FILTRO === 'lixeira') return;
+  const ids = Object.keys(SELECAO).filter(k=>SELECAO[k]);
+  if(!ids.length) return;
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">Excluir ${ids.length} pagamento(s)?</h3>
+    <p class="text-[13px] text-gray-500 mb-1">Eles saem da lista imediatamente (e continuam fora ao atualizar) e vão para a <b>Lixeira</b>, de onde podem ser restaurados.</p>
+    <p class="text-[12px] text-gray-400 mb-4">Pagamentos pendentes também são cancelados no Mercado Pago.</p>
+    <div class="flex gap-2">
+      <button class="act del flex-1 h-11" id="mDelYes">🗑️ Excluir tudo</button>
+      <button class="act flex-1 h-11" id="mNo">Cancelar</button>
+    </div>`);
+  $('#mNo').addEventListener('click', closeModal);
+  $('#mDelYes').addEventListener('click', async ()=>{
+    closeModal();
+    let ok = 0;
+    for(const id of ids){ if(await deletar(id, true)) ok++; }
+    SELECAO = {};
+    addLog(ok + ' pagamento(s) excluído(s) em lote.');
+    toast(ok + ' excluído(s)', 'ok');
+  });
+});
+
+/* ================= ativar por CÓDIGO (com duração) =================
+   Durações só para ativação por código — o Pix segue com 30 dias fixos.
+   O código gerado carrega o plano embutido (ver api/_admin.js) e o
+   /api/check-status devolve o expira certo quando o cliente digita no app. */
+function rotuloDuracao(d){
+  d = Number(d);
+  if(d === 0) return 'vitalícia';
+  if(d === 180) return '6 meses';
+  if(d === 365) return '1 ano';
+  return d + ' dias';
+}
+function ativarModal(p){
+  const email = (p.email || '').trim();
+  if(!email){ return editarModal(p, 'Este pagamento está sem e-mail — preencha antes de ativar.'); }
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🔑 Ativar por código</h3>
+    <p class="text-[12.5px] text-gray-500 mb-1"><b>${esc(p.id)}</b> — ${esc(email)}</p>
+    <p class="text-[12px] text-gray-400 mb-3">Escolha a duração da licença e toque para gerar o código. Vale só para a ativação por código — pelo Pix continua 30 dias fixos. O cliente digita o código no app em “Já tenho código”.</p>
+    <div class="grid gap-2">
+      <button class="act h-11 text-left" data-dur="30"><b>30 dias</b> <span class="font-normal text-gray-400">· igual ao Pix</span></button>
+      <button class="act h-11 text-left" data-dur="60"><b>60 dias</b> <span class="font-normal text-gray-400">· 2 meses</span></button>
+      <button class="act h-11 text-left" data-dur="180"><b>6 meses</b> <span class="font-normal text-gray-400">· semestre</span></button>
+      <button class="act h-11 text-left" data-dur="365"><b>1 ano</b> <span class="font-normal text-gray-400">· 12 meses</span></button>
+      <button class="act h-11 text-left" data-dur="0"><b>Vitalício</b> <span class="font-normal text-gray-400">· não expira nunca</span></button>
+      <button class="act h-11" id="durCancel">Cancelar</button>
+    </div>`);
+  $('#durCancel').addEventListener('click', closeModal);
+  $('#modalCard').querySelectorAll('[data-dur]').forEach(b=>b.addEventListener('click', ()=>ativar(p, b, Number(b.dataset.dur))));
+}
+async function ativar(p, btn, dias){
+  const email = (p.email || '').trim();
+  if(!email || !(dias === 0 || dias === 30 || dias === 60 || dias === 180 || dias === 365)) return;
+  const original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = 'Gerando…';
+  try{
+    const r = await api('/api/ativar-manual', {
+      method:'POST', headers: authHeaders(true),
+      body: JSON.stringify({ email, dias })
+    });
+    const j = await r.json();
+    if(!r.ok || !j.ok){ toast(j.error || 'Falha ao gerar código', 'err'); return; }
+    const dj = (j.dias === 0) ? 0 : (Number(j.dias) || 30);
+    CODIGOS[String(p.id)] = j.code;
+    CODS[j.code] = { email, nome: p.nome || '', code: j.code, quando: Date.now(), dias: dj };
+    saveCodigos();
+    addLog('Ativado por admin — código ' + j.code + ' (' + rotuloDuracao(dj) + ') para ' + email);
+    toast('Código ' + j.code + ' gerado — licença ' + rotuloDuracao(dj) + ' para ' + email, 'ok');
+    closeModal();
+    render();
+  }catch(e){ toast('Sem conexão: ' + e.message, 'err'); }
+  finally{ btn.disabled = false; btn.innerHTML = original; }
+}
+async function reenviar(p, btn){
+  const id = String(p.id);
+  if(!CODIGOS[id]){
+    btn.disabled = true;
+    try{
+      const r = await api('/api/ativar-manual', { method:'POST', headers: authHeaders(true), body: JSON.stringify({email:(p.email||'').trim()}) });
+      const j = await r.json();
+      if(!r.ok || !j.ok){ toast(j.error || 'Falha ao gerar código', 'err'); return; }
+      CODIGOS[id] = j.code;
+      CODS[j.code] = { email:(p.email||'').trim().toLowerCase(), nome: p.nome || '', code: j.code, quando: Date.now(), dias: (j.dias === 0) ? 0 : (Number(j.dias) || 30) };
+      saveCodigos();
+      addLog('Código ' + j.code + ' (' + rotuloDuracao((j.dias === 0) ? 0 : (Number(j.dias) || 30)) + ') gerado para ' + (p.email || '?'));
+    }catch(e){ toast('Sem conexão: ' + e.message, 'err'); return; }
+    finally{ btn.disabled = false; }
+  }
+  const cod = CODIGOS[id];
+  const infoC = CODS[cod] || {};
+  const msg = textoAtivacao(p.nome, p.email, cod, (infoC.dias === 0) ? 0 : (Number(infoC.dias) || 30));
+  try{ await navigator.clipboard.writeText(msg); }catch(e){}
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  addLog('Reenviado por WhatsApp — código ' + cod + ' para ' + (p.email || '?'));
+  toast('Mensagem pronta — escolha o contato do cliente', 'ok');
+  render();
+}
+async function copiarCodigo(p){
+  const cod = CODIGOS[String(p.id)];
+  if(!cod) return toast('Gere o código primeiro — botão “🔑 Ativar código”', 'warn');
+  try{ await navigator.clipboard.writeText(cod); addLog('Código ' + cod + ' copiado.'); toast('Código ' + cod + ' copiado', 'ok'); }
+  catch(e){ toast('Não foi possível copiar automaticamente', 'warn'); }
+}
+
+/* ================= ações da aba Ativos ================= */
+function textoAtivacao(nome, email, cod, dias){
+  const nome1 = (nome && nome !== '—') ? nome.split(' ')[0] + ', ' : '';
+  const d = (Number(dias) === 0) ? 0 : (Number(dias) || 30);
+  const dur = d === 0
+    ? 'Licença VITALÍCIA — não expira nunca. 🏊'
+    : 'Licença válida por ' + rotuloDuracao(d) + '. 🏊';
+  return '🌊 *PoolApp Universal — Ativação da licença*\n\n'
+    + 'Olá, ' + nome1 + 'tudo bem? Seu pagamento foi confirmado ✅\n\n'
+    + 'Código de ativação: *' + cod + '*\n\n'
+    + 'No app: toque em “Licença” → “Já tenho código” e digite o código acima.\n'
+    + dur;
+}
+async function copiarTexto(t){
+  if(!t) return toast('Registro sem código armazenado', 'warn');
+  try{ await navigator.clipboard.writeText(t); addLog('Código ' + t + ' copiado.'); toast('Código ' + t + ' copiado', 'ok'); }
+  catch(e){ toast('Não foi possível copiar automaticamente', 'warn'); }
+}
+async function reenviarCodigoDireto(email, nome, cod, dias){
+  if(!cod) return toast('Registro sem código armazenado', 'warn');
+  const msg = textoAtivacao(nome, email, cod, dias);
+  try{ await navigator.clipboard.writeText(msg); }catch(e){}
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  addLog('Reenviado por WhatsApp — código ' + cod + ' para ' + (email || '?'));
+  toast('Mensagem pronta — escolha o contato do cliente', 'ok');
+}
+function removerCodigoModal(cod, email){
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">Remover da lista de ativos?</h3>
+    <p class="text-[13px] text-gray-500 mb-1">Código <b>${esc(cod)}</b> — ${esc(email || 'sem e-mail')}.</p>
+    <p class="text-[12px] text-gray-400 mb-4">Só tira da aba “Ativos”. O pagamento (se existir) continua na lista normal.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="rmYes">Remover</button>
+      <button class="act flex-1 h-11" id="rmNo">Cancelar</button>
+    </div>`);
+  $('#rmNo').addEventListener('click', closeModal);
+  $('#rmYes').addEventListener('click', ()=>{
+    delete CODS[cod]; saveCodigos(); closeModal(); render();
+    addLog('Ativação por código removida dos ativos — ' + cod + ' (' + (email || '?') + ')');
+    toast('Removido da lista de ativos', 'ok');
+  });
+}
+
+/* ================= editar (agora persiste no painel) ================= */
+function editarModal(p, aviso){
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">Editar pagamento ${esc(p.id)}</h3>
+    ${aviso ? `<p class="text-[12.5px] font-semibold text-red-600 mb-2">${esc(aviso)}</p>` : ''}
+    <p class="text-[12px] text-gray-500 mb-1">Corrija o nome e o e-mail do cliente (resolve os “--” de pagamentos antigos).</p>
+    <label>Nome</label><input type="text" id="edNome" value="${esc(p.nome || '')}" placeholder="Nome do cliente">
+    <label>E-mail</label><input type="email" id="edEmail" value="${esc(p.email || '')}" placeholder="cliente@email.com">
+    <div class="flex gap-2 mt-4">
+      <button class="act pri flex-1 h-11" id="edSave">Salvar</button>
+      <button class="act flex-1 h-11" id="edCancel">Cancelar</button>
+    </div>`);
+  $('#edCancel').addEventListener('click', closeModal);
+  $('#edSave').addEventListener('click', async ()=>{
+    const nome = $('#edNome').value.trim(), email = $('#edEmail').value.trim();
+    if(!nome && !email) return toast('Preencha nome ou e-mail', 'warn');
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('E-mail inválido', 'err');
+    /* 1) persiste no painel (localStorage) — sobrevive ao refresh mesmo se o /tmp do Vercel zerar */
+    const ovr = getOvr();
+    ovr[String(p.id)] = { ...(ovr[String(p.id)] || {}), nome, email };
+    saveOvr(ovr);
+    /* 2) tenta gravar também no servidor (best-effort) */
+    let srv = false;
+    try{
+      const r = await api('/api/editar-pagamento', {
+        method:'POST', headers: authHeaders(true), body: JSON.stringify({id:String(p.id), nome, email})
+      });
+      const j = await r.json().catch(()=>({}));
+      srv = !!(r.ok && j.ok);
+    }catch(e){}
+    p.nome = nome || p.nome; p.email = email || p.email;
+    addLog('Dados editados: ' + String(p.id) + ' → ' + (nome || '-') + ' / ' + (email || '-') + (srv ? '' : ' (local)'));
+    closeModal(); render();
+    toast(srv ? 'Dados salvos' : 'Dados salvos no painel (API sem resposta)', srv ? 'ok' : 'warn');
+  });
+}
+
+/* ================= excluir (CORRIGIDO: sai da lista e NÃO volta) ================= */
+function excluirModal(p){
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🗑️ Excluir pagamento</h3>
+    <p class="text-[13px] text-gray-500 mb-1">Pagamento <b>${esc(p.id)}</b> — ${esc(p.email || 'sem e-mail')} (${fmtValor(p.valor)}).</p>
+    <p class="text-[13px] text-gray-500 mb-1">Ele sai da lista agora e <b>continua fora mesmo atualizando a página</b>. Fica guardado na <b>Lixeira</b> para restaurar se precisar.</p>
+    <p class="text-[12px] text-gray-400 mb-4">Se ainda estiver pendente, também é cancelado no Mercado Pago.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="delYes">Excluir da lista</button>
+      <button class="act flex-1 h-11" id="delNo">Cancelar</button>
+    </div>`);
+  $('#delNo').addEventListener('click', closeModal);
+  $('#delYes').addEventListener('click', async ()=>{
+    closeModal();
+    const ok = await deletar(String(p.id));
+    if(ok){
+      addLog('Excluído por admin em ' + fmtData(new Date().toISOString()) + ' — ' + String(p.id));
+      toast('Pagamento removido da lista', 'ok');
+    }
+  });
+}
+async function deletar(id, silencioso){
+  /* 1) persiste AQUI — é o que garante que não volta ao atualizar */
+  DEL.add(String(id));
+  DELINFO[String(id)] = { quando: fmtData(new Date().toISOString()) };
+  saveDel(); saveDelInfo(DELINFO);
+  delete SELECAO[String(id)];
+  aplicarLocal();
+  render();
+  /* 2) avisa o servidor: cancela pendente no MP + marca override (best-effort) */
+  try{
+    const r = await api('/api/deletar-pagamento', {
+      method:'POST', headers: authHeaders(true), body: JSON.stringify({id})
+    });
+    const j = await r.json().catch(()=>({}));
+    if(r.status === 401){ tokenClear(); mostrarLogin('Sessão expirada — entre novamente.'); return false; }
+    if(!r.ok && !silencioso) toast(j.error || 'Removido da lista, mas o servidor não confirmou o cancelamento', 'warn');
+  }catch(e){ if(!silencioso) toast('Removido da lista (servidor sem resposta)', 'warn'); }
+  return true;
+}
+function restaurar(id){
+  DEL.delete(String(id));
+  delete DELINFO[String(id)];
+  saveDel(); saveDelInfo(DELINFO);
+  aplicarLocal();
+  render();
+  addLog('Restaurado da Lixeira — ' + id);
+  toast('Pagamento restaurado', 'ok');
+}
+
+/* ================= excluir DEFINITIVAMENTE (sai da Lixeira e some do painel) ================= */
+function excluirDefModal(id){
+  const p = linhaPorId(id) || DELINFO[id] || {};
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🗑️ Excluir definitivamente?</h3>
+    <p class="text-[13px] text-gray-500 mb-1">Pagamento <b>${esc(id)}</b>${p && p.email ? ' — ' + esc(p.email) : ''}.</p>
+    <p class="text-[13px] text-gray-500 mb-1">Ele sai da Lixeira e <b>desaparece do painel para sempre</b> — não dá para restaurar.</p>
+    <p class="text-[12px] text-gray-400 mb-4">O registro continua no Mercado Pago (ninguém apaga de lá), mas nunca mais aparece aqui.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="defYes">🗑️ Excluir definitivo</button>
+      <button class="act flex-1 h-11" id="defNo">Cancelar</button>
+    </div>`);
+  $('#defNo').addEventListener('click', closeModal);
+  $('#defYes').addEventListener('click', async ()=>{
+    closeModal();
+    await excluirDefinitivo(id);
+    addLog('Excluído DEFINITIVAMENTE — ' + id);
+    toast('Excluído para sempre', 'ok');
+  });
+}
+async function excluirDefinitivo(id){
+  FOREVER.add(String(id));
+  DEL.delete(String(id));
+  delete DELINFO[String(id)];
+  saveForever(); saveDel(); saveDelInfo(DELINFO);
+  delete SELECAO[String(id)];
+  aplicarLocal();
+  render();
+  /* best-effort no servidor: cancela pendente no MP + grava override (reuso da API que já existe) */
+  try{ await api('/api/deletar-pagamento', { method:'POST', headers: authHeaders(true), body: JSON.stringify({id}) }); }catch(e){}
+  return true;
+}
+$('#btnLixClear').addEventListener('click', ()=>{
+  const ids = [...DEL];
+  if(!ids.length) return;
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">🗑️ Esvaziar a Lixeira?</h3>
+    <p class="text-[13px] text-gray-500 mb-1"><b>${ids.length}</b> pagamento(s) vão sair da Lixeira e <b>desaparecer do painel para sempre</b>.</p>
+    <p class="text-[12px] text-gray-400 mb-4">Os registros continuam no Mercado Pago, mas nunca mais aparecem aqui.</p>
+    <div class="flex gap-2 mt-3">
+      <button class="act del flex-1 h-11" id="lixYes">🗑️ Esvaziar tudo</button>
+      <button class="act flex-1 h-11" id="lixNo">Cancelar</button>
+    </div>`);
+  $('#lixNo').addEventListener('click', closeModal);
+  $('#lixYes').addEventListener('click', async ()=>{
+    closeModal();
+    for(const id of ids) await excluirDefinitivo(id);
+    addLog('Lixeira esvaziada — ' + ids.length + ' pagamento(s) excluído(s) definitivamente.');
+    toast('Lixeira esvaziada', 'ok');
+  });
+});
+
+/* ================= modo escuro ================= */
+function temaAplicar(){
+  const dark = document.documentElement.classList.contains('dark');
+  const b = $('#btnTema');
+  if(b) b.innerHTML = (dark ? '☀️' : '🌙') + '<span class="hidel"> Tema</span>';
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', dark ? '#0e1618' : '#0F5C5C');
+}
+$('#btnTema').addEventListener('click', ()=>{
+  const dark = document.documentElement.classList.toggle('dark');
+  try{ localStorage.setItem('pa_theme', dark ? 'dark' : 'light'); }catch(e){}
+  temaAplicar();
+  toast(dark ? 'Modo escuro ativado 🌙' : 'Modo claro ativado ☀️', 'info');
+});
+temaAplicar();
+
+/* ================= configurações do admin ================= */
+$('#btnCfg').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">⚙️ Configurações do Admin</h3>
+    <p class="text-[12px] text-gray-500">Nome e e-mail aparecem no painel. A senha é validada antes de trocar.</p>
+    <label>Nome do Admin</label><input type="text" id="cfNome" value="${esc(ADM_NOME)}">
+    <label>E-mail de acesso</label><input type="email" id="cfEmail" value="${esc($('#admEmail').textContent)}">
+    <label>Senha atual (só se for trocar a senha)</label>
+    <div class="mfield"><span class="icon-left"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="14" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg></span><input type="password" id="cfAtual" placeholder="••••••"><button type="button" class="eyeBtn" data-eye="cfAtual" tabindex="-1"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 10s2.5-5 7.5-5 7.5 5 7.5 5-2.5 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button></div>
+    <label>Nova senha</label>
+    <div class="mfield"><span class="icon-left"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="14" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg></span><input type="password" id="cfNova" placeholder="••••••"><button type="button" class="eyeBtn" data-eye="cfNova" tabindex="-1"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 10s2.5-5 7.5-5 7.5 5 7.5 5-2.5 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button></div>
+    <label>Confirmar nova senha</label>
+    <div class="mfield"><span class="icon-left"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="14" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg></span><input type="password" id="cfConf" placeholder="••••••"><button type="button" class="eyeBtn" data-eye="cfConf" tabindex="-1"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 10s2.5-5 7.5-5 7.5 5 7.5 5-2.5 5-7.5 5-7.5-5-7.5-5z"/><circle cx="10" cy="10" r="2.2"/></svg></button></div>
+    <div class="flex gap-2 mt-5">
+      <button class="act pri flex-1 h-11" id="cfSave">💾 Salvar</button>
+      <button class="act flex-1 h-11" id="cfCancel">Cancelar</button>
+    </div>`);
+  $('#modalCard').querySelectorAll('.eyeBtn').forEach(b=>b.addEventListener('click', ()=>{
+    const inp = document.getElementById(b.dataset.eye);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    b.style.color = show ? '#0F5C5C' : '#6b7280';
+  }));
+  $('#cfCancel').addEventListener('click', closeModal);
+  $('#cfSave').addEventListener('click', async ()=>{
+    const nome = $('#cfNome').value.trim(), email = $('#cfEmail').value.trim();
+    const atual = $('#cfAtual').value, nova = $('#cfNova').value, conf = $('#cfConf').value;
+    if(!nome) return toast('Informe o nome do admin', 'warn');
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('E-mail inválido', 'err');
+    if(nova || conf){
+      if(nova !== conf) return toast('A confirmação não confere com a nova senha', 'err');
+      if(nova.length < 6) return toast('A nova senha precisa de 6+ caracteres', 'warn');
+      if(!atual) return toast('Digite a senha atual para trocar a senha', 'warn');
+    }
+    try{
+      const r = await api('/api/admin-config', {
+        method:'POST', headers: authHeaders(true),
+        body: JSON.stringify({nome, email, senha_atual: atual || undefined, nova_senha: nova || undefined})
+      });
+      const j = await r.json();
+      if(r.status === 401){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
+      if(!r.ok || !j.ok){ toast(j.error || 'Falha ao salvar', 'err'); return; }
+      setNome(j.nome || nome);
+      $('#admEmail').textContent = j.email || email;
+      try{ localStorage.setItem('pa_admin_nome', j.nome || nome); }catch(e){}
+      addLog('Configurações do admin salvas.');
+      closeModal(); toast('Configurações salvas', 'ok');
+    }catch(e){ toast('Sem conexão: ' + e.message, 'err'); }
+  });
+});
+$('#btnEditNome').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-3">✏️ Como quer ser chamado?</h3>
+    <input type="text" id="nmInp" value="${esc(ADM_NOME)}" placeholder="Seu nome">
+    <div class="flex gap-2 mt-4">
+      <button class="act pri flex-1 h-11" id="nmSave">Salvar</button>
+      <button class="act flex-1 h-11" id="nmCancel">Cancelar</button>
+    </div>`);
+  $('#nmCancel').addEventListener('click', closeModal);
+  $('#nmSave').addEventListener('click', async ()=>{
+    const nome = $('#nmInp').value.trim();
+    if(!nome) return toast('Digite um nome', 'warn');
+    try{
+      await api('/api/admin-config', { method:'POST', headers: authHeaders(true), body: JSON.stringify({nome}) });
+    }catch(e){}
+    setNome(nome);
+    try{ localStorage.setItem('pa_admin_nome', nome); }catch(e){}
+    closeModal(); toast('Nome atualizado', 'ok');
+  });
+});
+
+/* ================= WhatsApp de suporte (configurável) ================= */
+const WA_DEF = '5531999999999';   /* padrão se nada configurado */
+function waSoDig(s){ return String(s || '').replace(/\D/g, ''); }
+function waNormaliza(s){
+  let d = waSoDig(s);
+  if(d.length === 10 || d.length === 11) d = '55' + d;  /* sem país → Brasil */
+  return d;
+}
+function waMascara(v){
+  let d = waSoDig(v);
+  if(d.startsWith('55') && d.length > 4) d = d.slice(2);   /* mostra sem o 55 */
+  else if(d.startsWith('55')) d = d.slice(2);
+  if(d.length <= 2) return d ? '(' + d : '';
+  if(d.length <= 6) return '(' + d.slice(0,2) + ') ' + d.slice(2);
+  if(d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+  return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7,11);
+}
+let WA_ATUAL = '';
+/* no carregamento do admin: GET /api/admin-config → localStorage pa_whatsapp_numero → padrão */
+async function carregarWA(){
+  let w = '';
+  try{
+    const r = await api('/api/admin-config');
+    if(r && r.ok){ const j = await r.json().catch(()=>({})); w = waNormaliza(j.whatsapp); }
+  }catch(e){}
+  if(!w){ try{ w = waNormaliza(localStorage.getItem('pa_whatsapp_numero')); }catch(e){} }
+  if(!w) w = WA_DEF;
+  WA_ATUAL = w;
+  try{ localStorage.setItem('pa_whatsapp_numero', w); }catch(e){}
+  return w;
+}
+$('#btnWa').addEventListener('click', ()=>{
+  openModal(`
+    <h3 class="text-[16px] font-bold mb-1">📱 WhatsApp de Suporte</h3>
+    <p class="text-[12px] text-gray-500">Mensagens do botão “Enviar pro WhatsApp” (tela “Paguei e não ativou?” do app) chegam neste número. Trocou de chip? Troque aqui.</p>
+    <label>Número do WhatsApp de Suporte</label>
+    <input type="text" id="cfgWhatsapp" inputmode="tel" placeholder="(31) 9xxxx-xxxx" autocomplete="tel-national">
+    <p class="text-[12px] font-semibold text-[#0F5C5C] mt-1.5 break-all" id="waPreview">Link atual: …</p>
+    <div class="flex gap-2 mt-5">
+      <button class="act pri flex-1 h-11" id="btnWaSave">💾 Salvar WhatsApp</button>
+      <button class="act flex-1 h-11" id="btnWaCancel">Cancelar</button>
+    </div>`);
+  const inp = $('#cfgWhatsapp');
+  inp.value = waMascara(WA_ATUAL || '');
+  const pintar = ()=>{
+    const cur = waSoDig(inp.value);
+    if(cur) inp.value = waMascara(cur);       /* formata enquanto digita */
+    const d = waNormaliza(inp.value);
+    $('#waPreview').textContent = d ? 'Link atual: https://wa.me/' + d : 'Link atual: —';
+  };
+  pintar();
+  inp.addEventListener('input', pintar);
+  $('#btnWaCancel').addEventListener('click', closeModal);
+  $('#btnWaSave').addEventListener('click', async ()=>{
+    const d = waNormaliza(inp.value);
+    if(d.length < 12 || d.length > 13 || !d.startsWith('55')){
+      return toast('Número inválido — digite DDD + número (ex.: 31 9 9999-9999)', 'err');
+    }
+    try{ localStorage.setItem('pa_whatsapp_numero', d); }catch(e){}
+    WA_ATUAL = d;
+    let servOk = false;
+    try{
+      const r = await api('/api/admin-config', { method:'POST', headers: authHeaders(true), body: JSON.stringify({whatsapp:d}) });
+      const j = await r.json().catch(()=>({}));
+      if(r.status === 401){ tokenClear(); return mostrarLogin('Sessão expirada — entre novamente.'); }
+      servOk = !!(r.ok && j.ok);
+    }catch(e){}
+    addLog('WhatsApp de suporte atualizado — ' + d);
+    closeModal();
+    toast(servOk ? 'WhatsApp atualizado!' : 'WhatsApp atualizado neste aparelho (servidor sem confirmação)', servOk ? 'ok' : 'warn');
+  });
+});
+
+/* ================= boot ================= */
+(function boot(){
+  seedCodigosDoLog();          /* recupera códigos gerados antes deste recurso */
+  const p = sessaoValida();
+  if(p){
+    /* nome do admin: o JWT guarda o nome do SERVIDOR no último login (p.n) —
+       vale mais que o localStorage antigo, que podia estar travado em “Admin”.
+       Se não vier nome do servidor, usa o salvo pelo ✏️ / Configurações. */
+    const gen = n => { const t = String(n || '').trim(); return !t || /^admin$/i.test(t); };
+    const saved = (()=>{ try{ return localStorage.getItem('pa_admin_nome') || ''; }catch(e){ return ''; } })();
+    let nome = '';
+    if(!gen(p.n)) nome = p.n;
+    else if(!gen(saved)) nome = saved;
+    if(!nome) nome = 'Admin';
+    abrirPainel(nome, p.e);
+  } else {
+    $('#viewLogin').hidden = false;
+  }
+})();
+setInterval(()=>{ if($('#viewPainel').hidden === false && !sessaoValida()){ tokenClear(); mostrarLogin('Sessão de 2 h expirada — entre novamente.'); } }, 60000);
+</script>
+<script>
+/* PWA do painel — registro SEPARADO do site principal.
+   Escopo próprio /admin.html: este service worker controla SÓ o painel,
+   nunca o site (que usa o sw.js com escopo /). Try/catch em tudo:
+   se o PWA falhar, o painel segue funcionando normal. */
+try{
+  if('serviceWorker' in navigator){
+    addEventListener('load', function(){
+      navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin.html' })
+        .then(function(){ console.log('[Painel] PWA ativo (escopo /admin.html)'); })
+        .catch(function(e){ console.log('[Painel] PWA indisponível — painel segue normal: ' + (e && e.message)); });
+    });
+  }
+}catch(e){ /* silencioso — o painel nunca depende do SW */ }
+
+/* ============ botão Instalar App (beforeinstallprompt) ============ */
+var installPromptEvt = null;
+var btnInstalar = document.getElementById('btnInstalar');
+function ehIOS(){
+  try{
+    return /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }catch(e){ return false; }
+}
+function jaInstalado(){
+  try{
+    return (window.matchMedia && matchMedia('(display-mode: standalone)').matches)
+      || window.navigator.standalone === true;
+  }catch(e){ return false; }
+}
+function mostrarBtnInstalar(){
+  try{
+    if(!btnInstalar) return;
+    if(jaInstalado()){ btnInstalar.hidden = true; console.log('[Painel] já está instalado como app — botão fica escondido'); return; }
+    btnInstalar.hidden = false;
+    console.log('[Painel] botão “Instalar App” visível');
+  }catch(e){ console.log('[Painel] falha ao mostrar botão instalar: ' + e.message); }
+}
+window.addEventListener('beforeinstallprompt', function(e){
+  try{
+    e.preventDefault();
+    installPromptEvt = e;
+    console.log('[Painel] beforeinstallprompt capturado — Chrome liberou a instalação');
+    mostrarBtnInstalar();
+  }catch(err){ console.log('[Painel] erro no beforeinstallprompt: ' + err.message); }
+});
+window.addEventListener('appinstalled', function(){
+  try{
+    installPromptEvt = null;
+    if(btnInstalar) btnInstalar.hidden = true;
+    addLog('Painel instalado como app (PWA).');
+    toast('Painel instalado! Abra pelo ícone 🔧 da tela inicial.', 'ok');
+    console.log('[Painel] appinstalled — instalação concluída');
+  }catch(e){}
+});
+if(btnInstalar) btnInstalar.addEventListener('click', async function(){
+  try{
+    if(ehIOS()){
+      openModal(
+        '<h3 class="text-[16px] font-bold mb-2">📱 Instalar no iPhone/iPad</h3>' +
+        '<p class="text-[13px] text-gray-600 mb-2">O iPhone não tem o botão automático — são 2 toques:</p>' +
+        '<ol class="text-[13.5px] text-gray-700 list-decimal pl-5 space-y-1.5 mb-3">' +
+        '<li>Toque no botão <b>Compartilhar</b> (quadrado com seta para cima ⬆️) no Safari.</li>' +
+        '<li>Toque em <b>“Adicionar à Tela de Início”</b> e confirme.</li></ol>' +
+        '<p class="text-[12px] text-gray-400">O painel abre em tela cheia, sem barra do navegador, direto no /admin.html.</p>' +
+        '<div class="flex gap-2 mt-3"><button class="act pri flex-1 h-11" id="mInstOk">Entendi</button></div>');
+      try{ document.getElementById('mInstOk').addEventListener('click', closeModal); }catch(e){}
+      return;
+    }
+    if(!installPromptEvt){
+      toast('O Chrome ainda não liberou a instalação nesta página. Feche TODAS as abas do painel, abra de novo e aguarde 5 segundos — ou use o menu ⋮ > “Instalar app”.', 'warn');
+      console.log('[Painel] clique em instalar sem beforeinstallprompt (critérios ainda não atendidos)');
+      return;
+    }
+    installPromptEvt.prompt();
+    const choice = await installPromptEvt.userChoice;
+    console.log('[Painel] resultado da instalação: ' + choice.outcome);
+    if(choice.outcome === 'accepted'){
+      addLog('Instalação do painel aceita (PWA).');
+      toast('Instalando o painel… depois abra pelo ícone 🔧 da tela inicial.', 'ok');
+    } else {
+      toast('Instalação cancelada. O botão continua aqui quando você quiser.', 'info');
+    }
+    installPromptEvt = null;
+  }catch(e){
+    console.log('[Painel] erro no clique de instalar: ' + e.message);
+    toast('Não consegui abrir o instalador: ' + e.message, 'err');
+  }
+});
+/* iOS não dispara beforeinstallprompt: mostra o botão direto, com o modo de usar */
+try{ if(ehIOS() && !jaInstalado()) mostrarBtnInstalar(); }catch(e){}
 </script>
 </body>
 </html>
