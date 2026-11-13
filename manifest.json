@@ -1,13 +1,27 @@
 {
-  "name": "PoolApp Universal",
-  "short_name": "PoolApp",
-  "start_url": "/",
+  "name": "NEGRET'S — Assistência Técnica & Vendas",
+  "short_name": "NEGRET'S",
+  "description": "Gestão de OS, bancada, caixa, estoque e rastreio online para o cliente.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0F5C5C",
-  "theme_color": "#0F5C5C",
+  "orientation": "any",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
   "icons": [
-    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
-    {"src": "/icon-180.png", "sizes": "180x180", "type": "image/png"}
+    { "src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nova OS", "short_name": "Nova OS", "description": "Abrir ordem nova com verificação de IMEI", "url": "./#nova" },
+    { "name": "Bancada de Ordens", "short_name": "Ordens", "description": "Ver a bancada e as ordens de serviço", "url": "./#os" },
+    { "name": "Caixa", "short_name": "Caixa", "description": "Receber pagamentos e ver o caixa", "url": "./#caixa" }
   ]
 }

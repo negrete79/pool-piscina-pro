@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<title>Offline — NEGRET'S</title>
+<style>
+:root{--bg:#080808;--gold:#d4af37;--ink:#ece7dc;--mut:#8f897a;--serif:'Cinzel',Georgia,serif;--sans:'Jost','Segoe UI',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--sans);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.b{margin-bottom:18px;filter:drop-shadow(0 0 14px rgba(212,175,55,.2))}
+h1{font-family:var(--serif);font-size:20px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
+p{color:var(--mut);font-size:13.5px;max-width:300px;line-height:1.6}
+button{margin-top:22px;background:linear-gradient(160deg,#e7c94f,#b8912a);color:#080808;border:0;border-radius:13px;padding:13px 26px;font-weight:600;font-size:13.5px;letter-spacing:.1em;font-family:var(--sans);cursor:pointer}
+</style>
+</head>
+<body>
+<svg class="b" width="64" height="64" viewBox="0 0 72 72"><path d="M36 4 68 36 36 68 4 36Z" fill="#080808" stroke="#d4af37" stroke-width="3"/><path d="M36 16 56 36 36 56 16 36Z" fill="none" stroke="#d4af37" stroke-width="1.4"/><text x="36" y="48" font-family="Georgia,serif" font-size="30" font-weight="bold" fill="#d4af37" text-anchor="middle">N</text></svg>
+<h1>VOCÊ ESTÁ OFFLINE</h1>
+<p>Sem internet agora. O app abre mesmo assim e mostra seus últimos dados salvos — o rastreio sincroniza quando a conexão voltar.</p>
+<button onclick="location.reload()">TENTAR DE NOVO</button>
+</body>
+</html>

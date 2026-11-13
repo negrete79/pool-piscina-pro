@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teste — Pix dinâmico Mercado Pago</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#0b1220;color:#e8eefc;margin:0;padding:16px}
+  .card{max-width:420px;margin:12px auto;background:#121a2e;border:1px solid #223;padding:16px;border-radius:12px}
+  input,button{width:100%;box-sizing:border-box;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334;font-size:16px}
+  button{background:#009ee3;color:#fff;border:0;font-weight:bold}
+  img{max-width:280px;width:100%;display:block;margin:8px auto;background:#fff;padding:8px;border-radius:8px}
+  textarea{width:100%;box-sizing:border-box;font-size:12px;padding:8px;border-radius:8px;border:1px solid #334;background:#0b1220;color:#cfe}
+  .ok{color:#37d67a;font-weight:bold}
+  .centro{text-align:center}
+  .mini{font-size:12px;color:#8fa3c8}
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>Teste do Pix dinâmico</h2>
+  <div class="mini">Página só para testar os endpoints. O bloco &lt;script&gt; abaixo é o que você copia para o index.html (na tela onde hoje abre o QR estático).</div>
+
+  <input id="valor" type="number" step="0.01" min="0.5" value="19.90" placeholder="Valor (R$)">
+  <input id="clienteId" placeholder="cliente_id (telefone ou e-mail do cliente)">
+  <button onclick="criarPixDinamico()">GERAR PIX</button>
+
+  <div id="pixMsg" class="centro"></div>
+  <img id="pixQrImg" alt="QR Code Pix" style="display:none">
+  <div id="pixCopiaColaBox" style="display:none">
+    <textarea id="pixCopiaCola" rows="3" readonly></textarea>
+    <button onclick="copiarPixCopiaCola()">COPIAR CÓDIGO PIX (copia e cola)</button>
+  </div>
+  <div id="pixStatusAguardando" class="centro" style="display:none">Aguardando pagamento... (consultando a cada 5s)</div>
+  <div id="pixPago" class="centro ok" style="display:none">Pagamento confirmado</div>
+</div>
+
+<script>
+// ============================================================
+// BLOCO PIX DINÂMICO (Mercado Pago) — copie do <script> até </script>
+// para dentro do index.html, na tela do pagamento.
+//
+// - NÃO usa gerarPix, crc16 nem QR estático com sua chave Pix:
+//   a imagem do QR vem PRONTA do Mercado Pago (qr_code_base64) e é
+//   só mostrada no <img>, sem biblioteca de QR.
+// - Nenhum Access Token aqui: tudo no backend (/api/criar-pix).
+// - A cada 5 segundos consulta /api/status-pix até virar pago e
+//   aí mostra "Pagamento confirmado".
+// ============================================================
+var pixTimer = null;
+var pixTentativas = 0;
+
+// função principal — chame no app assim: criarPixCom(19.90, clienteId)
+async function criarPixCom(valor, clienteId) {
+  var msg = document.getElementById('pixMsg');
+  msg.textContent = '';
+  document.getElementById('pixQrImg').style.display = 'none';
+  document.getElementById('pixCopiaColaBox').style.display = 'none';
+  document.getElementById('pixStatusAguardando').style.display = 'none';
+  document.getElementById('pixPago').style.display = 'none';
+
+  try {
+    msg.textContent = 'Gerando Pix...';
+    var r = await fetch('/api/criar-pix', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ valor: valor, cliente_id: clienteId })
+    });
+    var d = await r.json();
+    if (!d.ok) { msg.textContent = 'Erro: ' + (d.erro || 'falha desconhecida'); return; }
+
+    msg.textContent = '';
+    // QR vem pronto da API do Mercado Pago — só mostrar, sem gerar QR
+    if (d.qr_code_base64) {
+      var img = document.getElementById('pixQrImg');
+      img.src = 'data:image/png;base64,' + d.qr_code_base64;
+      img.style.display = 'block';
+    }
+    if (d.qr_code) {
+      document.getElementById('pixCopiaCola').value = d.qr_code;
+      document.getElementById('pixCopiaColaBox').style.display = 'block';
+    }
+    document.getElementById('pixStatusAguardando').style.display = 'block';
+
+    consultarStatusPix(d.id);                    // consulta já de cara
+    pixTentativas = 0;
+    pixTimer = setInterval(function () { consultarStatusPix(d.id); }, 5000);  // a cada 5 segundos
+  } catch (e) {
+    msg.textContent = 'Erro de rede: ' + e.message;
+  }
+}
+
+async function consultarStatusPix(id) {
+  pixTentativas++;
+  if (pixTentativas > 360) { clearInterval(pixTimer); return; }  // ~30 min (validade do QR)
+  try {
+    var r = await fetch('/api/status-pix?id=' + encodeURIComponent(id), { cache: 'no-store' });
+    var d = await r.json();
+    if (d.status === 'pago') {
+      clearInterval(pixTimer);
+      document.getElementById('pixStatusAguardando').style.display = 'none';
+      document.getElementById('pixPago').style.display = 'block';
+      // O acesso já foi liberado no Firebase pelo backend (webhook/status-pix).
+      // Se quiser seguir direto para o app, descomente:
+      // location.href = 'index.html';
+    }
+  } catch (e) { /* falha de rede: tenta de novo no próximo ciclo */ }
+}
+
+function copiarPixCopiaCola() {
+  var t = document.getElementById('pixCopiaCola');
+  t.select();
+  if (navigator.clipboard) navigator.clipboard.writeText(t.value);
+  document.execCommand('copy');
+}
+
+// ---- apenas para esta página de teste ----
+function criarPixDinamico() {
+  var valor = parseFloat(document.getElementById('valor').value);
+  var clienteId = document.getElementById('clienteId').value.trim();
+  if (!valor || !clienteId) {
+    document.getElementById('pixMsg').textContent = 'Informe valor e cliente_id.';
+    return;
+  }
+  criarPixCom(valor, clienteId);
+}
+</script>
+</body>
+</html>

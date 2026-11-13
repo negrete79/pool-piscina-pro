@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<meta name="description" content="NEGRET'S — Painel Admin de licenças: ativos, pagamentos, pendências e códigos de ativação.">
+<title>NEGRET'S · Painel Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Cpath d='M36 4 68 36 36 68 4 36Z' fill='%23080808' stroke='%23d4af37' stroke-width='3'/%3E%3Ctext x='36' y='48' font-family='Georgia,serif' font-size='32' font-weight='bold' fill='%23d4af37' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808; --card:#121212; --line:#1e1e1e;
+  --gold:#d4af37; --gold-d:#a8842c;
+  --ink:#ece7dc; --mut:#8f897a;
+  --serif:'Cinzel',Georgia,serif;
+  --sans:'Jost','Avenir Next','Segoe UI',sans-serif;
+  --ok:#8fd48f; --warn:#f0b95a; --bad:#e07070; --mutc:#9a948a;
+}
+body.light{
+  --bg:#f3efe4; --card:#ffffff; --line:#e2dcc9;
+  --ink:#1c1a14; --mut:#7a7466;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
+::selection{background:rgba(212,175,55,.35)}
+button,input,select{font-family:var(--sans);font-size:15px;color:var(--ink)}
+button{cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+.ic{width:20px;height:20px;flex:0 0 auto}
+/* ===== LOGIN ===== */
+#vLogin{display:none;min-height:100vh;align-items:center;justify-content:center;padding:28px 16px}
+#vLogin.on{display:flex}
+.lg-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 22px 20px}
+.lg-head{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.lg-logo{width:56px;height:56px;border-radius:15px;background:linear-gradient(150deg,#e8c95c,var(--gold) 55%,var(--gold-d));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(212,175,55,.28);flex:0 0 auto}
+.lg-logo svg{width:28px;height:28px}
+.lg-t{font-size:21px;font-weight:700;letter-spacing:.01em;line-height:1.15}
+.lg-s{font-size:14px;color:var(--mut);margin-top:2px}
+.lg-err{display:none;background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.45);color:var(--bad);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:12px}
+.lg-err.on{display:block}
+.fld{position:relative;margin-bottom:14px}
+.fld .fic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mut);width:19px;height:19px}
+.fld input{width:100%;height:54px;background:var(--bg);border:1px solid #2a2820;border-radius:15px;padding:0 48px 0 44px;font-size:16px;outline:none;transition:border-color .2s}
+body.light .fld input{border-color:#d8d2bd}
+.fld input:focus{border-color:var(--gold)}
+.fld.err input{border-color:#e07070!important;box-shadow:0 0 0 2px rgba(224,112,112,.18)}
+.fld.err input:focus{border-color:#e07070}
+.fld .peye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.fld .peye:active{color:var(--gold)}
+.lembrar{display:flex;align-items:center;gap:10px;font-size:14.5px;margin:2px 0 16px;user-select:none;cursor:pointer}
+.lembrar input{width:19px;height:19px;accent-color:var(--gold)}
+.btn-g{width:100%;height:54px;border:0;border-radius:15px;background:linear-gradient(160deg,#e8c95c,var(--gold) 60%,var(--gold-d));color:#080808;font-weight:700;font-size:17px;letter-spacing:.01em;box-shadow:0 8px 24px rgba(212,175,55,.3)}
+.btn-g:active{transform:scale(.98)}
+.lg-div{height:1px;background:var(--line);margin:20px 0 0}
+.lg-forgot{display:block;width:100%;background:none;border:0;color:var(--gold);font-weight:600;font-size:15px;text-align:center;padding:18px 0 6px}
+.foot{max-width:560px;margin:18px auto 0;padding:0 16px 26px;text-align:center;font-size:12.5px;color:var(--mut)}
+.foot b{color:var(--gold);font-weight:600}
+/* ===== DASH ===== */
+#vDash{display:none;padding-bottom:40px}
+#vDash.on{display:block}
+.dh{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0}
+.dh::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.45),transparent)}
+.dh-row{display:flex;align-items:center;gap:9px}
+.dh-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(150deg,#e8c95c,var(--gold) 55%,var(--gold-d));display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.dh-logo svg{width:21px;height:21px}
+.dh-who{min-width:0;flex:1 1 auto;margin-right:auto}
+.dh-nome{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh-nome button{background:none;border:0;color:var(--mut);padding:2px}
+.dh-mail{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:none;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:0 0 auto}
+.dh-btn:active{background:rgba(212,175,55,.1)}
+.dh-sair{height:40px;padding:0 13px;border-radius:12px;border:1px solid rgba(224,112,112,.55);background:none;color:var(--bad);font-weight:600;font-size:14.5px;flex:0 0 auto}
+.dh-sair:active{background:rgba(224,112,112,.12)}
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:16px 0 0}
+.stat{background:linear-gradient(160deg,var(--card),var(--bg));border:1px solid var(--line);border-radius:16px;padding:15px 16px}
+.stat.full{grid-column:1/-1}
+.stat .lb{font-size:10.5px;letter-spacing:.18em;color:var(--mut);font-weight:500}
+.stat .vl{font-family:var(--serif);font-weight:700;font-size:34px;margin-top:6px;line-height:1;color:var(--gold)}
+.stat .vl.sm{font-size:26px}
+.stat.ok .vl{color:var(--ok)}
+.stat.pd .vl{color:var(--warn)}
+.stat.bd .vl{color:var(--bad)}
+.stat .sm2{font-size:11.5px;color:var(--mut);margin-top:5px}
+/* controles */
+.ctl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:16px 0 0}
+.search{position:relative}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mut)}
+.search input{width:100%;height:48px;background:var(--bg);border:1px solid #2a2820;border-radius:14px;padding:0 14px 0 42px;font-size:15px;outline:none}
+body.light .search input{border-color:#d8d2bd}
+.search input:focus{border-color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.chip{background:none;border:1px solid var(--line);color:var(--mut);border-radius:11px;padding:8px 13px;font-size:13.5px;font-weight:500}
+.chip .n{display:inline-flex;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:rgba(212,175,55,.16);color:var(--gold);font-size:10.5px;align-items:center;justify-content:center;margin-left:5px;font-weight:600}
+.chip.on{background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.5);color:var(--gold)}
+.acts2{display:flex;gap:10px;margin-top:13px}
+.acts2 .btn-o{flex:1;height:46px;border-radius:13px;border:1px solid rgba(212,175,55,.5);background:none;color:var(--gold);font-weight:600;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px}
+.acts2 .btn-o:active{background:rgba(212,175,55,.1)}
+/* registros */
+.rec{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px 15px;margin-top:12px}
+.rc-row{display:flex;align-items:baseline;gap:10px;padding:4px 0}
+.rc-l{font-size:10px;letter-spacing:.16em;color:var(--mut);flex:0 0 78px;font-weight:500}
+.rc-v{font-size:14.5px;min-width:0;overflow-wrap:anywhere}
+.rc-v b{font-weight:600}
+.rc-top{display:flex;align-items:center}
+.rc-top .rc-v{flex:1}
+.rc-sel{width:20px;height:20px;accent-color:var(--gold);flex:0 0 auto;margin-left:8px}
+.badge{display:inline-block;padding:3.5px 12px;border-radius:99px;font-size:12.5px;font-weight:600;letter-spacing:.02em}
+.b-ativo{background:rgba(143,212,143,.14);color:var(--ok)}
+.b-trial{background:rgba(212,175,55,.15);color:var(--gold)}
+.b-pend{background:rgba(240,185,90,.15);color:var(--warn)}
+.b-exp{background:rgba(224,112,112,.15);color:var(--bad)}
+.b-desist{background:rgba(154,148,138,.15);color:var(--mutc)}
+.b-canc{background:rgba(201,106,106,.18);color:#c96a6a}
+.taglocal{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.08em;background:rgba(212,175,55,.16);color:var(--gold);margin-left:7px;vertical-align:1px}
+.rc-acts{display:flex;gap:9px;margin-top:11px;flex-wrap:wrap}
+.rc-acts .b1{flex:1;min-width:118px;height:40px;border-radius:11px;border:1px solid rgba(212,175,55,.5);background:none;color:var(--gold);font-weight:600;font-size:13px}
+.rc-acts .b2{flex:1;min-width:96px;height:40px;border-radius:11px;border:1px solid rgba(224,112,112,.45);background:none;color:var(--bad);font-weight:600;font-size:13px}
+.rc-acts .b2.rev{border-color:rgba(143,212,143,.5);color:var(--ok)}
+.rc-code{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px}
+.rc-code .pl4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+.rc-code .pl4 button{height:40px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink);font-weight:600;font-size:13px}
+.rc-code .pl4 button:active{border-color:var(--gold);color:var(--gold)}
+.codebox{background:var(--bg);border:1px solid rgba(212,175,55,.55);border-radius:12px;padding:11px 13px;text-align:center;font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.14em;color:var(--gold)}
+.rc-code .mini{display:flex;gap:8px;margin-top:9px}
+.rc-code .mini button{flex:1;height:38px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink);font-size:12.5px;font-weight:600}
+/* v3.6.5 — gestão de licenças: planos, segurança e modais */
+.pl4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
+.pl4 button{height:42px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink);font-weight:600;font-size:13px}
+.pl4 button.on{border-color:var(--gold);color:var(--gold);background:rgba(212,175,55,.12)}
+.pl4 button:active{border-color:var(--gold);color:var(--gold)}
+.err2{display:none;background:rgba(224,112,112,.12);border:1px solid rgba(224,112,112,.5);color:var(--bad);border-radius:11px;padding:9px 12px;font-size:13px;margin-top:10px}
+.err2.on{display:block}
+.fld-err{border-color:var(--bad)!important}
+.sh-dev{background:var(--bg);border:1px solid rgba(212,175,55,.5);border-radius:12px;padding:9px 12px;text-align:center;font-family:var(--serif);font-weight:700;letter-spacing:.1em;color:var(--gold);font-size:16px;margin:9px 0}
+.empty{border:1px dashed var(--line);border-radius:15px;padding:26px 16px;text-align:center;color:var(--mut);font-size:13.5px;margin-top:14px}
+/* barra bulk */
+.bulk{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;gap:10px;align-items:center;background:var(--card);border-top:1px solid rgba(212,175,55,.4);padding:11px 14px calc(11px + env(safe-area-inset-bottom,0px))}
+.bulk.on{display:flex}
+.bulk span{font-size:13.5px;color:var(--mut);margin-right:auto}
+.bulk button{height:40px;padding:0 14px;border-radius:11px;font-weight:600;font-size:13px;background:none}
+.bulk .b1{border:1px solid rgba(224,112,112,.5);color:var(--bad)}
+.bulk .b2{border:1px solid var(--line);color:var(--ink)}
+/* sheet */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.mask.on{display:flex}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom,0px));animation:up .22s}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.m-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.m-head h3{font-family:var(--serif);color:var(--gold);font-size:17px;letter-spacing:.1em}
+.m-x{background:none;border:1px solid var(--line);color:var(--mut);width:34px;height:34px;border-radius:10px;font-size:19px}
+.sh-lbl{display:block;font-size:10px;letter-spacing:.16em;color:var(--mut);margin:13px 0 5px;font-weight:500}
+.sh-in{width:100%;height:48px;background:var(--bg);border:1px solid #2a2820;border-radius:13px;padding:0 13px;font-size:15px;outline:none}
+body.light .sh-in{border-color:#d8d2bd}
+.sh-in:focus{border-color:var(--gold)}
+.sh-note{font-size:12.5px;color:var(--mut);margin-top:6px}
+.sh-kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
+.sh-kv b{font-weight:600;overflow-wrap:anywhere;text-align:right}
+/* toasts */
+#toasts{position:fixed;left:0;right:0;bottom:24px;z-index:400;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:#1a1712;border:1px solid rgba(212,175,55,.55);color:#f0e6c8;padding:11px 18px;border-radius:99px;font-size:13.5px;max-width:88vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:tin .2s}
+body.light .toast{background:#2a2620}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="vLogin">
+  <div style="width:100%">
+    <div class="wrap"><div class="lg-card">
+      <div class="lg-head">
+        <div class="lg-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div><div class="lg-t">NEGRET'S · Painel Admin</div><div class="lg-s">Acesso restrito ao administrador</div></div>
+      </div>
+      <div class="lg-err" id="lgErr"></div>
+      <div class="fld">
+        <svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6.5 9 6.5 9-6.5"/></svg>
+        <input id="aEmail" type="email" inputmode="email" autocomplete="username" placeholder="E-mail do administrador">
+      </div>
+      <div class="fld">
+        <svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="11" width="17" height="10" rx="2.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input id="aPass" type="password" autocomplete="current-password" placeholder="Senha">
+        <button class="peye" id="peye" type="button" aria-label="Mostrar senha"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <label class="lembrar"><input type="checkbox" id="aLemb" checked> Lembrar de mim</label>
+      <button class="btn-g" id="btnEntrar" type="button">Entrar</button>
+      <div class="lg-div"></div>
+      <button class="lg-forgot" id="btnForgot" type="button">Esqueceu a senha?</button>
+    </div></div>
+    <p class="foot">NEGRET'S Universal · Área restrita · Criado por <b>Elias Costa NEGRE'T'S</b></p>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="vDash">
+  <div class="dh"><div class="wrap dh-row">
+    <div class="dh-logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#080808" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+    <div class="dh-who">
+      <div class="dh-nome">Olá, <span id="dhNome">Elias</span><button id="dhEdit" type="button" title="Editar nome" aria-label="Editar nome"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></div>
+      <div class="dh-mail" id="dhMail"></div>
+    </div>
+    <button class="dh-btn" id="btnTema" type="button" title="Tema claro/escuro" aria-label="Alternar tema"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg></button>
+    <button class="dh-btn" id="btnDev" type="button" title="Aparelho local" aria-label="Aparelho local"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></button>
+    <button class="dh-btn" id="btnCfg" type="button" title="Configurações" aria-label="Configurações"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.08a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg></button>
+    <button class="dh-sair" id="btnSair" type="button">Sair</button>
+  </div></div>
+
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat full"><div class="lb">ATIVOS AGORA</div><div class="vl" id="stAtivos">0</div><div class="sm2" id="stAtivosSm"></div></div>
+      <div class="stat"><div class="lb">FATURADO · 30 DIAS</div><div class="vl sm" id="stFat">R$ 0,00</div><div class="sm2">ativações pagas no canal</div></div>
+      <div class="stat ok"><div class="lb">ATIVAÇÕES PAGAS</div><div class="vl" id="stPagas">0</div><div class="sm2">total no histórico</div></div>
+      <div class="stat pd"><div class="lb">PENDENTES</div><div class="vl" id="stPend">0</div><div class="sm2">pagou e aguarda ativação</div></div>
+      <div class="stat bd"><div class="lb">EXPIRADOS &gt; 30 D</div><div class="vl" id="stExp">0</div><div class="sm2">parados há mais de 30 dias</div></div>
+    </div>
+
+    <div class="ctl">
+      <div class="search"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="qBusca" placeholder="Buscar por e-mail, nome ou ID…" autocomplete="off"></div>
+      <div class="chips" id="chips"></div>
+      <div class="acts2">
+        <button class="btn-o" id="btnLicAdd" type="button"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> ADICIONAR LICENÇA</button>
+        <button class="btn-o" id="btnAtualizar" type="button"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg> Atualizar</button>
+        <button class="btn-o" id="btnCsv" type="button"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13m0 0 4.5-4.5M12 16l-4.5-4.5M4 21h16"/></svg> Exportar CSV</button>
+      </div>
+    </div>
+
+    <div id="recList"></div>
+    <p class="foot">NEGRET'S Universal · Área restrita · Criado por <b>Elias Costa NEGRE'T'S</b></p>
+  </div>
+</div>
+
+<!-- barra de seleção -->
+<div class="bulk" id="bulkBar">
+  <span id="bulkN">0 selecionado(s)</span>
+  <button class="b1" id="bulkCanc" type="button">CANCELAR</button>
+  <button class="b2" id="bulkRemove" type="button">REMOVER</button>
+  <button class="b2" id="bulkClear" type="button">LIMPAR</button>
+</div>
+
+<!-- sheet: config -->
+<div class="mask" id="shCfg"><div class="sheet">
+  <div class="m-head"><h3>CONFIGURAÇÕES DO PAINEL</h3><button class="m-x" data-close="shCfg" type="button">×</button></div>
+  <label class="sh-lbl">NOME DO PROPRIETÁRIO (MOSTRADO NO OLÁ)</label>
+  <input class="sh-in" id="nNome" placeholder="Elias">
+  <label class="sh-lbl">E-MAIL DE ACESSO AO PAINEL</label>
+  <input class="sh-in" id="nEmail" inputmode="email" placeholder="onegretth@gmail.com">
+  <label class="sh-lbl">NOVA SENHA DO PAINEL (VAZIO = MANTER)</label>
+  <input class="sh-in" id="nPass" type="password" autocomplete="new-password" placeholder="••••">
+  <label class="sh-lbl">CANAL PRIVADO DA NUVEM (LICENÇAS)</label>
+  <input class="sh-in" id="nTop" readonly>
+  <p class="sh-note">Os aparelhos com o app publicam os eventos de licença (trial, pagou, pendente, desistiu, ativo) neste canal privado ntfy.sh e o painel junta tudo aqui.</p>
+  <label class="sh-lbl">FIREBASE — ATIVAÇÃO À DISTÂNCIA (EX.: https://SEU-PROJETO.firebaseio.com)</label>
+  <input class="sh-in" id="nFb" placeholder="https://seu-projeto-default-rtdb.firebaseio.com" inputmode="url">
+  <label class="sh-lbl">URL DA API DE ATIVAÇÃO — PIX AUTOMÁTICO (EX.: https://NEGRETS.VERCEL.APP)</label>
+  <input class="sh-in" id="nApi" placeholder="https://negrets.vercel.app" inputmode="url">
+  <p class="sh-note">v3.6.5 — com o Firebase configurado, os botões ADICIONAR / EDITAR / EXCLUIR mandam comando direto para o aparelho do cliente (liberar ou bloquear na hora). Com a URL da API configurada, o app do cliente gera o QR do banco (Mercado Pago) e ativa sozinho quando o PIX cai. No Vercel, configure as variáveis <b>MP_TOKEN</b>, <b>FIREBASE_URL</b> e <b>SITE_URL</b>.</p>
+  <button class="btn-g" id="btnCfgSave" type="button" style="margin-top:16px">SALVAR</button>
+  <button class="btn-o" id="btnRegWipe" type="button" style="width:100%;height:46px;margin-top:10px;border-radius:13px;border:1px solid rgba(224,112,112,.5);background:none;color:var(--bad);font-weight:600;font-size:14.5px">LIMPAR REGISTRO RECEBIDO DA NUVEM</button>
+</div></div>
+
+<!-- sheet: aparelho local -->
+<div class="mask" id="shDev"><div class="sheet">
+  <div class="m-head"><h3>APARELHO DESTA INSTALAÇÃO</h3><button class="m-x" data-close="shDev" type="button">×</button></div>
+  <div id="devBody"></div>
+</div></div>
+
+<!-- v3.6.5 — senha de segurança para adicionar/editar/excluir licenças -->
+<div class="mask" id="shSenha"><div class="sheet">
+  <div class="m-head"><h3 id="ssTitle">CONFIRMAR AÇÃO</h3><button class="m-x" data-close="shSenha" type="button">×</button></div>
+  <p class="sh-note">Ação sensível — confirme com a <b>senha do painel</b> (padrão 1234) para continuar.</p>
+  <input class="sh-in" id="ssPass" type="password" autocomplete="off" placeholder="Senha do painel">
+  <div class="err2" id="ssErr"></div>
+  <button class="btn-g" id="btnSsOk" type="button" style="margin-top:14px">CONFIRMAR</button>
+</div></div>
+
+<!-- v3.6.5 — ADICIONAR LICENÇA -->
+<div class="mask" id="shLicAdd"><div class="sheet">
+  <div class="m-head"><h3>ADICIONAR LICENÇA</h3><button class="m-x" data-close="shLicAdd" type="button">×</button></div>
+  <label class="sh-lbl">ID DO APARELHO (O CLIENTE VÊ NO APP: MAIS → ASSINATURA)</label>
+  <input class="sh-in" id="alDev" placeholder="Ex.: NG-A1B2" autocomplete="off" style="text-transform:uppercase">
+  <label class="sh-lbl">NOME DA LOJA / CLIENTE</label>
+  <input class="sh-in" id="alNome" placeholder="Ex.: Assistência do João">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="sh-lbl">E-MAIL / CONTATO</label><input class="sh-in" id="alMail" inputmode="email" placeholder="cliente@email.com"></div>
+    <div style="flex:1"><label class="sh-lbl">WHATSAPP</label><input class="sh-in" id="alTel" inputmode="tel" placeholder="31999999999"></div>
+  </div>
+  <label class="sh-lbl">PLANO A LIBERAR</label>
+  <div class="pl4" id="alPlans">
+    <button data-p="d30" type="button">30 DIAS</button>
+    <button data-p="d60" type="button">60 DIAS</button>
+    <button data-p="a1" type="button">1 ANO</button>
+    <button data-p="vit" type="button">VITALÍCIO</button>
+  </div>
+  <p class="sh-note">Ao salvar: grava no Firebase, publica no canal e manda o comando <b>liberar</b> — o app do cliente ativa sozinho quando abrir.</p>
+  <button class="btn-g" id="btnLicAddSave" type="button" style="margin-top:14px">ADICIONAR E LIBERAR</button>
+</div></div>
+
+<!-- v3.6.5 — EDITAR LICENÇA -->
+<div class="mask" id="shLicEdit"><div class="sheet">
+  <div class="m-head"><h3>EDITAR LICENÇA</h3><button class="m-x" data-close="shLicEdit" type="button">×</button></div>
+  <div class="sh-dev" id="elDev">—</div>
+  <p class="sh-note" style="text-align:center" id="elNome"></p>
+  <label class="sh-lbl">NOVO PLANO (CONTA DA DATA DE HOJE)</label>
+  <div class="pl4" id="elPlans">
+    <button data-p="d30" type="button">30 DIAS</button>
+    <button data-p="d60" type="button">60 DIAS</button>
+    <button data-p="a1" type="button">1 ANO</button>
+    <button data-p="vit" type="button">VITALÍCIO</button>
+  </div>
+  <button class="btn-g" id="btnLicEditSave" type="button" style="margin-top:14px">SALVAR E MANDAR COMANDO</button>
+</div></div>
+
+<!-- v3.6.5 — EXCLUIR LICENÇA -->
+<div class="mask" id="shLicDel"><div class="sheet">
+  <div class="m-head"><h3>EXCLUIR LICENÇA</h3><button class="m-x" data-close="shLicDel" type="button">×</button></div>
+  <div class="sh-dev" id="dlDev">—</div>
+  <p class="sh-note" style="text-align:center">O aparelho do cliente vai ser <b style="color:var(--bad)">bloqueado à distância</b> (comando via Firebase) e o registro sai da lista. Não dá para desfazer.</p>
+  <label class="sh-lbl">DIGITE <b>EXCLUIR</b> PARA CONFIRMAR</label>
+  <input class="sh-in" id="dlTxt" autocomplete="off" placeholder="EXCLUIR">
+  <button class="btn-g" id="btnLicDelGo" type="button" style="margin-top:14px;background:#3a1515;border-color:rgba(224,112,112,.6);color:#ffb3b3">EXCLUIR DE VEZ</button>
+</div></div>
+
+<div id="toasts"></div>
+
+<script>
+/* ================= NEGRET'S · Painel Admin (arquivo separado) =================
+   - Login por e-mail + senha do proprietário (padrão: onegretth@gmail.com / 1234)
+   - Lê o app NEGRET'S no mesmo endereço (localStorage negrets_v6) e o canal da nuvem
+   - Agrega todos os aparelhos que publicam eventos de licença (trial/pagou/pendente/desistiu/ativo) */
+
+/* Opcionais: preencha ANTES de publicar para acessar de QUALQUER aparelho (ex.: seu PC),
+   mesmo sem o app instalado neste navegador. Vazio = usa e-mail/senha do app local. */
+const PAINEL_EMAIL='';   // ex.: 'onegretth@gmail.com'
+const PAINEL_SENHA='';   // ex.: 'minhaSenhaForte'
+
+const KEY='negrets_v6', REGK='negrets_licreg', NTFY='https://ntfy.sh/';
+const LIC_TOP='negrets-lic-7k4mqz';   /* deve ser IGUAL ao do index.html */
+const TRIAL_DIAS=30;
+const PLANS={d30:{d:30,n:'30 dias',l:'A'},d60:{d:60,n:'60 dias',l:'B'},a1:{d:365,n:'1 ano',l:'C'},vit:{d:0,n:'Vitalício',l:'D'}};
+
+let DB=null,reg=null,filtro='todos',sel=new Set(),pollTimer=null;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const money=v=>'R$ '+(+v||0).toFixed(2).replace('.',',');
+const pad=n=>String(n).padStart(2,'0');
+function fmtDT(t){if(!t)return '—';const d=new Date(+t);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2)+' '+pad(d.getHours())+':'+pad(d.getMinutes());}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;$('toasts').appendChild(t);setTimeout(()=>t.remove(),3400);}
+function openSh(id){$(id).classList.add('on');}
+function closeSh(id){$(id).classList.remove('on');}
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeSh(b.dataset.close)));
+document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on');}));
+
+function loadDB(){try{DB=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){DB=null;}}
+function loadReg(){try{reg=JSON.parse(localStorage.getItem(REGK)||'null')||null;}catch(e){reg=null;}
+  if(!reg||typeof reg!=='object')reg={devs:{},hist:[]};
+  if(!reg.devs)reg.devs={};if(!Array.isArray(reg.hist))reg.hist=[];
+  if(!reg.apiCfg||typeof reg.apiCfg!=='object')reg.apiCfg={fb:'',api:''};}
+function saveReg(){try{localStorage.setItem(REGK,JSON.stringify(reg));}catch(e){}}
+
+/* ---------- estado local do app (espelho do licState do index) ---------- */
+function localRec(){
+  if(!DB||!DB.config||!DB.config.lic)return null;
+  const L=DB.config.lic,n=Date.now();
+  return{dev:L.dev,loja:(DB.config.loja&&DB.config.loja.nome)||'',tel:(DB.config.loja&&DB.config.loja.zap)||'',email:L.oemail||'',ev:'local',t:Date.now(),plan:L.plan||'',exp:+L.exp||0,t0:+L.t0||0,pend:+L.pend||0,grace:+L.grace||0,st:'',val:+L.preco||20,local:true,hist:(L.hist||[]).slice()};
+}
+function stOf(d){
+  if(!d)return{k:'exp',lb:'—'};
+  if(d.canceled)return{k:'canc',lb:'Cancelado'};
+  const n=Date.now();
+  if(d.plan==='vit'||(+d.exp&&+d.exp>n))return{k:'ativo',lb:d.plan==='vit'?'Ativo · vitalício':'Ativo · '+Math.ceil((+d.exp-n)/864e5)+'d'};
+  if(d.st==='pend'||(+d.grace&&+d.grace>n)||(+d.pend&&n-+d.pend<48*3600e3))return{k:'pend',lb:'Pendente'};
+  const te=(+d.t0||0)+TRIAL_DIAS*864e5;
+  if(+d.t0&&n<te)return{k:'trial',lb:'Trial · '+Math.ceil((te-n)/864e5)+'d'};
+  if(d.ev==='desist'&&(n-+d.t<48*3600e3))return{k:'desist',lb:'Desistiu'};
+  return{k:'exp',lb:'Expirado'+((+d.t0&&n>te)?' · '+Math.floor((n-te)/864e5)+'d':'')};
+}
+function genCode(p){const P=PLANS[p];if(!P)return '';const seed=((P.d*7919+40503)^0x5A5A)>>>0;return 'NG'+P.l+seed.toString(36).toUpperCase().padStart(5,'0');}
+
+/* ---------- nuvem: junta os eventos publicados pelos aparelhos ---------- */
+async function pollCloud(){
+  if(!navigator.onLine)return 0;
+  try{
+    const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
+    const r=await fetch(NTFY+LIC_TOP+'/json?poll=1&since=12h',{signal:ctl.signal});
+    clearTimeout(tm);
+    if(!r.ok)return 0;
+    const txt=await r.text();let n=0;
+    txt.split('\n').forEach(line=>{
+      if(!line.trim())return;
+      let m;try{m=JSON.parse(line);}catch(e){return;}
+      if(!m||m.event!=='message'||!m.message)return;
+      let p;try{p=JSON.parse(m.message);}catch(e){return;}
+      if(!p||!p.dev||!p.ev)return;
+      const d=reg.devs[p.dev]||{};
+      reg.devs[p.dev]={dev:p.dev,loja:p.loja||d.loja||'',tel:p.tel||d.tel||'',email:p.email||d.email||'',ev:p.ev,t:+p.t||Date.now(),plan:p.plan||d.plan||'',exp:+p.exp||d.exp||0,t0:+p.t0||d.t0||0,pend:+p.pend||0,grace:+p.grace||0,st:p.st||d.st||'',val:+p.val||d.val||0,canceled:d.canceled,deleted:d.deleted||(p.del&&(p.ev==='canc'))};
+      reg.hist.push({t:+p.t||Date.now(),dev:p.dev,loja:p.loja||'',ev:p.ev,val:+p.val||0});
+      n++;
+    });
+    if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
+    if(n)saveReg();
+    return n;
+  }catch(e){return 0;}
+}
+
+/* ---------- montagem dos registros (local + nuvem) ---------- */
+function records(){
+  const map={};
+  Object.keys(reg.devs).forEach(k=>{const d=Object.assign({},reg.devs[k]);map[k]=d;});
+  const lr=localRec();
+  if(lr){const old=map[lr.dev]||{};map[lr.dev]=Object.assign({},old,lr,{canceled:old.canceled,deleted:old.deleted});}
+  return Object.keys(map).map(k=>map[k]).filter(d=>!d.deleted);
+}
+let curRecs=[];
+function applyFiltros(){
+  const q=norm($('qBusca').value).trim();
+  let rs=records();
+  const withK=rs.map(d=>({d,k:stOf(d)}));
+  if(filtro!=='todos')return withK.filter(x=>x.k.k===filtro||(filtro==='pend'&&x.k.k==='desist'&&false));
+  return withK;
+}
+function render(){
+  /* stats */
+  const rs=records().map(d=>({d,k:stOf(d)}));
+  const n=Date.now();
+  const ativos=rs.filter(x=>x.k.k==='ativo').length;
+  const pends=rs.filter(x=>x.k.k==='pend').length;
+  const exps=rs.filter(x=>{if(x.k.k!=='exp')return false;const base=+x.d.exp||((+x.d.t0||0)+TRIAL_DIAS*864e5);return base&&n-base>30*864e5;}).length;
+  const fat=reg.hist.filter(h=>h.ev==='ativ'&&n-+h.t<=30*864e5).reduce((a,h)=>a+(+h.val||0),0);
+  const pagas=reg.hist.filter(h=>h.ev==='ativ').length;
+  $('stAtivos').textContent=ativos;
+  $('stAtivosSm').textContent=rs.length+' aparelho(s) registrado(s)';
+  $('stFat').textContent=money(fat);
+  $('stPagas').textContent=pagas;
+  $('stPend').textContent=pends;
+  $('stExp').textContent=exps;
+  /* chips */
+  const cnt={todos:rs.length,ativo:ativos,trial:rs.filter(x=>x.k.k==='trial').length,pend:pends,exp:exps,desist:rs.filter(x=>x.k.k==='desist').length,canc:rs.filter(x=>x.k.k==='canc').length};
+  const names={todos:'Todos',ativo:'Ativos',trial:'Trial',pend:'Pendentes',exp:'Expirados',desist:'Desistiu',canc:'Cancelados'};
+  $('chips').innerHTML=Object.keys(names).map(k=>'<button class="chip'+(filtro===k?' on':'')+'" data-f="'+k+'" type="button">'+names[k]+'<span class="n">'+cnt[k]+'</span></button>').join('');
+  document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{filtro=c.dataset.f;render();}));
+  /* lista */
+  const q=norm($('qBusca').value).trim();
+  let list=rs.filter(x=>filtro==='todos'||x.k.k===filtro);
+  if(q)list=list.filter(x=>norm(x.d.loja+' '+x.d.email+' '+x.d.tel+' '+x.d.dev).includes(q));
+  list.sort((a,b)=>(+b.d.t||0)-(+a.d.t||0));
+  curRecs=list.map(x=>x.d);
+  $('recList').innerHTML=list.length?list.map((x,i)=>{
+    const d=x.d;
+    return `<div class="rec">
+      <div class="rc-row rc-top"><span class="rc-l">DATA</span><span class="rc-v"><b>${fmtDT(d.t)}</b>${d.local?'<span class="taglocal">LOCAL</span>':''}</span><input type="checkbox" class="rc-sel" data-dev="${esc(d.dev)}" ${sel.has(d.dev)?'checked':''} aria-label="Selecionar"></div>
+      <div class="rc-row"><span class="rc-l">NOME</span><span class="rc-v"><b>${esc(d.loja||'—')}</b></span></div>
+      <div class="rc-row"><span class="rc-l">CONTATO</span><span class="rc-v">${esc([d.email,d.tel].filter(Boolean).join(' · ')||'—')}</span></div>
+      <div class="rc-row"><span class="rc-l">APARELHO</span><span class="rc-v"><b>${esc(d.dev)}</b></span></div>
+      <div class="rc-row"><span class="rc-l">VALOR</span><span class="rc-v">${d.val?money(d.val):'—'}${d.plan?' · '+esc(PLANS[d.plan]?PLANS[d.plan].n:d.plan):''}</span></div>
+      <div class="rc-row"><span class="rc-l">STATUS</span><span class="rc-v"><span class="badge b-${x.k.k}">${esc(x.k.lb)}</span></span></div>
+      <div class="rc-acts">
+        <button class="b1" data-code="${esc(d.dev)}" type="button">GERAR CÓDIGO</button>
+        <button class="b1" data-edit="${esc(d.dev)}" type="button">✏ EDITAR</button>
+        <button class="b2" data-del="${esc(d.dev)}" type="button">🗑 EXCLUIR</button>
+        ${d.canceled?'<button class="b2 rev" data-rev="'+esc(d.dev)+'" type="button">REATIVAR</button>':'<button class="b2" data-canc="'+esc(d.dev)+'" type="button">CANCELAR</button>'}
+      </div>
+      <div class="rc-code" id="rcx-${esc(d.dev)}" style="display:none"></div>
+    </div>`;
+  }).join(''):'<div class="empty">Nenhum aparelho por aqui ainda.<br>Abra o app NEGRET\u2019S nos aparelhos dos clientes — os eventos aparecem automaticamente.</div>';
+  document.querySelectorAll('.rc-sel').forEach(c=>c.addEventListener('change',()=>{if(c.checked)sel.add(c.dataset.dev);else sel.delete(c.dataset.dev);bulkSync();}));
+  document.querySelectorAll('[data-code]').forEach(b=>b.addEventListener('click',()=>codeBox(b.dataset.code)));
+  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>pedirSenha('editar',b.dataset.edit)));
+  document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>pedirSenha('excluir',b.dataset.del)));
+  document.querySelectorAll('[data-canc]').forEach(b=>b.addEventListener('click',()=>{const d=reg.devs[b.dataset.canc]||{};d.canceled=true;if(reg.devs[b.dataset.canc])reg.devs[b.dataset.canc]=d;else{const lr=localRec();if(lr&&lr.dev===b.dataset.canc){/* local: guarda flag no reg */reg.devs[b.dataset.canc]=Object.assign({dev:b.dataset.canc},lr,{canceled:true});}}saveReg();render();toast('Registro cancelado.');}));
+  document.querySelectorAll('[data-rev]').forEach(b=>b.addEventListener('click',()=>{if(reg.devs[b.dataset.rev]){reg.devs[b.dataset.rev].canceled=false;}saveReg();render();toast('Registro reativado.');}));
+  bulkSync();
+}
+function bulkSync(){
+  const on=sel.size>0;
+  $('bulkBar').classList.toggle('on',on);
+  if(on)$('bulkN').textContent=sel.size+' selecionado(s)';
+}
+function codeBox(dev){
+  const d=curRecs.find(x=>x.dev===dev);const box=$('rcx-'+dev);if(!box)return;
+  if(box.style.display!=='none'){box.style.display='none';return;}
+  box.style.display='';
+  box.innerHTML='<div class="pl4">'+Object.keys(PLANS).map(p=>'<button data-p="'+p+'" type="button">'+PLANS[p].n.toUpperCase()+'</button>').join('')+'</div><div id="cbIn-'+esc(dev)+'"></div>';
+  box.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{
+    const c=genCode(b.dataset.p);
+    $('cbIn-'+dev).innerHTML='<div class="codebox">'+c+'</div><p class="sh-note" style="margin-top:6px">'+PLANS[b.dataset.p].n+' — vale para o aparelho <b>'+esc(dev)+'</b>. O cliente digita no app: MAIS → ASSINATURA DO APP → TENHO CÓDIGO DE ATIVAÇÃO.</p><div class="mini"><button data-cp="'+c+'" type="button">COPIAR</button><button data-wa="'+c+'" data-loja="'+esc(d?d.loja||'':'')+'" data-plan="'+PLANS[b.dataset.p].n+'" type="button">ENVIAR NO WHATSAPP</button></div>';
+    $('cbIn-'+dev).querySelector('[data-cp]').addEventListener('click',async e=>{
+      try{await navigator.clipboard.writeText(c);toast('Código copiado.');}catch(e2){toast('Código: '+c);}
+    });
+    $('cbIn-'+dev).querySelector('[data-wa]').addEventListener('click',e=>{
+      const el=e.currentTarget;
+      const msg='Código de ativação do app NEGRET\u2019S: '+el.dataset.wa+' ('+el.dataset.plan+').\nAparelho: '+dev+'\nNo app: MAIS → ASSINATURA DO APP → TENHO CÓDIGO DE ATIVAÇÃO.';
+      const tel=String((d&&d.tel)||'').replace(/\D/g,'');
+      window.open('https://wa.me/'+(tel?'55'+tel.replace(/^55/,''):'')+'?text='+encodeURIComponent(msg),'_blank');
+    });
+  }));
+}
+
+/* ---------- CSV ---------- */
+function exportCsv(){
+  const rows=[['DATA','NOME','CONTATO','APARELHO','VALOR','STATUS']];
+  curRecs.forEach(d=>{const k=stOf(d);rows.push([fmtDT(d.t),(d.loja||''),((d.email||'')+(d.tel?' '+(d.tel||''):'')),(d.dev||''),d.val?money(d.val):'',k.lb]);});
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='negrets-painel-licencas.csv';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('CSV exportado ('+(curRecs.length)+' registro(s)).');
+}
+
+/* ---------- aparelho local ---------- */
+function renderDev(){
+  const L=DB&&DB.config&&DB.config.lic;
+  if(!L){$('devBody').innerHTML='<p class="sh-note">O app NEGRET\u2019S não está aberto neste navegador — nada para mostrar.</p>';return;}
+  const lr=localRec(),k=stOf(lr);
+  const st=lr;
+  const te=(+L.t0||0)+TRIAL_DIAS*864e5;
+  const trialRest=Date.now()<te?Math.ceil((te-Date.now())/864e5):0;
+  $('devBody').innerHTML=
+    '<div class="sh-kv"><span>APARELHO</span><b>'+esc(L.dev)+'</b></div>'+
+    '<div class="sh-kv"><span>STATUS</span><b><span class="badge b-'+k.k+'">'+esc(k.lb)+'</span></b></div>'+
+    '<div class="sh-kv"><span>LOJA</span><b>'+esc((DB.config.loja&&DB.config.loja.nome)||'—')+'</b></div>'+
+    '<div class="sh-kv"><span>PLANO</span><b>'+(L.plan?(PLANS[L.plan]?PLANS[L.plan].n:L.plan):'trial')+'</b></div>'+
+    (L.exp?'<div class="sh-kv"><span>VALIDADE</span><b>'+fmtDT(L.exp)+'</b></div>':'<div class="sh-kv"><span>TRIAL</span><b>'+trialRest+' dia(s) restante(s)</b></div>')+
+    '<div class="sh-kv"><span>ÚLTIMOS EVENTOS</span><b>'+(L.hist||[]).slice(-3).map(h=>esc(h.e)).join('<br>')+'</b></div>'+
+    '<p class="sh-note">Para ativar ESTE aparelho: abra o app NEGRET\u2019S \u2192 MAIS \u2192 ASSINATURA DO APP \u2192 pague o PIX (ativa sozinho na hora) ou use TENHO C\u00d3DIGO DE ATIVA\u00c7\u00c3O com um c\u00f3digo gerado aqui.</p>';
+}
+
+/* ---------- config ---------- */
+function openCfg(){
+  const L=DB&&DB.config&&DB.config.lic;
+  $('nNome').value=L?(L.onome||'Elias'):'';
+  $('nEmail').value=L?(L.oemail||'onegretth@gmail.com'):(PAINEL_EMAIL||'');
+  $('nPass').value='';
+  $('nTop').value=LIC_TOP;
+  /* v3.6.5 — Firebase e API: prioridade no app local, depois no próprio painel */
+  const fb=(L&&L.fb)||reg.apiCfg.fb||'';const api=(L&&L.api)||reg.apiCfg.api||'';
+  $('nFb').value=fb;$('nApi').value=api;
+  $('btnCfgSave').style.display='';
+  openSh('shCfg');
+}
+function saveCfg(){
+  /* v3.6.5 — Firebase/API valem mesmo sem o app aberto neste navegador (ficam no registro do painel) */
+  const fb=$('nFb').value.trim().replace(/\/+$/,''),api=$('nApi').value.trim().replace(/\/+$/,'');
+  reg.apiCfg={fb,api};saveReg();
+  if(!DB||!DB.config.lic){closeSh('shCfg');toast('Configuração da nuvem salva no painel.');return;}
+  const L=DB.config.lic;
+  L.onome=$('nNome').value.trim()||'Elias';
+  L.oemail=$('nEmail').value.trim().toLowerCase()||'onegretth@gmail.com';
+  const np=$('nPass').value.trim();
+  if(np)L.op=np;
+  L.fb=fb;L.api=api;
+  try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}
+  fillHead();
+  closeSh('shCfg');
+  toast(np?'Configuração salva — a NOVA SENHA do painel já vale agora.':'Configuração salva.');
+}
+
+/* ---------- cabeçalho ---------- */
+function fillHead(){
+  const L=DB&&DB.config&&DB.config.lic;
+  $('dhNome').textContent=L?(L.onome||'Elias'):'Proprietário';
+  $('dhMail').textContent=L?(L.oemail||(PAINEL_EMAIL||'')):(PAINEL_EMAIL||'');
+}
+
+/* ---------- login ---------- */
+function lgErr(m){const e=$('lgErr');if(!m){e.classList.remove('on');return;}e.textContent=m;e.classList.add('on');}
+function lgN(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'').toLowerCase();}
+function fldErr(el,on){if(el&&el.parentElement)el.parentElement.classList.toggle('err',!!on);}
+/* v3.6.4: login tolerante \u2014 ignora espa\u00e7os, mai\u00fasculas/min\u00fasculas e acentos; senha padr\u00e3o 1234 */
+function entrar(){
+  lgErr('');
+  fldErr($('aEmail'),false);fldErr($('aPass'),false);
+  const u=$('aEmail').value||'';
+  const s=$('aPass').value||'';
+  const oemail=PAINEL_EMAIL||(DB&&DB.config&&DB.config.lic&&DB.config.lic.oemail)||'onegretth@gmail.com';
+  const op=(DB&&DB.config&&DB.config.lic&&DB.config.lic.op)||'';
+  const wantP=PAINEL_SENHA||op||'1234';
+  if(!u||lgN(u)!==lgN(oemail)){lgErr('E-mail incorreto \u2014 o e-mail autorizado neste painel \u00e9: '+oemail+'.');fldErr($('aEmail'),true);return;}
+  if(!s||lgN(s)!==lgN(wantP)){lgErr('Senha incorreta \u2014 a senha padr\u00e3o \u00e9 1234'+(op&&op!=='1234'?', mas este aparelho usa uma senha pr\u00f3pria (a \u00faltima salva nas Configura\u00e7\u00f5es do painel)':'')+'.');fldErr($('aPass'),true);return;}
+  if($('aLemb').checked)localStorage.setItem('negretsAdmEmail',u);else localStorage.removeItem('negretsAdmEmail');
+  sessionStorage.setItem('negretsAdmOk','1');
+  goDash();
+}
+function goDash(){
+  $('vLogin').classList.remove('on');
+  $('vDash').classList.add('on');
+  fillHead();
+  render();
+  pollCloud().then(n=>{if(n)render();});
+  clearInterval(pollTimer);
+  pollTimer=setInterval(()=>{if($('vDash').classList.contains('on'))pollCloud().then(n=>{if(n)render();});},60000);
+}
+function sair(){
+  sessionStorage.removeItem('negretsAdmOk');
+  clearInterval(pollTimer);
+  $('vDash').classList.remove('on');
+  $('vLogin').classList.add('on');
+  $('aPass').value='';
+  lgErr('');
+}
+
+/* ================= v3.6.5 — GESTÃO DE LICENÇAS: ADICIONAR / EDITAR / EXCLUIR com segurança ================= */
+const PAINEL_FB='';   /* opcional: fixe a URL do Firebase aqui para o painel funcionar sozinho em outro aparelho */
+let pendAcao=null,licPlanSel='d30',licEditDev='';
+function fbEff(){
+  if(DB&&DB.config&&DB.config.lic&&DB.config.lic.fb)return String(DB.config.lic.fb).trim().replace(/\/+$/,'');
+  if(reg.apiCfg&&reg.apiCfg.fb)return String(reg.apiCfg.fb).trim().replace(/\/+$/,'');
+  return String(PAINEL_FB||'').trim().replace(/\/+$/,'');
+}
+async function fbSendCmd(dev,obj){
+  const fb=fbEff();if(!fb)return false;
+  try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
+    const r=await fetch(fb+'/negrets/commands/'+encodeURIComponent(dev)+'.json',{method:'PUT',body:JSON.stringify(obj),signal:ctl.signal});
+    clearTimeout(tm);return r.ok;}catch(e){return false;}
+}
+async function fbPatchDev(dev,obj){
+  const fb=fbEff();if(!fb)return false;
+  try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),9000);
+    const r=await fetch(fb+'/negrets/devices/'+encodeURIComponent(dev)+'.json',{method:'PATCH',body:JSON.stringify(obj),signal:ctl.signal});
+    clearTimeout(tm);return r.ok;}catch(e){return false;}
+}
+function ntfyPub(ev,dev,extra){
+  try{
+    const d=reg.devs[dev]||{};
+    const s={t:Date.now(),dev,loja:d.loja||'',tel:d.tel||'',email:d.email||'',ev,plan:d.plan||'',val:+d.val||20,exp:+d.exp||0,t0:+d.t0||0};
+    if(extra)Object.assign(s,extra);
+    fetch(NTFY+LIC_TOP,{method:'POST',body:JSON.stringify(s)}).catch(()=>{});
+  }catch(e){}
+}
+/* segurança: pede a senha do painel antes de qualquer ação sensível */
+function pedirSenha(tipo,dev){
+  pendAcao={tipo,dev};
+  const tit={adicionar:'ADICIONAR LICENÇA',editar:'EDITAR LICENÇA',excluir:'EXCLUIR LICENÇA'}[tipo]||tipo;
+  $('ssTitle').textContent='CONFIRMAR — '+tit;
+  $('ssPass').value='';$('ssErr').classList.remove('on');$('ssPass').classList.remove('fld-err');
+  openSh('shSenha');setTimeout(()=>$('ssPass').focus(),80);
+}
+function ssOk(){
+  const want=(DB&&DB.config&&DB.config.lic&&DB.config.lic.op)||PAINEL_SENHA||'1234';
+  const s=$('ssPass').value||'';
+  if(lgN(s)!==lgN(want)){$('ssErr').textContent='Senha incorreta — digite a senha do painel para continuar.';$('ssErr').classList.add('on');$('ssPass').classList.add('fld-err');return;}
+  closeSh('shSenha');
+  const a=pendAcao;pendAcao=null;if(!a)return;
+  if(a.tipo==='adicionar')openLicAdd();
+  else if(a.tipo==='editar')openLicEdit(a.dev);
+  else if(a.tipo==='excluir')openLicDel(a.dev);
+}
+function selPlan(p){licPlanSel=p;document.querySelectorAll('#alPlans button,#elPlans button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));}
+function openLicAdd(){
+  $('alDev').value='';$('alNome').value='';$('alMail').value='';$('alTel').value='';
+  selPlan('d30');openSh('shLicAdd');setTimeout(()=>$('alDev').focus(),80);
+}
+function licAddSave(){
+  const dev=($('alDev').value||'').trim().toUpperCase();
+  if(!dev){toast('Informe o ID do aparelho (o cliente vê no app: MAIS → ASSINATURA DO APP).');$('alDev').classList.add('fld-err');return;}
+  $('alDev').classList.remove('fld-err');
+  const P=PLANS[licPlanSel];if(!P){toast('Escolha um plano.');return;}
+  const exp=P.d?Date.now()+P.d*864e5:0;
+  const loja=($('alNome').value||'').trim(),mail=($('alMail').value||'').trim(),tel=($('alTel').value||'').trim();
+  reg.devs[dev]=Object.assign({},reg.devs[dev]||{},{dev,loja,email:mail,tel,ev:'ativ',plan:licPlanSel,exp,t:Date.now(),val:20,manual:true,canceled:false,deleted:false});
+  reg.hist.push({t:Date.now(),dev,loja,ev:'adm-add',val:20});
+  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
+  saveReg();sel.delete(dev);render();closeSh('shLicAdd');
+  (async()=>{
+    await fbPatchDev(dev,{dev,plan:licPlanSel,exp,ev:'pago',val:20,t:Date.now()});
+    const ok=await fbSendCmd(dev,{acao:'liberar',plan:licPlanSel,exp,lido:false,t:Date.now()});
+    ntfyPub('ativ',dev);
+    if(ok)toast('Licença ADICIONADA — o app do cliente ativa sozinho ao abrir.');
+    else toast(fbEff()?'Salvo no Firebase (comando sem confirmação — aparelho offline?).':'Salvo na lista. Configure o FIREBASE nas CONFIGURAÇÕES para ativar à distância.');
+  })();
+}
+function openLicEdit(dev){
+  const d=curRecs.find(x=>x.dev===dev)||reg.devs[dev]||{};
+  licEditDev=dev;
+  $('elDev').textContent=dev;
+  $('elNome').textContent=d.loja||('Licença do aparelho '+dev);
+  selPlan(d.plan&&PLANS[d.plan]?d.plan:'d30');
+  openSh('shLicEdit');
+}
+function licEditSave(){
+  const dev=licEditDev,P=PLANS[licPlanSel];
+  if(!dev||!P)return;
+  const exp=P.d?Date.now()+P.d*864e5:0;
+  const loja=(reg.devs[dev]&&reg.devs[dev].loja)||'';
+  if(reg.devs[dev]){reg.devs[dev].plan=licPlanSel;reg.devs[dev].exp=exp;reg.devs[dev].ev='ativ';reg.devs[dev].t=Date.now();reg.devs[dev].canceled=false;reg.devs[dev].deleted=false;}
+  else{
+    const lr=localRec();
+    if(lr&&lr.dev===dev&&DB&&DB.config.lic){const L=DB.config.lic;L.plan=licPlanSel;L.exp=exp;L.grace=0;L.pend=0;L.hist=L.hist||[];L.hist.push({t:Date.now(),e:'Licença editada pelo painel admin — '+P.n,tp:'pagou'});try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}}
+  }
+  reg.hist.push({t:Date.now(),dev,loja,ev:'adm-edit',val:20});
+  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
+  saveReg();render();closeSh('shLicEdit');
+  (async()=>{
+    await fbPatchDev(dev,{plan:licPlanSel,exp,ev:'pago',val:20,t:Date.now()});
+    const ok=await fbSendCmd(dev,{acao:'liberar',plan:licPlanSel,exp,lido:false,t:Date.now()});
+    ntfyPub('ativ',dev);
+    toast(ok?'Licença EDITADA — o app do cliente atualiza sozinho.':(fbEff()?'Salvo no Firebase (confirmação pendente).':'Salvo na lista. Configure o FIREBASE para aplicar no aparelho.'));
+  })();
+}
+function openLicDel(dev){licEditDev=dev;$('dlTxt').value='';$('dlDev').textContent=dev;openSh('shLicDel');}
+function licDelGo(){
+  if(($('dlTxt').value||'').trim().toUpperCase()!=='EXCLUIR'){toast('Digite EXCLUIR para confirmar.');$('dlTxt').classList.add('fld-err');return;}
+  $('dlTxt').classList.remove('fld-err');
+  const dev=licEditDev,d=reg.devs[dev];
+  if(d&&!d.local){delete reg.devs[dev];}
+  else if(d){d.deleted=true;}
+  else{
+    const lr=localRec();
+    if(lr&&lr.dev===dev)reg.devs[dev]=Object.assign({dev},lr,{deleted:true});
+  }
+  reg.hist.push({t:Date.now(),dev,loja:(d&&d.loja)||'',ev:'adm-del',val:0});
+  if(reg.hist.length>600)reg.hist=reg.hist.slice(-600);
+  saveReg();sel.delete(dev);render();closeSh('shLicDel');
+  (async()=>{
+    if(fbEff()){
+      await fbPatchDev(dev,{ev:'canc',plan:'',exp:0,t:Date.now()});
+      const ok=await fbSendCmd(dev,{acao:'bloquear',lido:false,t:Date.now()});
+      ntfyPub('canc',dev,{del:1});
+      toast(ok?'Licença EXCLUÍDA — o app do cliente bloqueia sozinho ao abrir.':'Excluído da lista; comando não confirmado (aparelho offline?).');
+    }else toast('Excluído da lista local. Configure o FIREBASE para revogar no aparelho do cliente.');
+  })();
+}
+
+/* ---------- eventos ---------- */
+$('btnEntrar').addEventListener('click',entrar);
+$('aPass').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
+$('aEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('aPass').focus();});
+$('peye').addEventListener('click',()=>{const p=$('aPass');const show=p.type==='password';p.type=show?'text':'password';$('peye').style.color=show?'var(--gold)':'';p.focus();});
+$('aEmail').addEventListener('input',()=>fldErr($('aEmail'),false));
+$('aPass').addEventListener('input',()=>fldErr($('aPass'),false));
+$('btnForgot').addEventListener('click',()=>{
+  const zap=String((DB&&DB.config&&DB.config.loja&&DB.config.loja.zap)||(DB&&DB.config&&DB.config.lic&&DB.config.lic.ozap)||'').replace(/\D/g,'');
+  const msg='Olá! Esqueci a senha do PAINEL ADMIN do app NEGRET\u2019S. Pode me ajudar a redefinir?';
+  window.open('https://wa.me/'+(zap?'55'+zap.replace(/^55/,''):'')+'?text='+encodeURIComponent(msg),'_blank');
+  toast('Abrindo o WhatsApp para recuperar o acesso…');
+});
+$('btnSair').addEventListener('click',sair);
+$('btnTema').addEventListener('click',()=>{const on=document.body.classList.toggle('light');localStorage.setItem('negretsAdmTema',on?'1':'');});
+$('btnDev').addEventListener('click',()=>{renderDev();openSh('shDev');});
+$('btnCfg').addEventListener('click',openCfg);
+$('dhEdit').addEventListener('click',openCfg);
+$('btnCfgSave').addEventListener('click',saveCfg);
+$('btnRegWipe').addEventListener('click',()=>{reg={devs:{},hist:[],apiCfg:reg.apiCfg||{fb:'',api:''}};saveReg();closeSh('shCfg');render();toast('Registro da nuvem limpo (os próximos eventos voltam a acumular).');});
+/* v3.6.5 — gestão de licenças com segurança */
+$('btnLicAdd').addEventListener('click',()=>pedirSenha('adicionar'));
+$('btnSsOk').addEventListener('click',ssOk);
+$('ssPass').addEventListener('keydown',e=>{if(e.key==='Enter')ssOk();});
+$('ssPass').addEventListener('input',()=>{$('ssErr').classList.remove('on');$('ssPass').classList.remove('fld-err');});
+$('btnLicAddSave').addEventListener('click',licAddSave);
+$('btnLicEditSave').addEventListener('click',licEditSave);
+$('btnLicDelGo').addEventListener('click',licDelGo);
+document.querySelectorAll('#alPlans button,#elPlans button').forEach(b=>b.addEventListener('click',()=>selPlan(b.dataset.p)));
+$('btnAtualizar').addEventListener('click',async()=>{const n=await pollCloud();render();toast(n?('Atualizado — '+n+' evento(s) novo(s).'):'Sem novos eventos.');});
+$('btnCsv').addEventListener('click',exportCsv);
+$('qBusca').addEventListener('input',render);
+$('bulkCanc').addEventListener('click',()=>{sel.forEach(d=>{if(reg.devs[d])reg.devs[d].canceled=true;else{const lr=localRec();if(lr&&lr.dev===d)reg.devs[d]=Object.assign({dev:d},lr,{canceled:true});}});saveReg();sel.clear();render();toast('Selecionados cancelados.');});
+$('bulkRemove').addEventListener('click',()=>{let n=0;sel.forEach(d=>{if(reg.devs[d]&&!reg.devs[d].local){delete reg.devs[d];n++;}});saveReg();sel.clear();render();toast(n+' registro(s) removido(s) da lista.');});
+$('bulkClear').addEventListener('click',()=>{sel.clear();render();});
+
+/* ---------- init ---------- */
+loadDB();
+loadReg();
+if(localStorage.getItem('negretsAdmTema')==='1')document.body.classList.add('light');
+const lem=localStorage.getItem('negretsAdmEmail');
+if(lem)$('aEmail').value=lem;
+else if(DB&&DB.config&&DB.config.lic&&DB.config.lic.oemail)$('aEmail').value=DB.config.lic.oemail;
+if(sessionStorage.getItem('negretsAdmOk')==='1'&&((DB&&DB.config&&DB.config.lic)||PAINEL_SENHA))goDash();
+else $('vLogin').classList.add('on');
+</script>
+</body>
+</html>
